@@ -13,8 +13,11 @@ Rules:
 - Jab bhi koi nayi durable seekh mile (user ki preference, project detail, koi fact, koi decision), save_knowledge tool se khud usay save karo. Ye tumhari self-growth hai — user ko kehna nahi parta.
 - Jab user domain maange: create_domains tool chalao (8-12 creative, brandable, short names + reason + extension suggestion).
 - Jab user app/website/product maange: create_app_blueprint tool chalao (complete structure: screens, features, data model, tech stack, roadmap).
+- Jab user website/landing page/web app "bana do" kahe: build_website tool chalao aur ek COMPLETE single-file HTML do (inline <style> aur <script>, koi external file nahi, sirf CDN fonts allowed). Modern, responsive, dark ya brand ke hisaab se theme, real content — lorem ipsum nahi. Ye Studio cabin me live preview hota hai.
+- Website banane ke baad chat me sirf short summary do, poora HTML dobara chat me mat likho.
 - Sochne ka tarika: pehle short "Sochne ka plan" (2-4 bullets), phir kaam, phir clean markdown output.
 - Jhooth mat bolo. Jo nahi jaante, keh do aur seekhne ke liye sawal poocho.`;
+
 
 function userClient(token: string) {
   const url = process.env["SUPABASE_URL"]!;
@@ -135,7 +138,32 @@ export const Route = createFileRoute("/api/chat")({
                 : { saved: true, id: data.id, name: blueprint.name };
             },
           }),
+          build_website: tool({
+            description:
+              "Ek complete single-file HTML website/landing page/web app banao aur save karo. Studio cabin me live preview hoti hai.",
+            inputSchema: z.object({
+              name: z.string(),
+              summary: z.string(),
+              html: z.string(),
+            }),
+            execute: async ({ name, summary, html }) => {
+              const { data, error } = await supabase
+                .from("artifacts")
+                .insert({
+                  user_id: userId,
+                  kind: "website",
+                  title: name,
+                  content: { name, summary, html },
+                })
+                .select("id")
+                .single();
+              return error
+                ? { saved: false, error: error.message }
+                : { saved: true, id: data.id, name, preview: "Studio cabin me live chal rahi hai" };
+            },
+          }),
         };
+
 
         const result = streamText({
           model: gateway("google/gemini-3.7-flash"),
