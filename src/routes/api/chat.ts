@@ -138,7 +138,32 @@ export const Route = createFileRoute("/api/chat")({
                 : { saved: true, id: data.id, name: blueprint.name };
             },
           }),
+          build_website: tool({
+            description:
+              "Ek complete single-file HTML website/landing page/web app banao aur save karo. Studio cabin me live preview hoti hai.",
+            inputSchema: z.object({
+              name: z.string(),
+              summary: z.string(),
+              html: z.string(),
+            }),
+            execute: async ({ name, summary, html }) => {
+              const { data, error } = await supabase
+                .from("artifacts")
+                .insert({
+                  user_id: userId,
+                  kind: "website",
+                  title: name,
+                  content: { name, summary, html },
+                })
+                .select("id")
+                .single();
+              return error
+                ? { saved: false, error: error.message }
+                : { saved: true, id: data.id, name, preview: "Studio cabin me live chal rahi hai" };
+            },
+          }),
         };
+
 
         const result = streamText({
           model: gateway("google/gemini-3.7-flash"),
