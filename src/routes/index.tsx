@@ -1,24 +1,87 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { Brain, LogOut } from "lucide-react";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ChatPanel } from "@/components/nova/ChatPanel";
+import { MemoryPanel } from "@/components/nova/MemoryPanel";
+import { BuildsPanel } from "@/components/nova/BuildsPanel";
+import { useAuth } from "@/hooks/useAuth";
+
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "NOVA — Self-Growing AI that Thinks, Learns & Builds" },
+      {
+        name: "description",
+        content:
+          "NOVA is a self-growing AI workspace: it thinks step by step, grows its own memory from every chat, and builds domain names and full app blueprints on request.",
+      },
+      { property: "og:title", content: "NOVA — Self-Growing AI that Thinks, Learns & Builds" },
+      {
+        property: "og:description",
+        content:
+          "Chat with a self-growing AI that saves what it learns and generates domains and complete app blueprints.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: Home,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function Home() {
+  const navigate = useNavigate();
+  const { user, loading, signOut } = useAuth();
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    if (!loading && !user) navigate({ to: "/auth" });
+  }, [user, loading, navigate]);
+
+  if (loading || !user) {
+    return (
+      <main className="flex min-h-screen items-center justify-center">
+        <Brain className="h-8 w-8 text-primary node-pulse" />
+      </main>
+    );
+  }
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 pb-4 pt-5">
+      <header className="mb-4 flex items-center gap-3">
+        <span className="neural-ring flex h-10 w-10 items-center justify-center rounded-2xl">
+          <Brain className="h-5 w-5 text-primary-foreground" />
+        </span>
+        <div className="flex-1">
+          <h1 className="text-lg font-semibold leading-tight">
+            NOVA <span className="text-gradient">self-growing AI</span>
+          </h1>
+          <p className="text-xs text-muted-foreground">Sochti hai · seekhti hai · khud banati hai</p>
+        </div>
+        <Button variant="ghost" size="icon" onClick={() => signOut()} aria-label="Sign out">
+          <LogOut className="h-4 w-4" />
+        </Button>
+      </header>
+
+      <Tabs defaultValue="chat" className="flex min-h-0 flex-1 flex-col">
+        <TabsList className="mb-3 grid w-full grid-cols-3">
+          <TabsTrigger value="chat">Chat</TabsTrigger>
+          <TabsTrigger value="memory">Memory</TabsTrigger>
+          <TabsTrigger value="builds">Builds</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="chat" className="mt-0 flex min-h-0 flex-1 flex-col">
+          <ChatPanel userId={user.id} onWorkChanged={() => setRefreshKey((key) => key + 1)} />
+        </TabsContent>
+        <TabsContent value="memory" className="mt-0 flex-1 overflow-y-auto">
+          <MemoryPanel userId={user.id} refreshKey={refreshKey} />
+        </TabsContent>
+        <TabsContent value="builds" className="mt-0 flex-1 overflow-y-auto">
+          <BuildsPanel userId={user.id} refreshKey={refreshKey} />
+        </TabsContent>
+      </Tabs>
+    </main>
   );
 }
