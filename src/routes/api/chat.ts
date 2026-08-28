@@ -1,0 +1,154 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { createClient } from "@supabase/supabase-js";
+import { convertToModelMessages, streamText, tool, stepCountIs, type UIMessage } from "ai";
+import { z } from "zod";
+
+import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+
+const SYSTEM_PROMPT = `Tum "NOVA" ho — ek self-growing AI jo khud sochti hai, khud structure banati hai aur har baat-cheet se seekh kar apni knowledge base khud grow karti hai.
+
+Rules:
+- User Urdu/Roman-Urdu/English kisi bhi zubaan me baat kare, usi zubaan me jawab do. Default Roman Urdu.
+- Har jawab se pehle apni knowledge base recall karo (recall_knowledge tool) jab bhi topic personal ya pehle discuss hua ho.
+- Jab bhi koi nayi durable seekh mile (user ki preference, project detail, koi fact, koi decision), save_knowledge tool se khud usay save karo. Ye tumhari self-growth hai — user ko kehna nahi parta.
+- Jab user domain maange: create_domains tool chalao (8-12 creative, brandable, short names + reason + extension suggestion).
+- Jab user app/website/product maange: create_app_blueprint tool chalao (complete structure: screens, features, data model, tech stack, roadmap).
+- Sochne ka tarika: pehle short "Sochne ka plan" (2-4 bullets), phir kaam, phir clean markdown output.
+- Jhooth mat bolo. Jo nahi jaante, keh do aur seekhne ke liye sawal poocho.`;
+
+function userClient(token: string) {
+  const url = process.env["SUPABASE_URL"]!;
+  const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
+  return createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: { headers: { apikey: key, Authorization: `Bearer ${token}` } },
+  });
+}
+
+export const Route = createFileRoute("/api/chat")({
+  server: {
+    handlers: {
+      POST: async ({ request }) => {
+        const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+        if (!token) return new Response("Unauthorized", { status: 401 });
+
+        const supabase = userClient(token);
+        const { data: userData, error: userError } = await supabase.auth.getUser(token);
+        if (userError || !userData.user) return new Response("Unauthorized", { status: 401 });
+        const userId = userData.user.id;
+
+        const body = (await request.json()) as { messages?: unknown };
+        if (!Array.isArray(body.messages)) {
+          return new Response("Messages are required", { status: 400 });
+        }
+
+        const apiKey = process.env["LOVABLE_API_KEY"];
+        if (!apiKey) return new Response("AI is not configured", { status: 500 });
+
+        const gateway = createLovableAiGatewayProvider(apiKey);
+
+        const tools = {
+          recall_knowledge: tool({
+            description: "Apni saved knowledge base me se relevant memories dhoondo.",
+            inputSchema: z.object({ query: z.string() }),
+            execute: async ({ query }) => {
+              const { data } = await supabase
+                .from("knowledge")
+                .select("topic, content, tags, confidence")
+                .eq("user_id", userId)
+                .or(`topic.ilike.%${query}%,content.ilike.%${query}%`)
+                .order("created_at", { ascending: false })
+                .limit(8);
+              return { memories: data ?? [] };
+            },
+          }),
+          save_knowledge: tool({
+            description:
+              "Koi nayi durable seekh apni knowledge base me save karo taake future me yaad rahe.",
+            inputSchema: z.object({
+              topic: z.string(),
+              content: z.string(),
+              tags: z.array(z.string()),
+              confidence: z.number(),
+            }),
+            execute: async ({ topic, content, tags, confidence }) => {
+              const { error } = await supabase.from("knowledge").insert({
+                user_id: userId,
+                topic,
+                content,
+                tags,
+                confidence: Math.min(1, Math.max(0, confidence)),
+              });
+              return error ? { saved: false, error: error.message } : { saved: true, topic };
+            },
+          }),
+          create_domains: tool({
+            description: "Domain name ideas generate karke save karo.",
+            inputSchema: z.object({
+              brief: z.string(),
+              names: z.array(
+                z.object({
+                  name: z.string(),
+                  extension: z.string(),
+                  reason: z.string(),
+                }),
+              ),
+            }),
+            execute: async ({ brief, names }) => {
+              const { data, error } = await supabase
+                .from("artifacts")
+                .insert({
+                  user_id: userId,
+                  kind: "domains",
+                  title: brief.slice(0, 80),
+                  content: { brief, names },
+                })
+                .select("id")
+                .single();
+              return error ? { saved: false, error: error.message } : { saved: true, id: data.id, names };
+            },
+          }),
+          create_app_blueprint: tool({
+            description: "Puri app ka structure/blueprint banao aur save karo.",
+            inputSchema: z.object({
+              name: z.string(),
+              summary: z.string(),
+              screens: z.array(z.object({ title: z.string(), purpose: z.string() })),
+              features: z.array(z.string()),
+              data_model: z.array(z.object({ table: z.string(), fields: z.array(z.string()) })),
+              tech_stack: z.array(z.string()),
+              roadmap: z.array(z.string()),
+            }),
+            execute: async (blueprint) => {
+              const { data, error } = await supabase
+                .from("artifacts")
+                .insert({
+                  user_id: userId,
+                  kind: "blueprint",
+                  title: blueprint.name,
+                  content: blueprint,
+                })
+                .select("id")
+                .single();
+              return error
+                ? { saved: false, error: error.message }
+                : { saved: true, id: data.id, name: blueprint.name };
+            },
+          }),
+        };
+
+        const result = streamText({
+          model: gateway("google/gemini-3.7-flash"),
+          system: SYSTEM_PROMPT,
+          messages: await convertToModelMessages(body.messages as UIMessage[]),
+          tools,
+          stopWhen: stepCountIs(50),
+        });
+
+        return result.toUIMessageStreamResponse({
+          originalMessages: body.messages as UIMessage[],
+        });
+      },
+    },
+  },
+});
