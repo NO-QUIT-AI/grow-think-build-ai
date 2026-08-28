@@ -49,7 +49,7 @@ function AuthPage() {
     setBusy(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -58,7 +58,12 @@ function AuthPage() {
           },
         });
         if (error) throw error;
-        toast.success("Account ban gaya! Ab andar aa jao.");
+        if (!data.session) {
+          toast.success("Account ban gaya! Email me confirmation link bheja hai.");
+          setMode("signin");
+          return;
+        }
+        toast.success("Account ban gaya!");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
