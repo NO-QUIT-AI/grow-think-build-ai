@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Brain, LogOut } from "lucide-react";
+import logoAsset from "@/assets/logo.jpg.asset.json";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -53,9 +54,11 @@ function Home() {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 pb-4 pt-5">
       <header className="mb-4 flex items-center gap-3">
-        <span className="neural-ring flex h-10 w-10 items-center justify-center rounded-2xl">
-          <Brain className="h-5 w-5 text-primary-foreground" />
-        </span>
+        <img
+          src={logoAsset.url}
+          alt="NO QUIT AI logo"
+          className="h-10 w-10 rounded-2xl border border-border object-cover"
+        />
         <div className="flex-1">
           <h1 className="text-lg font-semibold leading-tight">
             NO QUIT AI <span className="text-gradient">self-growing AI</span>

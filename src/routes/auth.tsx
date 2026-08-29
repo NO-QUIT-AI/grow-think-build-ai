@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Brain, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import logoAsset from "@/assets/logo.jpg.asset.json";
 import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/auth")({
@@ -92,9 +93,11 @@ function AuthPage() {
     <main className="flex min-h-screen items-center justify-center px-4 py-10">
       <div className="panel w-full max-w-md p-7">
         <div className="mb-6 flex items-center gap-3">
-          <span className="neural-ring flex h-11 w-11 items-center justify-center rounded-2xl">
-            <Brain className="h-6 w-6 text-primary-foreground" />
-          </span>
+          <img
+            src={logoAsset.url}
+            alt="NO QUIT AI logo"
+            className="h-11 w-11 rounded-2xl border border-border object-cover"
+          />
           <div>
             <h1 className="text-xl font-semibold">NO QUIT AI</h1>
             <p className="text-xs text-muted-foreground">Self-growing AI workspace</p>
