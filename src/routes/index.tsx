@@ -85,6 +85,12 @@ function Home() {
         <TabsContent value="builds" className="mt-0 flex-1 overflow-y-auto">
           <BuildsPanel userId={user.id} refreshKey={refreshKey} />
         </TabsContent>
+        <TabsContent value="studio" className="mt-0 flex-1 overflow-y-auto">
+          <StudioPanel userId={user.id} refreshKey={refreshKey} />
+        </TabsContent>
+        <TabsContent value="mind" className="mt-0 flex-1 overflow-y-auto">
+          <MindPanel userId={user.id} refreshKey={refreshKey} />
+        </TabsContent>
       </Tabs>
     </main>
   );
