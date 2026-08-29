@@ -14,6 +14,7 @@ const TOOL_LABELS: Record<string, string> = {
   "tool-save_knowledge": "Nayi seekh save ki",
   "tool-create_domains": "Domain names banaye",
   "tool-create_app_blueprint": "App blueprint banaya",
+  "tool-build_website": "Website live banayi",
 };
 
 const SUGGESTIONS = [
