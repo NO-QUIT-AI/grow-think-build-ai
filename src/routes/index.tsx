@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChatPanel } from "@/components/nova/ChatPanel";
 import { MemoryPanel } from "@/components/nova/MemoryPanel";
 import { BuildsPanel } from "@/components/nova/BuildsPanel";
+import { StudioPanel } from "@/components/nova/StudioPanel";
+import { MindPanel } from "@/components/nova/MindPanel";
 import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/")({
@@ -66,10 +68,12 @@ function Home() {
       </header>
 
       <Tabs defaultValue="chat" className="flex min-h-0 flex-1 flex-col">
-        <TabsList className="mb-3 grid w-full grid-cols-3">
+        <TabsList className="mb-3 grid w-full grid-cols-5">
           <TabsTrigger value="chat">Chat</TabsTrigger>
           <TabsTrigger value="memory">Memory</TabsTrigger>
           <TabsTrigger value="builds">Builds</TabsTrigger>
+          <TabsTrigger value="studio">Studio</TabsTrigger>
+          <TabsTrigger value="mind">Mind</TabsTrigger>
         </TabsList>
 
         <TabsContent value="chat" className="mt-0 flex min-h-0 flex-1 flex-col">
