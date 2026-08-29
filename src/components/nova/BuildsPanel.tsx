@@ -38,7 +38,7 @@ export function BuildsPanel({ userId, refreshKey }: { userId: string; refreshKey
   if (items.length === 0) {
     return (
       <p className="px-1 pt-2 text-sm text-muted-foreground">
-        Abhi kuch bana nahi. NOVA se kaho: “mujhe domain bana do” ya “ek app ka structure bna do”.
+        Abhi kuch bana nahi. NO QUIT AI se kaho: “mujhe domain bana do” ya “ek app ka structure bna do”.
       </p>
     );
   }

@@ -7,18 +7,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChatPanel } from "@/components/nova/ChatPanel";
 import { MemoryPanel } from "@/components/nova/MemoryPanel";
 import { BuildsPanel } from "@/components/nova/BuildsPanel";
+import { StudioPanel } from "@/components/nova/StudioPanel";
+import { MindPanel } from "@/components/nova/MindPanel";
 import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "NOVA — Self-Growing AI that Thinks, Learns & Builds" },
+      { title: "NO QUIT AI — Self-Growing AI that Thinks, Learns & Builds" },
       {
         name: "description",
         content:
-          "NOVA is a self-growing AI workspace: it thinks step by step, grows its own memory from every chat, and builds domain names and full app blueprints on request.",
+          "NO QUIT AI is a self-growing AI workspace: it thinks step by step, grows its own memory from every chat, and builds domain names and full app blueprints on request.",
       },
-      { property: "og:title", content: "NOVA — Self-Growing AI that Thinks, Learns & Builds" },
+      { property: "og:title", content: "NO QUIT AI — Self-Growing AI that Thinks, Learns & Builds" },
       {
         property: "og:description",
         content:
@@ -56,7 +58,7 @@ function Home() {
         </span>
         <div className="flex-1">
           <h1 className="text-lg font-semibold leading-tight">
-            NOVA <span className="text-gradient">self-growing AI</span>
+            NO QUIT AI <span className="text-gradient">self-growing AI</span>
           </h1>
           <p className="text-xs text-muted-foreground">Sochti hai · seekhti hai · khud banati hai</p>
         </div>
@@ -66,10 +68,12 @@ function Home() {
       </header>
 
       <Tabs defaultValue="chat" className="flex min-h-0 flex-1 flex-col">
-        <TabsList className="mb-3 grid w-full grid-cols-3">
+        <TabsList className="mb-3 grid w-full grid-cols-5">
           <TabsTrigger value="chat">Chat</TabsTrigger>
           <TabsTrigger value="memory">Memory</TabsTrigger>
           <TabsTrigger value="builds">Builds</TabsTrigger>
+          <TabsTrigger value="studio">Studio</TabsTrigger>
+          <TabsTrigger value="mind">Mind</TabsTrigger>
         </TabsList>
 
         <TabsContent value="chat" className="mt-0 flex min-h-0 flex-1 flex-col">
@@ -80,6 +84,12 @@ function Home() {
         </TabsContent>
         <TabsContent value="builds" className="mt-0 flex-1 overflow-y-auto">
           <BuildsPanel userId={user.id} refreshKey={refreshKey} />
+        </TabsContent>
+        <TabsContent value="studio" className="mt-0 flex-1 overflow-y-auto">
+          <StudioPanel userId={user.id} refreshKey={refreshKey} />
+        </TabsContent>
+        <TabsContent value="mind" className="mt-0 flex-1 overflow-y-auto">
+          <MindPanel userId={user.id} refreshKey={refreshKey} />
         </TabsContent>
       </Tabs>
     </main>

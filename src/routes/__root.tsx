@@ -78,12 +78,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "NOVA — Self-Growing AI" },
+      { title: "NO QUIT AI — Self-Growing AI" },
       {
         name: "description",
         content: "A self-growing AI that thinks, learns and builds domains and app blueprints.",
       },
-      { property: "og:title", content: "NOVA — Self-Growing AI" },
+      { property: "og:title", content: "NO QUIT AI — Self-Growing AI" },
       {
         property: "og:description",
         content: "A self-growing AI that thinks, learns and builds domains and app blueprints.",

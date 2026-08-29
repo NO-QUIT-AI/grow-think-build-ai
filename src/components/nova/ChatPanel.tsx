@@ -14,6 +14,7 @@ const TOOL_LABELS: Record<string, string> = {
   "tool-save_knowledge": "Nayi seekh save ki",
   "tool-create_domains": "Domain names banaye",
   "tool-create_app_blueprint": "App blueprint banaya",
+  "tool-build_website": "Website live banayi",
 };
 
 const SUGGESTIONS = [
@@ -56,7 +57,7 @@ export function ChatPanel({
       if (!id) {
         const { data: created, error } = await supabase
           .from("conversations")
-          .insert({ user_id: userId, title: "NOVA thread" })
+          .insert({ user_id: userId, title: "NO QUIT AI thread" })
           .select("id")
           .single();
         if (error) {
@@ -155,7 +156,7 @@ export function ChatPanel({
         {messages.length === 0 && (
           <div className="panel p-5">
             <div className="mb-3 flex items-center gap-2 text-sm font-medium">
-              <Sparkles className="h-4 w-4 text-primary" /> NOVA taiyar hai
+              <Sparkles className="h-4 w-4 text-primary" /> NO QUIT AI taiyar hai
             </div>
             <p className="text-sm text-muted-foreground">
               Main har baat se seekhti hoon aur apni memory khud grow karti hoon. Kuch aisa poochho:
@@ -218,7 +219,7 @@ export function ChatPanel({
 
         {busy && (
           <div className="flex items-center gap-2 px-1 text-xs text-muted-foreground">
-            <Brain className="h-4 w-4 text-primary node-pulse" /> NOVA soch rahi hai aur seekh rahi hai…
+            <Brain className="h-4 w-4 text-primary node-pulse" /> NO QUIT AI soch rahi hai aur seekh rahi hai…
           </div>
         )}
         {error && <p className="px-1 text-xs text-destructive">{error.message}</p>}
@@ -241,7 +242,7 @@ export function ChatPanel({
               void submit(input);
             }
           }}
-          placeholder="NOVA se kuch bhi poochho…"
+          placeholder="NO QUIT AI se kuch bhi poochho…"
           rows={1}
           className="max-h-40 min-h-11 resize-none border-0 bg-transparent focus-visible:ring-0"
         />
