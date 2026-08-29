@@ -101,6 +101,56 @@ export type Database = {
         }
         Relationships: []
       }
+      memories: {
+        Row: {
+          blueprint: Json
+          code: string
+          created_at: string
+          id: string
+          liked: boolean
+          parent_id: string | null
+          project_type: string
+          prompt: string
+          summary: string
+          user_id: string
+          version: number
+        }
+        Insert: {
+          blueprint?: Json
+          code?: string
+          created_at?: string
+          id?: string
+          liked?: boolean
+          parent_id?: string | null
+          project_type?: string
+          prompt: string
+          summary?: string
+          user_id: string
+          version?: number
+        }
+        Update: {
+          blueprint?: Json
+          code?: string
+          created_at?: string
+          id?: string
+          liked?: boolean
+          parent_id?: string | null
+          project_type?: string
+          prompt?: string
+          summary?: string
+          user_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "memories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
