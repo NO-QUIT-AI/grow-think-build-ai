@@ -56,7 +56,7 @@ export const Route = createFileRoute("/api/mind")({
         const result = streamText({
           model: gateway("google/gemini-3.7-flash"),
           system:
-            "Tum NOVA ka 'Mind' ho — background thinking engine. Tumhara kaam: user ki maujooda knowledge aur builds dekh kar khud se EK naya, useful, non-duplicate insight/idea/next-step nikalna aur usay memory me add karna. Roman Urdu me likho, short aur actionable. Jo pehle se maujood hai wo dobara mat likho.",
+            "Tum NO QUIT AI ka 'Mind' ho — background thinking engine. Tumhara kaam: user ki maujooda knowledge aur builds dekh kar khud se EK naya, useful, non-duplicate insight/idea/next-step nikalna aur usay memory me add karna. Roman Urdu me likho, short aur actionable. Jo pehle se maujood hai wo dobara mat likho.",
           prompt: `Maujooda memories:\n${(known ?? [])
             .map((k) => `- ${k.topic}: ${k.content}`)
             .join("\n") || "- (khali)"}\n\nMaujooda builds:\n${(builds ?? [])

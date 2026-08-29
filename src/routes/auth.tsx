@@ -13,13 +13,13 @@ import { useAuth } from "@/hooks/useAuth";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in to NOVA — Self-Growing AI" },
+      { title: "Sign in to NO QUIT AI — Self-Growing AI" },
       {
         name: "description",
         content:
-          "Sign in to NOVA, the self-growing AI that thinks, learns and builds domains and app blueprints for you.",
+          "Sign in to NO QUIT AI, the self-growing AI that thinks, learns and builds domains and app blueprints for you.",
       },
-      { property: "og:title", content: "Sign in to NOVA — Self-Growing AI" },
+      { property: "og:title", content: "Sign in to NO QUIT AI — Self-Growing AI" },
       {
         property: "og:description",
         content: "Access your self-growing AI workspace: memory, domains and app blueprints.",
@@ -96,7 +96,7 @@ function AuthPage() {
             <Brain className="h-6 w-6 text-primary-foreground" />
           </span>
           <div>
-            <h1 className="text-xl font-semibold">NOVA</h1>
+            <h1 className="text-xl font-semibold">NO QUIT AI</h1>
             <p className="text-xs text-muted-foreground">Self-growing AI workspace</p>
           </div>
         </div>

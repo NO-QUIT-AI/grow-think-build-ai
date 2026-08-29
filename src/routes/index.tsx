@@ -12,13 +12,13 @@ import { useAuth } from "@/hooks/useAuth";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "NOVA — Self-Growing AI that Thinks, Learns & Builds" },
+      { title: "NO QUIT AI — Self-Growing AI that Thinks, Learns & Builds" },
       {
         name: "description",
         content:
-          "NOVA is a self-growing AI workspace: it thinks step by step, grows its own memory from every chat, and builds domain names and full app blueprints on request.",
+          "NO QUIT AI is a self-growing AI workspace: it thinks step by step, grows its own memory from every chat, and builds domain names and full app blueprints on request.",
       },
-      { property: "og:title", content: "NOVA — Self-Growing AI that Thinks, Learns & Builds" },
+      { property: "og:title", content: "NO QUIT AI — Self-Growing AI that Thinks, Learns & Builds" },
       {
         property: "og:description",
         content:
@@ -56,7 +56,7 @@ function Home() {
         </span>
         <div className="flex-1">
           <h1 className="text-lg font-semibold leading-tight">
-            NOVA <span className="text-gradient">self-growing AI</span>
+            NO QUIT AI <span className="text-gradient">self-growing AI</span>
           </h1>
           <p className="text-xs text-muted-foreground">Sochti hai · seekhti hai · khud banati hai</p>
         </div>

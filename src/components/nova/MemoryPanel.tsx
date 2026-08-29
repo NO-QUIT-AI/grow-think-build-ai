@@ -42,7 +42,7 @@ export function MemoryPanel({ userId, refreshKey }: { userId: string; refreshKey
 
       {items.length === 0 && (
         <p className="px-1 text-sm text-muted-foreground">
-          Abhi memory khali hai. Chat karo — NOVA khud seekh kar yahan add karti rahegi.
+          Abhi memory khali hai. Chat karo — NO QUIT AI khud seekh kar yahan add karti rahegi.
         </p>
       )}
 

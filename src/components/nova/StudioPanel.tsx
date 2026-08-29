@@ -57,7 +57,7 @@ export function StudioPanel({ userId, refreshKey }: { userId: string; refreshKey
         <Globe2 className="h-6 w-6 text-primary node-pulse" />
         <p className="text-sm font-medium">Studio cabin khali hai</p>
         <p className="text-xs text-muted-foreground">
-          Chat me kaho: “mere coffee brand ki landing page bana do” — NOVA yahin live bana kar dikhayegi.
+          Chat me kaho: “mere coffee brand ki landing page bana do” — NO QUIT AI yahin live bana kar dikhayegi.
         </p>
       </div>
     );
