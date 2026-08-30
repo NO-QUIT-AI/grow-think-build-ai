@@ -38,6 +38,8 @@ function Home() {
   const navigate = useNavigate();
   const { user, loading, signOut } = useAuth();
   const [refreshKey, setRefreshKey] = useState(0);
+  const [activeTab, setActiveTab] = useState("chat");
+  const [activeMemoryId, setActiveMemoryId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth" });
@@ -49,6 +51,11 @@ function Home() {
         <Brain className="h-8 w-8 text-primary node-pulse" />
       </main>
     );
+  }
+
+  function openMemoryInStudio(memoryId: string) {
+    setActiveMemoryId(memoryId);
+    setActiveTab("studio");
   }
 
   return (
@@ -70,7 +77,7 @@ function Home() {
         </Button>
       </header>
 
-      <Tabs defaultValue="chat" className="flex min-h-0 flex-1 flex-col">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col">
         <TabsList className="mb-3 grid w-full grid-cols-5">
           <TabsTrigger value="chat">Chat</TabsTrigger>
           <TabsTrigger value="memory">Memory</TabsTrigger>
@@ -86,10 +93,19 @@ function Home() {
           <MemoryPanel userId={user.id} refreshKey={refreshKey} />
         </TabsContent>
         <TabsContent value="builds" className="mt-0 flex-1 overflow-y-auto">
-          <BuildsPanel userId={user.id} refreshKey={refreshKey} />
+          <BuildsPanel
+            userId={user.id}
+            refreshKey={refreshKey}
+            onOpenStudio={openMemoryInStudio}
+          />
         </TabsContent>
-        <TabsContent value="studio" className="mt-0 flex-1 overflow-y-auto">
-          <StudioPanel userId={user.id} refreshKey={refreshKey} />
+        <TabsContent value="studio" className="mt-0 flex min-h-0 flex-1 flex-col overflow-hidden">
+          <StudioPanel
+            userId={user.id}
+            refreshKey={refreshKey}
+            activeMemoryId={activeMemoryId}
+            onMemorySaved={() => setRefreshKey((key) => key + 1)}
+          />
         </TabsContent>
         <TabsContent value="mind" className="mt-0 flex-1 overflow-y-auto">
           <MindPanel userId={user.id} refreshKey={refreshKey} />

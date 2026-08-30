@@ -11,9 +11,9 @@ Rules:
 - User Urdu/Roman-Urdu/English kisi bhi zubaan me baat kare, usi zubaan me jawab do. Default Roman Urdu.
 - Har jawab se pehle apni knowledge base recall karo (recall_knowledge tool) jab bhi topic personal ya pehle discuss hua ho.
 - Jab bhi koi nayi durable seekh mile (user ki preference, project detail, koi fact, koi decision), save_knowledge tool se khud usay save karo. Ye tumhari self-growth hai — user ko kehna nahi parta.
-- Jab user domain maange: create_domains tool chalao (8-12 creative, brandable, short names + reason + extension suggestion).
-- Jab user app/website/product maange: create_app_blueprint tool chalao (complete structure: screens, features, data model, tech stack, roadmap).
-- Jab user website/landing page/web app "bana do" kahe: build_website tool chalao aur ek COMPLETE single-file HTML do (inline <style> aur <script>, koi external file nahi, sirf CDN fonts allowed). Modern, responsive, dark ya brand ke hisaab se theme, real content — lorem ipsum nahi. Ye Studio cabin me live preview hota hai.
+- Jab user domain maange: create_domains tool chalao (8-12 creative, brandable, short names + reason + extension suggestion). Har naya build automatically Memories me save hota hai.
+- Jab user app/website/product maange: create_app_blueprint tool chalao (complete structure: screens, features, data model, tech stack, roadmap). Har naya build automatically Memories me save hota hai.
+- Jab user website/landing page/web app "bana do" kahe: build_website tool chalao aur ek COMPLETE single-file HTML do (inline <style> aur <script>, koi external file nahi, sirf CDN fonts allowed). Modern, responsive, dark ya brand ke hisaab se theme, real content — lorem ipsum nahi. Ye Studio cabin me live preview hota hai aur Memories me save hota hai.
 - Website banane ke baad chat me sirf short summary do, poora HTML dobara chat me mat likho.
 - Sochne ka tarika: pehle short "Sochne ka plan" (2-4 bullets), phir kaam, phir clean markdown output.
 - Jhooth mat bolo. Jo nahi jaante, keh do aur seekhne ke liye sawal poocho.`;
@@ -98,17 +98,32 @@ export const Route = createFileRoute("/api/chat")({
               ),
             }),
             execute: async ({ brief, names }) => {
-              const { data, error } = await supabase
-                .from("artifacts")
-                .insert({
+              const title = brief.slice(0, 80);
+              const content = { brief, names };
+              const [{ data, error }, { error: memoryError }] = await Promise.all([
+                supabase
+                  .from("artifacts")
+                  .insert({
+                    user_id: userId,
+                    kind: "domains",
+                    title,
+                    content,
+                  })
+                  .select("id")
+                  .single(),
+                supabase.from("memories").insert({
                   user_id: userId,
-                  kind: "domains",
-                  title: brief.slice(0, 80),
-                  content: { brief, names },
-                })
-                .select("id")
-                .single();
-              return error ? { saved: false, error: error.message } : { saved: true, id: data.id, names };
+                  prompt: brief,
+                  project_type: "domains",
+                  code: JSON.stringify(names),
+                  summary: title,
+                  blueprint: content,
+                }),
+              ]);
+              if (error || memoryError) {
+                return { saved: false, error: error?.message || memoryError?.message };
+              }
+              return { saved: true, id: data!.id, names };
             },
           }),
           create_app_blueprint: tool({
@@ -123,19 +138,30 @@ export const Route = createFileRoute("/api/chat")({
               roadmap: z.array(z.string()),
             }),
             execute: async (blueprint) => {
-              const { data, error } = await supabase
-                .from("artifacts")
-                .insert({
+              const [{ data, error }, { error: memoryError }] = await Promise.all([
+                supabase
+                  .from("artifacts")
+                  .insert({
+                    user_id: userId,
+                    kind: "blueprint",
+                    title: blueprint.name,
+                    content: blueprint,
+                  })
+                  .select("id")
+                  .single(),
+                supabase.from("memories").insert({
                   user_id: userId,
-                  kind: "blueprint",
-                  title: blueprint.name,
-                  content: blueprint,
-                })
-                .select("id")
-                .single();
-              return error
-                ? { saved: false, error: error.message }
-                : { saved: true, id: data.id, name: blueprint.name };
+                  prompt: `${blueprint.name}: ${blueprint.summary}`,
+                  project_type: "blueprint",
+                  code: "",
+                  summary: blueprint.summary,
+                  blueprint,
+                }),
+              ]);
+              if (error || memoryError) {
+                return { saved: false, error: error?.message || memoryError?.message };
+              }
+              return { saved: true, id: data!.id, name: blueprint.name };
             },
           }),
           build_website: tool({
@@ -147,19 +173,31 @@ export const Route = createFileRoute("/api/chat")({
               html: z.string(),
             }),
             execute: async ({ name, summary, html }) => {
-              const { data, error } = await supabase
-                .from("artifacts")
-                .insert({
+              const content = { name, summary, html };
+              const [{ data, error }, { error: memoryError }] = await Promise.all([
+                supabase
+                  .from("artifacts")
+                  .insert({
+                    user_id: userId,
+                    kind: "website",
+                    title: name,
+                    content,
+                  })
+                  .select("id")
+                  .single(),
+                supabase.from("memories").insert({
                   user_id: userId,
-                  kind: "website",
-                  title: name,
-                  content: { name, summary, html },
-                })
-                .select("id")
-                .single();
-              return error
-                ? { saved: false, error: error.message }
-                : { saved: true, id: data.id, name, preview: "Studio cabin me live chal rahi hai" };
+                  prompt: `${name}: ${summary}`,
+                  project_type: "website",
+                  code: html,
+                  summary,
+                  blueprint: content,
+                }),
+              ]);
+              if (error || memoryError) {
+                return { saved: false, error: error?.message || memoryError?.message };
+              }
+              return { saved: true, id: data!.id, name, preview: "Studio cabin me live chal rahi hai" };
             },
           }),
         };
