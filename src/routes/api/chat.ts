@@ -138,19 +138,30 @@ export const Route = createFileRoute("/api/chat")({
               roadmap: z.array(z.string()),
             }),
             execute: async (blueprint) => {
-              const { data, error } = await supabase
-                .from("artifacts")
-                .insert({
+              const [{ data, error }, { error: memoryError }] = await Promise.all([
+                supabase
+                  .from("artifacts")
+                  .insert({
+                    user_id: userId,
+                    kind: "blueprint",
+                    title: blueprint.name,
+                    content: blueprint,
+                  })
+                  .select("id")
+                  .single(),
+                supabase.from("memories").insert({
                   user_id: userId,
-                  kind: "blueprint",
-                  title: blueprint.name,
-                  content: blueprint,
-                })
-                .select("id")
-                .single();
-              return error
-                ? { saved: false, error: error.message }
-                : { saved: true, id: data.id, name: blueprint.name };
+                  prompt: `${blueprint.name}: ${blueprint.summary}`,
+                  project_type: "blueprint",
+                  code: "",
+                  summary: blueprint.summary,
+                  blueprint,
+                }),
+              ]);
+              if (error || memoryError) {
+                return { saved: false, error: error?.message || memoryError?.message };
+              }
+              return { saved: true, id: data!.id, name: blueprint.name };
             },
           }),
           build_website: tool({
