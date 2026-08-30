@@ -75,7 +75,7 @@ export function BuildsPanel({
 
   function previewUrl(item: Memory) {
     if (item.project_type === "website") {
-      const html = item.code || (item.blueprint?.html as string) || "";
+      const html = item.code || (item.blueprint?.['html'] as string) || "";
       return html ? URL.createObjectURL(new Blob([html], { type: "text/html" })) : null;
     }
     return null;
@@ -173,19 +173,19 @@ export function BuildsPanel({
           {item.project_type === "blueprint" && (
             <div className="mb-3 space-y-2 text-sm">
               <BuildSection title="Screens">
-                {((item.blueprint?.screens ?? []) as { title: string; purpose: string }[]).map((screen) => (
+                {((item.blueprint?.['screens'] ?? []) as { title: string; purpose: string }[]).map((screen) => (
                   <li key={screen.title}>
                     <span className="font-medium">{screen.title}</span> — {screen.purpose}
                   </li>
                 ))}
               </BuildSection>
               <BuildSection title="Features">
-                {((item.blueprint?.features ?? []) as string[]).map((feature) => (
+                {((item.blueprint?.['features'] ?? []) as string[]).map((feature) => (
                   <li key={feature}>{feature}</li>
                 ))}
               </BuildSection>
               <div className="flex flex-wrap gap-1.5">
-                {((item.blueprint?.tech_stack ?? []) as string[]).map((tech) => (
+                {((item.blueprint?.['tech_stack'] ?? []) as string[]).map((tech) => (
                   <span
                     key={tech}
                     className="rounded-full border border-border bg-secondary px-2 py-0.5 text-[11px]"
