@@ -75,7 +75,7 @@ export function BuildsPanel({
 
   function previewUrl(item: Memory) {
     if (item.project_type === "website") {
-      const html = item.code || (item.blueprint?.html as string) || "";
+      const html = item.code || (item.blueprint?.['html'] as string) || "";
       return html ? URL.createObjectURL(new Blob([html], { type: "text/html" })) : null;
     }
     return null;
@@ -173,7 +173,7 @@ export function BuildsPanel({
           {item.project_type === "blueprint" && (
             <div className="mb-3 space-y-2 text-sm">
               <BuildSection title="Screens">
-                {((item.blueprint?.screens ?? []) as { title: string; purpose: string }[]).map((screen) => (
+                {((item.blueprint?.['screens'] ?? []) as { title: string; purpose: string }[]).map((screen) => (
                   <li key={screen.title}>
                     <span className="font-medium">{screen.title}</span> — {screen.purpose}
                   </li>
