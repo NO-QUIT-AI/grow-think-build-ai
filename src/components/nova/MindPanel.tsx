@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Brain, Heart, Loader2, Search, Sparkles, Trash2, X } from "lucide-react";
+import { Brain, Heart, Loader2, Pause, Play, Search, Sparkles, Trash2, X, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,14 @@ import { supabase } from "@/integrations/supabase/client";
 
 const PROJECT_TYPES = ["all", "website", "blueprint", "domains"] as const;
 type ProjectType = (typeof PROJECT_TYPES)[number];
+
+type Thought = {
+  id: string;
+  thought: string;
+  source_chat: string | null;
+  is_auto: boolean;
+  created_at: string;
+};
 
 type Memory = {
   id: string;
@@ -42,6 +50,77 @@ export function MindPanel({ userId, refreshKey }: { userId: string; refreshKey: 
   useEffect(() => {
     void load();
   }, [load, refreshKey]);
+
+
+  const [thoughts, setThoughts] = useState<Thought[]>([]);
+  const [thinking, setThinking] = useState(false);
+  const [autoOn, setAutoOn] = useState(true);
+
+  const loadThoughts = useCallback(async () => {
+    const { data } = await supabase
+      .from("mind_thoughts")
+      .select("id, thought, source_chat, is_auto, created_at")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    setThoughts((data as unknown as Thought[]) ?? []);
+  }, [userId]);
+
+  const think = useCallback(
+    async (manual: boolean) => {
+      setThinking(true);
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData.session?.access_token;
+        if (!token) return;
+        const res = await fetch(`/api/mind/think${manual ? "?manual=1" : ""}`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const json = (await res.json().catch(() => null)) as
+          | { ok: boolean; error?: string }
+          | null;
+        if (!res.ok || !json?.ok) {
+          if (manual) toast.error(json?.error ?? "Mind soch nahi saka");
+          return;
+        }
+        if (manual) toast.success("Nayi soch add ho gayi");
+      } catch {
+        if (manual) toast.error("Mind se connect nahi ho saka");
+      } finally {
+        setThinking(false);
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    void loadThoughts();
+  }, [loadThoughts, refreshKey]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("mind-thoughts")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "mind_thoughts", filter: `user_id=eq.${userId}` },
+        () => {
+          void loadThoughts();
+        },
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [userId, loadThoughts]);
+
+  useEffect(() => {
+    if (!autoOn) return;
+    const id = setInterval(() => {
+      void think(false);
+    }, 90_000);
+    return () => clearInterval(id);
+  }, [autoOn, think]);
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -89,6 +168,62 @@ export function MindPanel({ userId, refreshKey }: { userId: string; refreshKey: 
 
   return (
     <div className="space-y-3 pb-6">
+      <section className="panel flex flex-col gap-3 p-4">
+        <div className="flex items-center gap-2">
+          <Zap className="h-4 w-4 text-primary" />
+          <span className="text-sm font-medium">Mind — khud sochne wala engine</span>
+          <span className="ml-auto text-2xl font-semibold text-gradient">{thoughts.length}</span>
+        </div>
+
+        <p className="text-xs text-muted-foreground">
+          {memories.length === 0
+            ? "Chat karo — abhi 0 learnings hain, jitni zyada knowledge hogi Mind utni behtar nayi soch nikalega."
+            : `${memories.length} learnings se ab tak ${thoughts.length} nayi sochein nikli hain — har 90 second me Mind khud kuch naya seekhta hai.`}
+        </p>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <Button size="sm" onClick={() => void think(true)} disabled={thinking} className="h-8 gap-1.5">
+            {thinking ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+            Socho
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 gap-1.5"
+            onClick={() => setAutoOn((v) => !v)}
+          >
+            {autoOn ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+            {autoOn ? "Pause" : "Resume"}
+          </Button>
+          <span className="text-[11px] text-muted-foreground">
+            {autoOn ? "Auto-grow ON (90s)" : "Auto-grow paused"}
+          </span>
+        </div>
+
+        <div className="space-y-2">
+          {thoughts.length === 0 && (
+            <p className="rounded-xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
+              Abhi koi soch nahi — "Socho" dabao ya chat me kuch banwao.
+            </p>
+          )}
+          {thoughts.map((t) => (
+            <div key={t.id} className="rounded-xl border border-border bg-secondary/50 p-3">
+              <p className="text-sm leading-snug">{t.thought}</p>
+              <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[10px] text-muted-foreground">
+                <span>{new Date(t.created_at).toLocaleString()}</span>
+                <span>·</span>
+                <span>{t.is_auto ? "auto" : "manual"}</span>
+                {t.source_chat && t.source_chat !== "general" && (
+                  <>
+                    <span>·</span>
+                    <span className="truncate">from: {t.source_chat}</span>
+                  </>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
       <div className="panel flex flex-col gap-3 p-4">
         <div className="flex items-center gap-2">
           <Brain className="h-4 w-4 text-primary" />
