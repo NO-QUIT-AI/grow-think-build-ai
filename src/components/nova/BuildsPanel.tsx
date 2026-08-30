@@ -180,12 +180,12 @@ export function BuildsPanel({
                 ))}
               </BuildSection>
               <BuildSection title="Features">
-                {((item.blueprint?.features ?? []) as string[]).map((feature) => (
+                {((item.blueprint?.['features'] ?? []) as string[]).map((feature) => (
                   <li key={feature}>{feature}</li>
                 ))}
               </BuildSection>
               <div className="flex flex-wrap gap-1.5">
-                {((item.blueprint?.tech_stack ?? []) as string[]).map((tech) => (
+                {((item.blueprint?.['tech_stack'] ?? []) as string[]).map((tech) => (
                   <span
                     key={tech}
                     className="rounded-full border border-border bg-secondary px-2 py-0.5 text-[11px]"

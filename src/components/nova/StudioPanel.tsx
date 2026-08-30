@@ -10,7 +10,7 @@ import {
   Smartphone,
   Sparkles,
 } from "lucide-react";
-import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { Group, Panel, Separator } from "react-resizable-panels";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -177,8 +177,8 @@ export function StudioPanel({
           </pre>
         </div>
       ) : (
-        <PanelGroup direction="horizontal" className="panel min-h-0 flex-1 overflow-hidden p-1">
-          <Panel defaultSize={50} minSize={20} className="flex min-h-0 flex-col">
+        <Group orientation="horizontal" className="panel min-h-0 flex-1 overflow-hidden p-1">
+          <Panel defaultSize="50" minSize="20" className="flex min-h-0 flex-col">
             <div className="mb-2 flex items-center justify-between px-2 pt-1">
               <span className="text-xs font-medium text-muted-foreground">Code Editor</span>
               <Button
@@ -198,8 +198,8 @@ export function StudioPanel({
               spellCheck={false}
             />
           </Panel>
-          <PanelResizeHandle className="mx-1 w-1 rounded-full bg-border transition hover:bg-primary" />
-          <Panel defaultSize={50} minSize={20} className="flex min-h-0 flex-col">
+          <Separator className="mx-1 w-1 rounded-full bg-border transition hover:bg-primary" />
+          <Panel defaultSize="50" minSize="20" className="flex min-h-0 flex-col">
             <div className="mb-2 flex items-center justify-between px-2 pt-1">
               <span className="text-xs font-medium text-muted-foreground">Live Preview</span>
               <div className="flex items-center gap-1">
@@ -219,7 +219,7 @@ export function StudioPanel({
               </div>
             </div>
           </Panel>
-        </PanelGroup>
+        </Group>
       )}
 
       <div className="flex items-center gap-2 px-1 pb-1 text-xs text-muted-foreground">
