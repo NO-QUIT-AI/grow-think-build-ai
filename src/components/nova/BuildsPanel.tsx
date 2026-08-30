@@ -7,12 +7,14 @@ import {
   Layers,
   Loader2,
   MessageSquareQuote,
+  Smartphone,
   Trash2,
   Wand2,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { ShortcutAppDialog, type ShortcutTarget } from "@/components/nova/ShortcutAppDialog";
 import { supabase } from "@/integrations/supabase/client";
 
 type Memory = {
@@ -39,6 +41,7 @@ export function BuildsPanel({
   const [items, setItems] = useState<Memory[]>([]);
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [shortcut, setShortcut] = useState<ShortcutTarget | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -84,6 +87,15 @@ export function BuildsPanel({
   function openPreview(item: Memory) {
     const url = previewUrl(item);
     if (url) window.open(url, "_blank", "noopener");
+  }
+
+  function makeShortcut(item: Memory) {
+    const html = item.code || (item.blueprint?.['html'] as string) || "";
+    if (!html) {
+      toast.error("Is build ka code nahi mila");
+      return;
+    }
+    setShortcut({ name: item.summary?.slice(0, 30) || item.prompt.slice(0, 30), html });
   }
 
   if (loading && items.length === 0) {
