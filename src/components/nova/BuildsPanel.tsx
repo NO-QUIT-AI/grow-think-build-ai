@@ -7,12 +7,14 @@ import {
   Layers,
   Loader2,
   MessageSquareQuote,
+  Smartphone,
   Trash2,
   Wand2,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { ShortcutAppDialog, type ShortcutTarget } from "@/components/nova/ShortcutAppDialog";
 import { supabase } from "@/integrations/supabase/client";
 
 type Memory = {
