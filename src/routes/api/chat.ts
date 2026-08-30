@@ -98,17 +98,32 @@ export const Route = createFileRoute("/api/chat")({
               ),
             }),
             execute: async ({ brief, names }) => {
-              const { data, error } = await supabase
-                .from("artifacts")
-                .insert({
+              const title = brief.slice(0, 80);
+              const content = { brief, names };
+              const [{ data, error }, { error: memoryError }] = await Promise.all([
+                supabase
+                  .from("artifacts")
+                  .insert({
+                    user_id: userId,
+                    kind: "domains",
+                    title,
+                    content,
+                  })
+                  .select("id")
+                  .single(),
+                supabase.from("memories").insert({
                   user_id: userId,
-                  kind: "domains",
-                  title: brief.slice(0, 80),
-                  content: { brief, names },
-                })
-                .select("id")
-                .single();
-              return error ? { saved: false, error: error.message } : { saved: true, id: data.id, names };
+                  prompt: brief,
+                  project_type: "domains",
+                  code: JSON.stringify(names),
+                  summary: title,
+                  blueprint: content,
+                }),
+              ]);
+              if (error || memoryError) {
+                return { saved: false, error: error?.message || memoryError?.message };
+              }
+              return { saved: true, id: data!.id, names };
             },
           }),
           create_app_blueprint: tool({
