@@ -189,6 +189,33 @@ export type Database = {
           },
         ]
       }
+      mind_thoughts: {
+        Row: {
+          created_at: string
+          id: string
+          is_auto: boolean
+          source_chat: string | null
+          thought: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_auto?: boolean
+          source_chat?: string | null
+          thought: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_auto?: boolean
+          source_chat?: string | null
+          thought?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
