@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as InviteRouteImport } from './routes/invite'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiMindRouteImport } from './routes/api/mind'
 import { Route as ApiMindThinkRouteImport } from './routes/api/mind/think'
@@ -23,6 +24,11 @@ const IndexRoute = IndexRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InviteRoute = InviteRouteImport.update({
+  id: '/invite',
+  path: '/invite',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
@@ -44,6 +50,7 @@ const ApiMindThinkRoute = ApiMindThinkRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/invite': typeof InviteRoute
   '/api/chat': typeof ApiChatRoute
   '/api/mind': typeof ApiMindRouteWithChildren
   '/api/mind/think': typeof ApiMindThinkRoute
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/invite': typeof InviteRoute
   '/api/chat': typeof ApiChatRoute
   '/api/mind': typeof ApiMindRouteWithChildren
   '/api/mind/think': typeof ApiMindThinkRoute
@@ -59,21 +67,31 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/invite': typeof InviteRoute
   '/api/chat': typeof ApiChatRoute
   '/api/mind': typeof ApiMindRouteWithChildren
   '/api/mind/think': typeof ApiMindThinkRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/api/chat' | '/api/mind' | '/api/mind/think'
+  fullPaths:
+    '/' | '/auth' | '/invite' | '/api/chat' | '/api/mind' | '/api/mind/think'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/api/chat' | '/api/mind' | '/api/mind/think'
-  id: '__root__' | '/' | '/auth' | '/api/chat' | '/api/mind' | '/api/mind/think'
+  to: '/' | '/auth' | '/invite' | '/api/chat' | '/api/mind' | '/api/mind/think'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/invite'
+    | '/api/chat'
+    | '/api/mind'
+    | '/api/mind/think'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  InviteRoute: typeof InviteRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiMindRoute: typeof ApiMindRouteWithChildren
 }
@@ -92,6 +110,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invite': {
+      id: '/invite'
+      path: '/invite'
+      fullPath: '/invite'
+      preLoaderRoute: typeof InviteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/chat': {
@@ -132,6 +157,7 @@ const ApiMindRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  InviteRoute: InviteRoute,
   ApiChatRoute: ApiChatRoute,
   ApiMindRoute: ApiMindRouteWithChildren,
 }
