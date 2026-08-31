@@ -234,6 +234,27 @@ export type Database = {
         }
         Relationships: []
       }
+      referrals: {
+        Row: {
+          created_at: string
+          id: string
+          invited_user_id: string
+          inviter_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invited_user_id: string
+          inviter_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invited_user_id?: string
+          inviter_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
