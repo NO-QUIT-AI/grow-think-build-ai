@@ -10,7 +10,9 @@ import { MemoryPanel } from "@/components/nova/MemoryPanel";
 import { BuildsPanel } from "@/components/nova/BuildsPanel";
 import { StudioPanel } from "@/components/nova/StudioPanel";
 import { MindPanel } from "@/components/nova/MindPanel";
+import { InviteDialog } from "@/components/nova/InviteDialog";
 import { useAuth } from "@/hooks/useAuth";
+import { redeemReferral } from "@/lib/referral";
 
 export const Route = createFileRoute("/")({
   head: () => ({
