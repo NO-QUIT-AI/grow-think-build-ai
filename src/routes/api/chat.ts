@@ -219,6 +219,16 @@ export const Route = createFileRoute("/api/chat")({
               html: z.string(),
             }),
             execute: async ({ name, summary, html }) => {
+              if (!html || html.trim().length < 30) {
+                return { saved: false, error: "HTML khali tha — dobara complete HTML bhejo." };
+              }
+              if (html.length > MAX_HTML) {
+                return {
+                  saved: false,
+                  error:
+                    "HTML bohot bara hai. Ise chhota karo (kam inline data, sections short) aur dobara bhejo.",
+                };
+              }
               const content = { name, summary, html };
               const [{ data, error }, { error: memoryError }] = await Promise.all([
                 supabase
