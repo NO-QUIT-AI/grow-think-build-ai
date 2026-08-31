@@ -259,16 +259,25 @@ export const Route = createFileRoute("/api/chat")({
         };
 
 
+        const incoming = body.messages as UIMessage[];
+
         const result = streamText({
           model: gateway("google/gemini-3.7-flash"),
           system: SYSTEM_PROMPT,
-          messages: await convertToModelMessages(body.messages as UIMessage[]),
+          messages: await convertToModelMessages(trimMessages(incoming)),
           tools,
-          stopWhen: stepCountIs(50),
+          stopWhen: stepCountIs(30),
+          onError: ({ error }) => {
+            console.error("[chat] stream error", error);
+          },
         });
 
         return result.toUIMessageStreamResponse({
-          originalMessages: body.messages as UIMessage[],
+          originalMessages: incoming,
+          onError: (error) =>
+            error instanceof Error
+              ? `AI ruk gaya: ${error.message}`
+              : "AI ruk gaya — thora chhota prompt ya naya chat try karo.",
         });
       },
     },
