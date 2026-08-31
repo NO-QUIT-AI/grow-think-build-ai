@@ -79,10 +79,20 @@ function Home() {
           </h1>
           <p className="text-xs text-muted-foreground">Sochti hai · seekhti hai · khud banati hai</p>
         </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setInviteOpen(true)}
+          aria-label="Invite friends"
+        >
+          <UserPlus className="h-4 w-4" />
+        </Button>
         <Button variant="ghost" size="icon" onClick={() => signOut()} aria-label="Sign out">
           <LogOut className="h-4 w-4" />
         </Button>
       </header>
+
+      <InviteDialog userId={user.id} open={inviteOpen} onOpenChange={setInviteOpen} />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col">
         <TabsList className="mb-3 grid w-full grid-cols-5">
