@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Brain, LogOut } from "lucide-react";
+import { Brain, LogOut, UserPlus } from "lucide-react";
 import logoAsset from "@/assets/logo.jpg.asset.json";
 
 import { Button } from "@/components/ui/button";
