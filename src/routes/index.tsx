@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Brain, LogOut } from "lucide-react";
+import { Brain, LogOut, UserPlus } from "lucide-react";
 import logoAsset from "@/assets/logo.jpg.asset.json";
 
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,9 @@ import { MemoryPanel } from "@/components/nova/MemoryPanel";
 import { BuildsPanel } from "@/components/nova/BuildsPanel";
 import { StudioPanel } from "@/components/nova/StudioPanel";
 import { MindPanel } from "@/components/nova/MindPanel";
+import { InviteDialog } from "@/components/nova/InviteDialog";
 import { useAuth } from "@/hooks/useAuth";
+import { redeemReferral } from "@/lib/referral";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -40,10 +42,15 @@ function Home() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [activeTab, setActiveTab] = useState("chat");
   const [activeMemoryId, setActiveMemoryId] = useState<string | null>(null);
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth" });
   }, [user, loading, navigate]);
+
+  useEffect(() => {
+    if (user) void redeemReferral(user.id);
+  }, [user]);
 
   if (loading || !user) {
     return (
@@ -72,10 +79,20 @@ function Home() {
           </h1>
           <p className="text-xs text-muted-foreground">Sochti hai · seekhti hai · khud banati hai</p>
         </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setInviteOpen(true)}
+          aria-label="Invite friends"
+        >
+          <UserPlus className="h-4 w-4" />
+        </Button>
         <Button variant="ghost" size="icon" onClick={() => signOut()} aria-label="Sign out">
           <LogOut className="h-4 w-4" />
         </Button>
       </header>
+
+      <InviteDialog userId={user.id} open={inviteOpen} onOpenChange={setInviteOpen} />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col">
         <TabsList className="mb-3 grid w-full grid-cols-5">
