@@ -19,6 +19,52 @@ Rules:
 - Jhooth mat bolo. Jo nahi jaante, keh do aur seekhne ke liye sawal poocho.`;
 
 
+const MAX_HTML = 300_000;
+const MAX_TEXT_PART = 6_000;
+const MAX_HISTORY = 14;
+
+/**
+ * Bade builds (jaise mining coin app with contract address) ka HTML history me
+ * reh jata tha aur agla request token limit cross kar ke fail ho jata tha.
+ * Isliye history trim + heavy tool outputs compact kar dete hain.
+ */
+function trimMessages(messages: UIMessage[]): UIMessage[] {
+  return messages.slice(-MAX_HISTORY).map((message) => {
+    const parts = (message.parts ?? []).map((part) => {
+      const anyPart = part as Record<string, unknown>;
+      const type = String(anyPart["type"] ?? "");
+
+      if (type === "text" && typeof anyPart["text"] === "string") {
+        const text = anyPart["text"] as string;
+        if (text.length > MAX_TEXT_PART) {
+          return { ...anyPart, text: `${text.slice(0, MAX_TEXT_PART)}\n…[trimmed]` };
+        }
+        return part;
+      }
+
+      if (type.startsWith("tool-")) {
+        const next: Record<string, unknown> = { ...anyPart };
+        const input = next["input"] as Record<string, unknown> | undefined;
+        if (input && typeof input["html"] === "string") {
+          next["input"] = { ...input, html: "[HTML build saved — Studio me maujood hai]" };
+        }
+        const output = next["output"];
+        if (typeof output === "string" && output.length > 1_000) {
+          next["output"] = `${output.slice(0, 1_000)}…[trimmed]`;
+        } else if (output && typeof output === "object") {
+          const compact = { ...(output as Record<string, unknown>) };
+          if (typeof compact["html"] === "string") compact["html"] = "[trimmed]";
+          next["output"] = compact;
+        }
+        return next;
+      }
+
+      return part;
+    });
+    return { ...message, parts } as UIMessage;
+  });
+}
+
 function userClient(token: string) {
   const url = process.env["SUPABASE_URL"]!;
   const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
