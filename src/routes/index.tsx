@@ -42,10 +42,15 @@ function Home() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [activeTab, setActiveTab] = useState("chat");
   const [activeMemoryId, setActiveMemoryId] = useState<string | null>(null);
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth" });
   }, [user, loading, navigate]);
+
+  useEffect(() => {
+    if (user) void redeemReferral(user.id);
+  }, [user]);
 
   if (loading || !user) {
     return (
