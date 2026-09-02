@@ -10,6 +10,7 @@ import { MemoryPanel } from "@/components/nova/MemoryPanel";
 import { BuildsPanel } from "@/components/nova/BuildsPanel";
 import { StudioPanel } from "@/components/nova/StudioPanel";
 import { MindPanel } from "@/components/nova/MindPanel";
+import { CommunityPanel } from "@/components/nova/CommunityPanel";
 import { InviteDialog } from "@/components/nova/InviteDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { redeemReferral } from "@/lib/referral";
@@ -95,12 +96,13 @@ function Home() {
       <InviteDialog userId={user.id} open={inviteOpen} onOpenChange={setInviteOpen} />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col">
-        <TabsList className="mb-3 grid w-full grid-cols-5">
-          <TabsTrigger value="chat">Chat</TabsTrigger>
-          <TabsTrigger value="memory">Memory</TabsTrigger>
-          <TabsTrigger value="builds">Builds</TabsTrigger>
-          <TabsTrigger value="studio">Studio</TabsTrigger>
-          <TabsTrigger value="mind">Mind</TabsTrigger>
+        <TabsList className="mb-3 grid w-full grid-cols-6 gap-0.5">
+          <TabsTrigger value="chat" className="px-1 text-[11px]">Chat</TabsTrigger>
+          <TabsTrigger value="memory" className="px-1 text-[11px]">Memory</TabsTrigger>
+          <TabsTrigger value="builds" className="px-1 text-[11px]">Builds</TabsTrigger>
+          <TabsTrigger value="studio" className="px-1 text-[11px]">Studio</TabsTrigger>
+          <TabsTrigger value="mind" className="px-1 text-[11px]">Mind</TabsTrigger>
+          <TabsTrigger value="community" className="px-1 text-[11px]">Log</TabsTrigger>
         </TabsList>
 
         <TabsContent value="chat" className="mt-0 flex min-h-0 flex-1 flex-col">
@@ -126,6 +128,9 @@ function Home() {
         </TabsContent>
         <TabsContent value="mind" className="mt-0 flex-1 overflow-y-auto">
           <MindPanel userId={user.id} refreshKey={refreshKey} />
+        </TabsContent>
+        <TabsContent value="community" className="mt-0 flex-1 overflow-y-auto">
+          <CommunityPanel userId={user.id} />
         </TabsContent>
       </Tabs>
     </main>
