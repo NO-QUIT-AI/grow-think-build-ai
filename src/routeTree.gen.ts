@@ -15,6 +15,7 @@ import { Route as CommunityRouteImport } from './routes/community'
 import { Route as InviteRouteImport } from './routes/invite'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiMindRouteImport } from './routes/api/mind'
+import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as ApiMindThinkRouteImport } from './routes/api/mind/think'
 
 const IndexRoute = IndexRouteImport.update({
@@ -47,6 +48,11 @@ const ApiMindRoute = ApiMindRouteImport.update({
   path: '/api/mind',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UUsernameRoute = UUsernameRouteImport.update({
+  id: '/u/$username',
+  path: '/u/$username',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiMindThinkRoute = ApiMindThinkRouteImport.update({
   id: '/think',
   path: '/think',
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/invite': typeof InviteRoute
   '/api/chat': typeof ApiChatRoute
   '/api/mind': typeof ApiMindRouteWithChildren
+  '/u/$username': typeof UUsernameRoute
   '/api/mind/think': typeof ApiMindThinkRoute
 }
 export interface FileRoutesByTo {
@@ -69,6 +76,7 @@ export interface FileRoutesByTo {
   '/invite': typeof InviteRoute
   '/api/chat': typeof ApiChatRoute
   '/api/mind': typeof ApiMindRouteWithChildren
+  '/u/$username': typeof UUsernameRoute
   '/api/mind/think': typeof ApiMindThinkRoute
 }
 export interface FileRoutesById {
@@ -79,6 +87,7 @@ export interface FileRoutesById {
   '/invite': typeof InviteRoute
   '/api/chat': typeof ApiChatRoute
   '/api/mind': typeof ApiMindRouteWithChildren
+  '/u/$username': typeof UUsernameRoute
   '/api/mind/think': typeof ApiMindThinkRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/invite'
     | '/api/chat'
     | '/api/mind'
+    | '/u/$username'
     | '/api/mind/think'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/invite'
     | '/api/chat'
     | '/api/mind'
+    | '/u/$username'
     | '/api/mind/think'
   id:
     | '__root__'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/invite'
     | '/api/chat'
     | '/api/mind'
+    | '/u/$username'
     | '/api/mind/think'
   fileRoutesById: FileRoutesById
 }
@@ -118,6 +130,7 @@ export interface RootRouteChildren {
   InviteRoute: typeof InviteRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiMindRoute: typeof ApiMindRouteWithChildren
+  UUsernameRoute: typeof UUsernameRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -164,6 +177,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiMindRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/u/$username': {
+      id: '/u/$username'
+      path: '/u/$username'
+      fullPath: '/u/$username'
+      preLoaderRoute: typeof UUsernameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/mind/think': {
       id: '/api/mind/think'
       path: '/think'
@@ -192,6 +212,7 @@ const rootRouteChildren: RootRouteChildren = {
   InviteRoute: InviteRoute,
   ApiChatRoute: ApiChatRoute,
   ApiMindRoute: ApiMindRouteWithChildren,
+  UUsernameRoute: UUsernameRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
