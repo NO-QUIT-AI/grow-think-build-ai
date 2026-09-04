@@ -17,7 +17,7 @@ import {
   type CommunityProfile,
 } from "@/lib/community";
 
-type Search = { u?: string };
+type Search = { u?: string | undefined };
 
 export const Route = createFileRoute("/messages")({
   validateSearch: (search: Record<string, unknown>): Search => ({

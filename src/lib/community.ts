@@ -65,7 +65,9 @@ export async function notify(input: {
 
 /** Finds (or creates) the 1:1 conversation between two members. */
 export async function ensureConversation(meId: string, otherId: string) {
-  const [a, b] = [meId, otherId].sort();
+  const sorted = [meId, otherId].sort();
+  const a = sorted[0] as string;
+  const b = sorted[1] as string;
   const { data: existing } = await supabase
     .from("dm_conversations")
     .select("id")

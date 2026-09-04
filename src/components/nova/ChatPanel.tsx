@@ -43,6 +43,20 @@ export function ChatPanel({
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    try {
+      const remix = localStorage.getItem("noquit_remix_prompt");
+      if (remix) {
+        setInput(remix);
+        localStorage.removeItem("noquit_remix_prompt");
+      }
+    } catch {
+      /* storage blocked */
+    }
+  }, []);
+
+
+
+  useEffect(() => {
     let active = true;
     (async () => {
       const { data: existing } = await supabase

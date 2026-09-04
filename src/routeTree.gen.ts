@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as InviteRouteImport } from './routes/invite'
+import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiMindRouteImport } from './routes/api/mind'
@@ -37,6 +38,11 @@ const CommunityRoute = CommunityRouteImport.update({
 const InviteRoute = InviteRouteImport.update({
   id: '/invite',
   path: '/invite',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LeaderboardRoute = LeaderboardRouteImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MessagesRoute = MessagesRouteImport.update({
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/community': typeof CommunityRoute
   '/invite': typeof InviteRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRoute
   '/api/chat': typeof ApiChatRoute
   '/api/mind': typeof ApiMindRouteWithChildren
@@ -81,6 +88,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/community': typeof CommunityRoute
   '/invite': typeof InviteRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRoute
   '/api/chat': typeof ApiChatRoute
   '/api/mind': typeof ApiMindRouteWithChildren
@@ -93,6 +101,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/community': typeof CommunityRoute
   '/invite': typeof InviteRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRoute
   '/api/chat': typeof ApiChatRoute
   '/api/mind': typeof ApiMindRouteWithChildren
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/community'
     | '/invite'
+    | '/leaderboard'
     | '/messages'
     | '/api/chat'
     | '/api/mind'
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/community'
     | '/invite'
+    | '/leaderboard'
     | '/messages'
     | '/api/chat'
     | '/api/mind'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/community'
     | '/invite'
+    | '/leaderboard'
     | '/messages'
     | '/api/chat'
     | '/api/mind'
@@ -140,6 +152,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CommunityRoute: typeof CommunityRoute
   InviteRoute: typeof InviteRoute
+  LeaderboardRoute: typeof LeaderboardRoute
   MessagesRoute: typeof MessagesRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiMindRoute: typeof ApiMindRouteWithChildren
@@ -174,6 +187,13 @@ declare module '@tanstack/react-router' {
       path: '/invite'
       fullPath: '/invite'
       preLoaderRoute: typeof InviteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/leaderboard': {
+      id: '/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof LeaderboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/messages': {
@@ -230,6 +250,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CommunityRoute: CommunityRoute,
   InviteRoute: InviteRoute,
+  LeaderboardRoute: LeaderboardRoute,
   MessagesRoute: MessagesRoute,
   ApiChatRoute: ApiChatRoute,
   ApiMindRoute: ApiMindRouteWithChildren,
