@@ -16,6 +16,7 @@ import { Route as InviteRouteImport } from './routes/invite'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as ApiEditImageRouteImport } from './routes/api/edit-image'
 import { Route as ApiMindRouteImport } from './routes/api/mind'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as ApiMindThinkRouteImport } from './routes/api/mind/think'
@@ -55,6 +56,11 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiEditImageRoute = ApiEditImageRouteImport.update({
+  id: '/api/edit-image',
+  path: '/api/edit-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiMindRoute = ApiMindRouteImport.update({
   id: '/api/mind',
   path: '/api/mind',
@@ -79,6 +85,7 @@ export interface FileRoutesByFullPath {
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/edit-image': typeof ApiEditImageRoute
   '/api/mind': typeof ApiMindRouteWithChildren
   '/u/$username': typeof UUsernameRoute
   '/api/mind/think': typeof ApiMindThinkRoute
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/edit-image': typeof ApiEditImageRoute
   '/api/mind': typeof ApiMindRouteWithChildren
   '/u/$username': typeof UUsernameRoute
   '/api/mind/think': typeof ApiMindThinkRoute
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/edit-image': typeof ApiEditImageRoute
   '/api/mind': typeof ApiMindRouteWithChildren
   '/u/$username': typeof UUsernameRoute
   '/api/mind/think': typeof ApiMindThinkRoute
@@ -118,6 +127,7 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/messages'
     | '/api/chat'
+    | '/api/edit-image'
     | '/api/mind'
     | '/u/$username'
     | '/api/mind/think'
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/messages'
     | '/api/chat'
+    | '/api/edit-image'
     | '/api/mind'
     | '/u/$username'
     | '/api/mind/think'
@@ -142,6 +153,7 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/messages'
     | '/api/chat'
+    | '/api/edit-image'
     | '/api/mind'
     | '/u/$username'
     | '/api/mind/think'
@@ -155,6 +167,7 @@ export interface RootRouteChildren {
   LeaderboardRoute: typeof LeaderboardRoute
   MessagesRoute: typeof MessagesRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiEditImageRoute: typeof ApiEditImageRoute
   ApiMindRoute: typeof ApiMindRouteWithChildren
   UUsernameRoute: typeof UUsernameRoute
 }
@@ -210,6 +223,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/edit-image': {
+      id: '/api/edit-image'
+      path: '/api/edit-image'
+      fullPath: '/api/edit-image'
+      preLoaderRoute: typeof ApiEditImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/mind': {
       id: '/api/mind'
       path: '/api/mind'
@@ -253,6 +273,7 @@ const rootRouteChildren: RootRouteChildren = {
   LeaderboardRoute: LeaderboardRoute,
   MessagesRoute: MessagesRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiEditImageRoute: ApiEditImageRoute,
   ApiMindRoute: ApiMindRouteWithChildren,
   UUsernameRoute: UUsernameRoute,
 }
