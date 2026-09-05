@@ -284,9 +284,33 @@ export function ChatPanel({
           );
         })}
 
-        {busy && (
+        {edits.map((edit) => (
+          <div key={edit.id} className="panel space-y-3 p-3">
+            <p className="text-xs text-muted-foreground">Image edit: {edit.prompt}</p>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1">
+                <p className="text-[11px] text-muted-foreground">Pehle</p>
+                <img src={edit.before} alt="Original image" className="w-full rounded-lg border border-border" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-[11px] text-muted-foreground">Baad me</p>
+                <img src={edit.after} alt="AI se edit ki hui image" className="w-full rounded-lg border border-border" />
+              </div>
+            </div>
+            <a
+              href={edit.after}
+              download={`noquit-ai-image-${edit.id.slice(0, 8)}.png`}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary px-3 py-1.5 text-xs text-secondary-foreground transition-colors hover:border-primary"
+            >
+              <Download className="h-3.5 w-3.5" /> Download
+            </a>
+          </div>
+        ))}
+
+        {(busy || editing) && (
           <div className="flex items-center gap-2 px-1 text-xs text-muted-foreground">
-            <Brain className="h-4 w-4 text-primary node-pulse" /> NO QUIT AI soch rahi hai aur seekh rahi hai…
+            <Brain className="h-4 w-4 text-primary node-pulse" />{" "}
+            {editing ? "Image edit ho rahi hai…" : "NO QUIT AI soch rahi hai aur seekh rahi hai…"}
           </div>
         )}
         {error && <p className="px-1 text-xs text-destructive">{error.message}</p>}
@@ -298,25 +322,70 @@ export function ChatPanel({
           event.preventDefault();
           void submit(input);
         }}
-        className="panel sticky bottom-0 flex items-end gap-2 p-2"
+        className="panel sticky bottom-0 flex flex-col gap-2 p-2"
       >
-        <Textarea
-          value={input}
-          onChange={(event) => setInput(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter" && !event.shiftKey) {
-              event.preventDefault();
-              void submit(input);
-            }
-          }}
-          placeholder="NO QUIT AI se kuch bhi poochho…"
-          rows={1}
-          className="max-h-40 min-h-11 resize-none border-0 bg-transparent focus-visible:ring-0"
-        />
-        <Button type="submit" size="icon" disabled={busy || !input.trim()} className="glow shrink-0">
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowUp className="h-4 w-4" />}
-        </Button>
+        {attached && (
+          <div className="flex items-center gap-2 rounded-lg border border-border bg-secondary/60 p-2">
+            <img src={attached} alt="Attach ki hui image" className="h-14 w-14 rounded-md object-cover" />
+            <p className="flex-1 text-xs text-muted-foreground">
+              Image attached — likho kya change karna hai, phir bhejo.
+            </p>
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              onClick={() => setAttached(null)}
+              aria-label="Image hatao"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+        <div className="flex items-end gap-2">
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(event) => {
+              pickImage(event.target.files?.[0]);
+              event.target.value = "";
+            }}
+          />
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="shrink-0"
+            aria-label="Image attach karo"
+            onClick={() => fileRef.current?.click()}
+          >
+            <ImagePlus className="h-4 w-4" />
+          </Button>
+          <Textarea
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                void submit(input);
+              }
+            }}
+            placeholder={attached ? "Image me kya change karna hai…" : "NO QUIT AI se kuch bhi poochho…"}
+            rows={1}
+            className="max-h-40 min-h-11 resize-none border-0 bg-transparent focus-visible:ring-0"
+          />
+          <Button
+            type="submit"
+            size="icon"
+            disabled={busy || editing || (!attached && !input.trim())}
+            className="glow shrink-0"
+          >
+            {busy || editing ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowUp className="h-4 w-4" />}
+          </Button>
+        </div>
       </form>
     </div>
+
   );
 }
