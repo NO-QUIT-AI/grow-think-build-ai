@@ -193,7 +193,12 @@ export function ChatPanel({
 
   async function submit(text: string) {
     const value = text.trim();
+    if (attached) {
+      await runImageEdit(value || "Is image ko behtar, clean aur professional bana do.");
+      return;
+    }
     if (!value || busy || !conversationId) return;
+
     setInput("");
     await supabase.from("messages").insert({
       conversation_id: conversationId,
