@@ -41,7 +41,54 @@ export function ChatPanel({
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [initialMessages, setInitialMessages] = useState<UIMessage[] | null>(null);
   const [input, setInput] = useState("");
+  const [attached, setAttached] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [edits, setEdits] = useState<{ id: string; before: string; after: string; prompt: string }[]>([]);
+  const fileRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  function pickImage(file: File | undefined) {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Sirf image file bhejein");
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error("Image 8MB se chhoti honi chahiye");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setAttached(String(reader.result));
+    reader.readAsDataURL(file);
+  }
+
+  async function runImageEdit(instruction: string) {
+    if (!attached || editing) return;
+    const before = attached;
+    setEditing(true);
+    setInput("");
+    try {
+      const res = await fetch("/api/edit-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: before, prompt: instruction }),
+      });
+      if (!res.ok) throw new Error((await res.text()) || "Image edit fail hui");
+      const json = (await res.json()) as { image?: string };
+      if (!json.image) throw new Error("Model ne image return nahi ki");
+      setEdits((prev) => [
+        ...prev,
+        { id: crypto.randomUUID(), before, after: json.image!, prompt: instruction },
+      ]);
+      setAttached(null);
+      toast.success("Image edit ho gayi");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Image edit fail hui");
+    } finally {
+      setEditing(false);
+    }
+  }
+
 
   useEffect(() => {
     try {
