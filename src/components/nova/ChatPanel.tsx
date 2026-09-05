@@ -1,13 +1,14 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowUp, Brain, Loader2, Sparkles, Wrench } from "lucide-react";
+import { ArrowUp, Brain, Download, ImagePlus, Loader2, Sparkles, Wrench, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+
 
 const TOOL_LABELS: Record<string, string> = {
   "tool-recall_knowledge": "Memory recall ki",
