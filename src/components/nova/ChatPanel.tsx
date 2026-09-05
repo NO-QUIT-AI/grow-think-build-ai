@@ -1,14 +1,34 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowUp, Brain, Download, ImagePlus, Loader2, Sparkles, Wrench, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  ArrowUp,
+  Brain,
+  Check,
+  Download,
+  ImagePlus,
+  Loader2,
+  MessageSquarePlus,
+  Sparkles,
+  Trash2,
+  Wrench,
+  X,
+} from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 
+const ACTIVE_KEY = "noquit_active_conversation";
 
 const TOOL_LABELS: Record<string, string> = {
   "tool-recall_knowledge": "Memory recall ki",
@@ -24,6 +44,8 @@ const SUGGESTIONS = [
   "Yaad rakho: main Roman Urdu me baat karta hoon",
 ];
 
+type Thread = { id: string; title: string; updated_at: string };
+
 function messageText(message: UIMessage) {
   return message.parts
     .map((part) => (part.type === "text" ? part.text : ""))
@@ -38,14 +60,191 @@ export function ChatPanel({
   userId: string;
   onWorkChanged: () => void;
 }) {
+  const [threads, setThreads] = useState<Thread[] | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [initialMessages, setInitialMessages] = useState<UIMessage[] | null>(null);
+
+  const loadThreads = useCallback(async () => {
+    const { data } = await supabase
+      .from("conversations")
+      .select("id, title, updated_at")
+      .eq("user_id", userId)
+      .order("updated_at", { ascending: false })
+      .limit(30);
+    const rows = (data ?? []) as Thread[];
+    setThreads(rows);
+    return rows;
+  }, [userId]);
+
+  const openThread = useCallback(async (id: string) => {
+    setConversationId(id);
+    setInitialMessages(null);
+    try {
+      localStorage.setItem(ACTIVE_KEY, id);
+    } catch {
+      /* storage blocked */
+    }
+    const { data: rows } = await supabase
+      .from("messages")
+      .select("id, role, content")
+      .eq("conversation_id", id)
+      .order("created_at", { ascending: true });
+    setInitialMessages(
+      (rows ?? []).map((row) => ({
+        id: row.id,
+        role: row.role as UIMessage["role"],
+        parts: [{ type: "text" as const, text: row.content }],
+      })),
+    );
+  }, []);
+
+  const newThread = useCallback(async () => {
+    const { data: created, error } = await supabase
+      .from("conversations")
+      .insert({ user_id: userId, title: "Naya chat" })
+      .select("id, title, updated_at")
+      .single();
+    if (error || !created) {
+      toast.error("Naya chat nahi ban saka");
+      return;
+    }
+    setThreads((prev) => [created as Thread, ...(prev ?? [])]);
+    setConversationId(created.id);
+    setInitialMessages([]);
+    try {
+      localStorage.setItem(ACTIVE_KEY, created.id);
+    } catch {
+      /* storage blocked */
+    }
+  }, [userId]);
+
+  async function deleteThread(id: string) {
+    await supabase.from("messages").delete().eq("conversation_id", id);
+    const { error } = await supabase.from("conversations").delete().eq("id", id);
+    if (error) {
+      toast.error("Chat delete nahi hui");
+      return;
+    }
+    const rows = await loadThreads();
+    if (conversationId === id) {
+      const next = rows[0];
+      if (next) void openThread(next.id);
+      else void newThread();
+    }
+    toast.success("Chat delete ho gayi");
+  }
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const rows = await loadThreads();
+      if (!active) return;
+      let saved: string | null = null;
+      try {
+        saved = localStorage.getItem(ACTIVE_KEY);
+      } catch {
+        /* storage blocked */
+      }
+      const target = rows.find((r) => r.id === saved) ?? rows[0];
+      if (target) void openThread(target.id);
+      else void newThread();
+    })();
+    return () => {
+      active = false;
+    };
+  }, [loadThreads, openThread, newThread]);
+
+  const activeTitle = threads?.find((t) => t.id === conversationId)?.title ?? "Chat";
+
+  return (
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="mb-2 flex items-center gap-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="min-w-0 flex-1 justify-start text-xs">
+              <span className="truncate">{activeTitle}</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="max-h-72 w-72 overflow-y-auto">
+            <DropdownMenuLabel className="text-xs">Recent chats</DropdownMenuLabel>
+            {threads?.length === 0 && (
+              <p className="px-2 py-2 text-xs text-muted-foreground">Koi purani chat nahi</p>
+            )}
+            {threads?.map((thread) => (
+              <DropdownMenuItem
+                key={thread.id}
+                onSelect={() => void openThread(thread.id)}
+                className="flex items-center gap-2 text-xs"
+              >
+                {thread.id === conversationId ? (
+                  <Check className="h-3.5 w-3.5 shrink-0 text-primary" />
+                ) : (
+                  <span className="w-3.5 shrink-0" />
+                )}
+                <span className="min-w-0 flex-1 truncate">{thread.title}</span>
+                <button
+                  aria-label="Chat delete karo"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    void deleteThread(thread.id);
+                  }}
+                  className="shrink-0 text-muted-foreground hover:text-destructive"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <Button size="sm" variant="secondary" className="gap-1 text-xs" onClick={() => void newThread()}>
+          <MessageSquarePlus className="h-3.5 w-3.5" /> Naya chat
+        </Button>
+      </div>
+
+      {!conversationId || !initialMessages ? (
+        <div className="flex flex-1 items-center justify-center py-20 text-muted-foreground">
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Memory load ho rahi hai…
+        </div>
+      ) : (
+        <ChatThread
+          key={conversationId}
+          userId={userId}
+          conversationId={conversationId}
+          initialMessages={initialMessages}
+          onWorkChanged={onWorkChanged}
+          onTitle={(title) => {
+            setThreads((prev) =>
+              (prev ?? []).map((t) => (t.id === conversationId ? { ...t, title } : t)),
+            );
+            void supabase.from("conversations").update({ title }).eq("id", conversationId);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function ChatThread({
+  userId,
+  conversationId,
+  initialMessages,
+  onWorkChanged,
+  onTitle,
+}: {
+  userId: string;
+  conversationId: string;
+  initialMessages: UIMessage[];
+  onWorkChanged: () => void;
+  onTitle: (title: string) => void;
+}) {
   const [input, setInput] = useState("");
   const [attached, setAttached] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [edits, setEdits] = useState<{ id: string; before: string; after: string; prompt: string }[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const titled = useRef(initialMessages.length > 0);
 
   function pickImage(file: File | undefined) {
     if (!file) return;
@@ -89,7 +288,6 @@ export function ChatPanel({
     }
   }
 
-
   useEffect(() => {
     try {
       const remix = localStorage.getItem("noquit_remix_prompt");
@@ -101,54 +299,6 @@ export function ChatPanel({
       /* storage blocked */
     }
   }, []);
-
-
-
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      const { data: existing } = await supabase
-        .from("conversations")
-        .select("id")
-        .eq("user_id", userId)
-        .order("updated_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      let id = existing?.id ?? null;
-      if (!id) {
-        const { data: created, error } = await supabase
-          .from("conversations")
-          .insert({ user_id: userId, title: "NO QUIT AI thread" })
-          .select("id")
-          .single();
-        if (error) {
-          toast.error("Thread nahi ban saka");
-          return;
-        }
-        id = created.id;
-      }
-
-      const { data: rows } = await supabase
-        .from("messages")
-        .select("id, role, content")
-        .eq("conversation_id", id)
-        .order("created_at", { ascending: true });
-
-      if (!active) return;
-      setConversationId(id);
-      setInitialMessages(
-        (rows ?? []).map((row) => ({
-          id: row.id,
-          role: row.role as UIMessage["role"],
-          parts: [{ type: "text" as const, text: row.content }],
-        })),
-      );
-    })();
-    return () => {
-      active = false;
-    };
-  }, [userId]);
 
   const transport = useMemo(
     () =>
@@ -163,11 +313,10 @@ export function ChatPanel({
   );
 
   const { messages, sendMessage, status, error } = useChat({
-    id: conversationId ?? "pending",
-    messages: initialMessages ?? [],
+    id: conversationId,
+    messages: initialMessages,
     transport,
     onFinish: async ({ message }) => {
-      if (!conversationId) return;
       const text = messageText(message);
       if (!text) return;
       await supabase.from("messages").insert({
@@ -197,9 +346,13 @@ export function ChatPanel({
       await runImageEdit(value || "Is image ko behtar, clean aur professional bana do.");
       return;
     }
-    if (!value || busy || !conversationId) return;
+    if (!value || busy) return;
 
     setInput("");
+    if (!titled.current) {
+      titled.current = true;
+      onTitle(value.slice(0, 48));
+    }
     await supabase.from("messages").insert({
       conversation_id: conversationId,
       user_id: userId,
@@ -207,14 +360,6 @@ export function ChatPanel({
       content: value,
     });
     void sendMessage({ text: value });
-  }
-
-  if (!initialMessages) {
-    return (
-      <div className="flex flex-1 items-center justify-center py-20 text-muted-foreground">
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Memory load ho rahi hai…
-      </div>
-    );
   }
 
   return (
@@ -386,6 +531,5 @@ export function ChatPanel({
         </div>
       </form>
     </div>
-
   );
 }
