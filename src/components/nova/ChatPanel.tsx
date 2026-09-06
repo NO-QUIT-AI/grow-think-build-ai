@@ -460,13 +460,13 @@ function ChatThread({
                 <img src={edit.after} alt="AI se edit ki hui image" className="w-full rounded-lg border border-border" />
               </div>
             </div>
-            <a
-              href={edit.after}
-              download={`noquit-ai-image-${edit.id.slice(0, 8)}.png`}
+            <button
+              type="button"
+              onClick={() => void downloadDataUrl(edit.after, `noquit-ai-image-${edit.id.slice(0, 8)}.png`)}
               className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary px-3 py-1.5 text-xs text-secondary-foreground transition-colors hover:border-primary"
             >
               <Download className="h-3.5 w-3.5" /> Download
-            </a>
+            </button>
           </div>
         ))}
 
