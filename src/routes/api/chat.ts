@@ -274,7 +274,7 @@ export const Route = createFileRoute("/api/chat")({
         const incoming = body.messages as UIMessage[];
 
         const result = streamText({
-          model: gateway("google/gemini-3.7-flash"),
+          model,
           system: SYSTEM_PROMPT,
           messages: await convertToModelMessages(trimMessages(incoming)),
           tools,
