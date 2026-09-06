@@ -106,7 +106,7 @@ export const Route = createFileRoute("/api/chat")({
             })
           : null;
         const gateway = apiKey ? createLovableAiGatewayProvider(apiKey) : null;
-        const model = deepseek ? deepseek("deepseek-chat") : gateway!("google/gemini-3.7-flash");
+        const model = deepseek ? deepseek.chatModel("deepseek-chat") : gateway!("google/gemini-3.7-flash");
 
         const tools = {
           recall_knowledge: tool({
