@@ -53,6 +53,24 @@ function messageText(message: UIMessage) {
     .trim();
 }
 
+async function downloadDataUrl(dataUrl: string, filename: string) {
+  try {
+    // data: URLs are blocked/ignored by many mobile browsers; a Blob URL downloads reliably.
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10_000);
+  } catch {
+    toast.error("Download nahi ho saki");
+  }
+}
+
 export function ChatPanel({
   userId,
   onWorkChanged,
@@ -442,13 +460,13 @@ function ChatThread({
                 <img src={edit.after} alt="AI se edit ki hui image" className="w-full rounded-lg border border-border" />
               </div>
             </div>
-            <a
-              href={edit.after}
-              download={`noquit-ai-image-${edit.id.slice(0, 8)}.png`}
+            <button
+              type="button"
+              onClick={() => void downloadDataUrl(edit.after, `noquit-ai-image-${edit.id.slice(0, 8)}.png`)}
               className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary px-3 py-1.5 text-xs text-secondary-foreground transition-colors hover:border-primary"
             >
               <Download className="h-3.5 w-3.5" /> Download
-            </a>
+            </button>
           </div>
         ))}
 
