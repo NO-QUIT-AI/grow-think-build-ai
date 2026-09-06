@@ -458,7 +458,13 @@ function ChatThread({
             {editing ? "Image edit ho rahi hai…" : "NO QUIT AI soch rahi hai aur seekh rahi hai…"}
           </div>
         )}
-        {error && <p className="px-1 text-xs text-destructive">{error.message}</p>}
+        {error && (
+          <p className="px-1 text-xs text-destructive">
+            {/credits|402|Payment Required|Not enough credits/i.test(error.message)
+              ? "AI credits khatam ho gaye hain. Lovable billing se credits add karo."
+              : error.message}
+          </p>
+        )}
         <div ref={bottomRef} />
       </div>
 

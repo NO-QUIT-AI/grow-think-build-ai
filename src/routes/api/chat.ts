@@ -274,10 +274,13 @@ export const Route = createFileRoute("/api/chat")({
 
         return result.toUIMessageStreamResponse({
           originalMessages: incoming,
-          onError: (error) =>
-            error instanceof Error
-              ? `AI ruk gaya: ${error.message}`
-              : "AI ruk gaya — thora chhota prompt ya naya chat try karo.",
+          onError: (error) => {
+            const msg = error instanceof Error ? error.message : "";
+            if (msg.includes("Payment Required") || msg.includes("Not enough credits") || msg.includes("402")) {
+              return "AI credits khatam ho gaye hain. Lovable billing se credits add karo — ya phir apna OpenAI API key add karo.";
+            }
+            return msg ? `AI ruk gaya: ${msg}` : "AI ruk gaya — thora chhota prompt ya naya chat try karo.";
+          },
         });
       },
     },
