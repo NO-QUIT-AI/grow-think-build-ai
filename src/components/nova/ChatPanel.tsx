@@ -53,6 +53,24 @@ function messageText(message: UIMessage) {
     .trim();
 }
 
+async function downloadDataUrl(dataUrl: string, filename: string) {
+  try {
+    // data: URLs are blocked/ignored by many mobile browsers; a Blob URL downloads reliably.
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10_000);
+  } catch {
+    toast.error("Download nahi ho saki");
+  }
+}
+
 export function ChatPanel({
   userId,
   onWorkChanged,
