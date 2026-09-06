@@ -93,9 +93,20 @@ export const Route = createFileRoute("/api/chat")({
         }
 
         const apiKey = process.env["LOVABLE_API_KEY"];
-        if (!apiKey) return new Response("AI is not configured", { status: 500 });
+        const deepseekKey = process.env["DEEPSEEK_API_KEY"];
+        if (!apiKey && !deepseekKey) return new Response("AI is not configured", { status: 500 });
 
-        const gateway = createLovableAiGatewayProvider(apiKey);
+        // Personal DeepSeek key maujood ho to wahi primary model hai —
+        // Lovable credits khatam hone par bhi chat kabhi band nahi hoti.
+        const deepseek = deepseekKey
+          ? createOpenAICompatible({
+              name: "deepseek",
+              baseURL: "https://api.deepseek.com",
+              apiKey: deepseekKey,
+            })
+          : null;
+        const gateway = apiKey ? createLovableAiGatewayProvider(apiKey) : null;
+        const model = deepseek ? deepseek("deepseek-chat") : gateway!("google/gemini-3.7-flash");
 
         const tools = {
           recall_knowledge: tool({
