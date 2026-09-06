@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { convertToModelMessages, streamText, tool, stepCountIs, type UIMessage } from "ai";
 import { z } from "zod";
 
