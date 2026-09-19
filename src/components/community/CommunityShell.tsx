@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Bell, Coins, Home, MessageCircle, Sparkles, Trophy, Users } from "lucide-react";
 
+import { LegalFooter } from "@/components/legal/LegalPage";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -151,6 +152,8 @@ export function CommunityShell({
       </header>
 
       {children}
+
+      <LegalFooter />
 
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur">
         <div className="mx-auto flex w-full max-w-2xl items-center justify-around px-2 py-2">
