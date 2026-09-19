@@ -9,7 +9,7 @@ export const Route = createFileRoute("/about")({
       {
         name: "description",
         content:
-          "NO QUIT AI is a self-growing AI workspace that builds websites and apps from a simple chat, with a builder community and NQAI rewards. Contact the team here.",
+          "NO QUIT AI builds websites and apps from a simple chat, with a builder community and NQAI rewards. Contact the team here.",
       },
       { property: "og:title", content: "About & Contact — NO QUIT AI" },
       {
@@ -28,10 +28,10 @@ function About() {
     <LegalPage title="About & Contact" updated="19 September 2026">
       <h2>What NO QUIT AI is</h2>
       <p>
-        NO QUIT AI is a self-growing AI workspace. You describe an idea in plain language — in
-        English or Roman Urdu — and the assistant thinks it through, builds a website or app, shows a
-        live preview in the Studio, and keeps learning from every conversation through its Mind
-        engine.
+        NO QUIT AI is a build studio. You describe an idea in plain language — in
+        English or Roman Urdu — and the assistant builds a website or app, shows a
+        live preview in the Studio, and remembers your projects so you can improve
+        them version by version.
       </p>
 
       <h2>What you can do here</h2>

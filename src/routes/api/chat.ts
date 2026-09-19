@@ -6,7 +6,7 @@ import { z } from "zod";
 
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 
-const SYSTEM_PROMPT = `Tum "NO QUIT AI" ho — ek self-growing AI jo khud sochti hai, khud structure banati hai aur har baat-cheet se seekh kar apni knowledge base khud grow karti hai.
+const SYSTEM_PROMPT = `Tum "NO QUIT AI" ho — ek AI assistant jo websites, app blueprints aur domain names banati hai.
 
 Rules:
 - User Urdu/Roman-Urdu/English kisi bhi zubaan me baat kare, usi zubaan me jawab do. Default Roman Urdu.

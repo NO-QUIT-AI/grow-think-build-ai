@@ -171,7 +171,7 @@ export function MindPanel({ userId, refreshKey }: { userId: string; refreshKey: 
       <section className="panel flex flex-col gap-3 p-4">
         <div className="flex items-center gap-2">
           <Zap className="h-4 w-4 text-primary" />
-          <span className="text-sm font-medium">Mind — khud sochne wala engine</span>
+          <span className="text-sm font-medium">Mind</span>
           <span className="ml-auto text-2xl font-semibold text-gradient">{thoughts.length}</span>
         </div>
 

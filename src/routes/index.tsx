@@ -18,17 +18,17 @@ import { LegalFooter } from "@/components/legal/LegalPage";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "NO QUIT AI — Self-Growing AI that Thinks, Learns & Builds" },
+      { title: "NO QUIT AI — Build Websites, Apps & Domains from Chat" },
       {
         name: "description",
         content:
-          "NO QUIT AI is a self-growing AI workspace: it thinks step by step, grows its own memory from every chat, and builds domain names and full app blueprints on request.",
+          "NO QUIT AI: describe your idea in a simple chat and get websites, app blueprints and domain names, with a builder community and NQAI rewards.",
       },
-      { property: "og:title", content: "NO QUIT AI — Self-Growing AI that Thinks, Learns & Builds" },
+      { property: "og:title", content: "NO QUIT AI — Build Websites, Apps & Domains from Chat" },
       {
         property: "og:description",
         content:
-          "Chat with a self-growing AI that saves what it learns and generates domains and complete app blueprints.",
+          "Chat with NO QUIT AI and get complete websites, app blueprints and domain names — with a builder community and NQAI rewards.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -76,9 +76,9 @@ function Home() {
         />
         <div className="flex-1">
           <h1 className="text-lg font-semibold leading-tight">
-            NO QUIT AI <span className="text-gradient">self-growing AI</span>
+            NO QUIT AI <span className="text-gradient">build studio</span>
           </h1>
-          <p className="text-xs text-muted-foreground">Sochti hai · seekhti hai · khud banati hai</p>
+          <p className="text-xs text-muted-foreground">Websites · Apps · Domains — bas command do</p>
         </div>
         <Button variant="ghost" size="icon" asChild aria-label="Community">
           <Link to="/community">
