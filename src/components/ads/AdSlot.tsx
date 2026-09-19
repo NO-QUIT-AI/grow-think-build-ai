@@ -35,10 +35,14 @@ export function AdSlot({
     try {
       (window.adsbygoogle = window.adsbygoogle ?? []).push({});
       pushed.current = true;
+      void logAdImpression(
+        name,
+        typeof window !== "undefined" ? window.location.pathname : undefined,
+      );
     } catch {
       /* ad blocked or script unavailable — ignore silently */
     }
-  }, [active]);
+  }, [active, name]);
 
   if (!active) {
     if (import.meta.env.PROD) return null;
