@@ -419,7 +419,7 @@ function ChatThread({
               <Sparkles className="h-4 w-4 text-primary" /> NO QUIT AI taiyar hai
             </div>
             <p className="text-sm text-muted-foreground">
-              Main har baat se seekhti hoon aur apni memory khud grow karti hoon. Kuch aisa poochho:
+              Kya banana hai? Command do — website, app ya domain names:
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               {SUGGESTIONS.map((suggestion) => (

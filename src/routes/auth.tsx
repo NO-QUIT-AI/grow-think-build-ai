@@ -14,16 +14,16 @@ import { useAuth } from "@/hooks/useAuth";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in to NO QUIT AI — Self-Growing AI" },
+      { title: "Sign in to NO QUIT AI" },
       {
         name: "description",
         content:
-          "Sign in to NO QUIT AI, the self-growing AI that thinks, learns and builds domains and app blueprints for you.",
+          "Sign in to NO QUIT AI and build websites, app blueprints and domain names from a simple chat.",
       },
-      { property: "og:title", content: "Sign in to NO QUIT AI — Self-Growing AI" },
+      { property: "og:title", content: "Sign in to NO QUIT AI" },
       {
         property: "og:description",
-        content: "Access your self-growing AI workspace: memory, domains and app blueprints.",
+        content: "Access your NO QUIT AI workspace: builds, Studio and domain names.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -100,7 +100,7 @@ function AuthPage() {
           />
           <div>
             <h1 className="text-xl font-semibold">NO QUIT AI</h1>
-            <p className="text-xs text-muted-foreground">Self-growing AI workspace</p>
+            <p className="text-xs text-muted-foreground">Build studio</p>
           </div>
         </div>
 

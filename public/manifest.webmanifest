@@ -1,7 +1,7 @@
 {
   "name": "NO QUIT AI — Build Anything",
   "short_name": "NO QUIT AI",
-  "description": "Self-growing AI jo sochti hai, seekhti hai aur khud websites, domains aur app blueprints banati hai.",
+  "description": "Command do aur websites, domains aur app blueprints bana lo — NO QUIT AI.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

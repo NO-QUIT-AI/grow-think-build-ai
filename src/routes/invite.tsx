@@ -12,16 +12,16 @@ export const Route = createFileRoute("/invite")({
   }),
   head: () => ({
     meta: [
-      { title: "Invite: NO QUIT AI — AI jo khud sochti aur banati hai" },
+      { title: "Invite: NO QUIT AI — Websites, Apps & Domains from Chat" },
       {
         name: "description",
         content:
-          "Tumhe NO QUIT AI par invite kiya gaya hai — ek self-growing AI jo domains, app blueprints aur poori websites bana kar live preview deti hai. Free sign up karo.",
+          "Tumhe NO QUIT AI par invite kiya gaya hai — command do aur websites, app blueprints aur domain names bana kar live preview pao. Free sign up karo.",
       },
-      { property: "og:title", content: "Invite: NO QUIT AI — AI jo khud sochti aur banati hai" },
+      { property: "og:title", content: "Invite: NO QUIT AI — Websites, Apps & Domains from Chat" },
       {
         property: "og:description",
-        content: "Join NO QUIT AI: chat karo, AI khud seekhti hai aur tumhare liye apps banati hai.",
+        content: "Join NO QUIT AI: chat karo aur apne liye websites aur apps banwao.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -51,13 +51,13 @@ function InvitePage() {
               NO QUIT AI <span className="text-gradient">invite</span>
             </h1>
             <p className="text-xs text-muted-foreground">
-              Sochti hai · seekhti hai · khud banati hai
+              Websites · Apps · Domains — bas command do
             </p>
           </div>
         </div>
 
         <p className="mb-5 text-sm text-muted-foreground">
-          Tumhe ek self-growing AI workspace par bulaya gaya hai. Sirf command do — AI plan banati
+          Tumhe NO QUIT AI par bulaya gaya hai. Sirf command do — AI plan banati
           hai, code likhti hai aur live preview kar deti hai.
         </p>
 
