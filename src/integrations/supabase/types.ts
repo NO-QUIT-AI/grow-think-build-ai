@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_impressions: {
+        Row: {
+          created_at: string
+          id: string
+          page: string | null
+          slot: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          page?: string | null
+          slot: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          page?: string | null
+          slot?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       artifacts: {
         Row: {
           content: Json
@@ -574,6 +598,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      ad_stats: { Args: never; Returns: Json }
       nqai_award: {
         Args: { _amount: number; _reason: string; _user: string }
         Returns: undefined
