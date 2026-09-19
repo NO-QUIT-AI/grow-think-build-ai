@@ -109,6 +109,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       { rel: "manifest", href: "/manifest.webmanifest" },
     ],
+    // AdSense loader: single instance, only when configured in production.
+    scripts: adsEnabled
+      ? [
+          {
+            src: ADSENSE_SCRIPT_SRC,
+            async: true,
+            crossOrigin: "anonymous",
+          },
+        ]
+      : [],
   }),
   shellComponent: RootShell,
   component: RootComponent,
