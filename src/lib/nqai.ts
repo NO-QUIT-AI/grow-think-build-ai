@@ -17,7 +17,7 @@ export type NqaiTx = {
 
 export type MineResult = {
   ok: boolean;
-  reward?: number;
+  reward?: number | undefined;
   balance: number;
   streak: number;
   next_at: string | null;
