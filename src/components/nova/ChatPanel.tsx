@@ -264,19 +264,21 @@ function ChatThread({
   const bottomRef = useRef<HTMLDivElement>(null);
   const titled = useRef(initialMessages.length > 0);
 
-  function pickImage(file: File | undefined) {
+  async function pickImage(file: File | undefined) {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
       toast.error("Sirf image file bhejein");
       return;
     }
-    if (file.size > 8 * 1024 * 1024) {
-      toast.error("Image 8MB se chhoti honi chahiye");
+    if (file.size > 30 * 1024 * 1024) {
+      toast.error("Image bohot bari hai (30MB se kam bhejein)");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => setAttached(String(reader.result));
-    reader.readAsDataURL(file);
+    try {
+      setAttached(await compressImage(file));
+    } catch {
+      toast.error("Image load nahi ho saki, dobara try karein");
+    }
   }
 
   async function runImageEdit(instruction: string) {
