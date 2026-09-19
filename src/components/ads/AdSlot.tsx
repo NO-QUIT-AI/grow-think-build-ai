@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 
 import { ADSENSE_CLIENT, AD_SLOTS, adsEnabled, type AdSlotName } from "@/lib/adsense";
+import { logAdImpression } from "@/lib/ads-stats";
 import { cn } from "@/lib/utils";
 
 declare global {
