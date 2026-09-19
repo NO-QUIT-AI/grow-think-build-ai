@@ -5,7 +5,7 @@ import { BadgeDollarSign, CheckCircle2, ExternalLink, Loader2, XCircle } from "l
 import { CommunityShell } from "@/components/community/CommunityShell";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { ADSENSE_CLIENT, AD_SLOTS, adsEnabled } from "@/lib/adsense";
+import { isAdsActive, useAdsConfig } from "@/lib/adsense";
 import { OWNER_EMAIL, estimateEarnings, fetchAdStats, type AdStats } from "@/lib/ads-stats";
 
 export const Route = createFileRoute("/admin/ads")({
@@ -62,6 +62,7 @@ function AdminAdsPage() {
 }
 
 function AdsDashboard({ userId }: { userId: string }) {
+  const ads = useAdsConfig();
   const [stats, setStats] = useState<AdStats | null>(null);
   const [rpm, setRpm] = useState(1);
 
@@ -92,12 +93,12 @@ function AdsDashboard({ userId }: { userId: string }) {
 
   const checks = [
     {
-      ok: /^ca-pub-\d{10,}$/.test(ADSENSE_CLIENT),
-      label: "Publisher ID (VITE_ADSENSE_PUBLISHER_ID) set hai",
+      ok: isAdsActive(ads),
+      label: "Publisher ID (ADSENSE_PUBLISHER_ID) set hai",
     },
-    { ok: AD_SLOTS.feed.length > 0, label: "Feed ad unit ID set hai" },
-    { ok: AD_SLOTS.footer.length > 0, label: "Footer ad unit ID set hai" },
-    { ok: adsEnabled, label: "Live site par asli ads chal rahe hain" },
+    { ok: ads.slots.feed.length > 0, label: "Feed ad unit ID set hai" },
+    { ok: ads.slots.footer.length > 0, label: "Footer ad unit ID set hai" },
+    { ok: isAdsActive(ads) && ads.slots.feed.length > 0, label: "Live site par asli ads chal rahe hain" },
   ];
 
   return (
