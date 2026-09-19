@@ -4,7 +4,7 @@ import { createFileRoute } from "@tanstack/react-router";
  * Serves /ads.txt from an env var so the publisher id is never hard-coded.
  * Set ADSENSE_PUBLISHER_ID (or VITE_ADSENSE_CLIENT), e.g. "ca-pub-1234567890123456".
  */
-export const Route = createFileRoute("/ads[.]txt")({
+export const Route = createFileRoute("/ads.txt")({
   server: {
     handlers: {
       GET: () => {
