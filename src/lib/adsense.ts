@@ -27,6 +27,8 @@ export interface AdsConfig {
   loaded: boolean;
 }
 
+export type AdSlotName = keyof AdsConfig["slots"];
+
 let config: AdsConfig = {
   client: (
     env["VITE_ADSENSE_PUBLISHER_ID"] ??
