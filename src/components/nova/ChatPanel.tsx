@@ -53,6 +53,34 @@ function messageText(message: UIMessage) {
     .trim();
 }
 
+// Phone photos are huge; shrink them in the browser so the upload never fails.
+async function compressImage(file: File, maxSide = 1600, quality = 0.85) {
+  const dataUrl = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("read failed"));
+    reader.readAsDataURL(file);
+  });
+
+  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const el = new Image();
+    el.onload = () => resolve(el);
+    el.onerror = () => reject(new Error("decode failed"));
+    el.src = dataUrl;
+  });
+
+  const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+  if (scale === 1 && file.size <= 2 * 1024 * 1024) return dataUrl;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(img.width * scale));
+  canvas.height = Math.max(1, Math.round(img.height * scale));
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return dataUrl;
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL("image/jpeg", quality);
+}
+
 async function downloadDataUrl(dataUrl: string, filename: string) {
   try {
     // data: URLs are blocked/ignored by many mobile browsers; a Blob URL downloads reliably.
