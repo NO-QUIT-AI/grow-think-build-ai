@@ -1,16 +1,21 @@
 /**
  * Google AdSense configuration.
- * Publisher ID is never hard-coded — it comes from env vars.
+ * Publisher ID is never hard-coded — it comes from env vars only.
  *
- *   VITE_ADSENSE_CLIENT      e.g. "ca-pub-1234567890123456"
- *   VITE_ADSENSE_SLOT_FEED   in-feed ad unit id (digits)
- *   VITE_ADSENSE_SLOT_FOOTER footer/bottom ad unit id (digits)
- *   VITE_ADSENSE_TEST        "true" -> render placeholders, never real ads
+ *   VITE_ADSENSE_PUBLISHER_ID   e.g. "ca-pub-1234567890123456" (preferred)
+ *   VITE_ADSENSE_CLIENT         legacy alias, same value
+ *   VITE_ADSENSE_SLOT_FEED      in-feed ad unit id (digits)
+ *   VITE_ADSENSE_SLOT_FOOTER    footer/bottom ad unit id (digits)
+ *   VITE_ADSENSE_TEST           "true" -> render placeholders, never real ads
  */
 
 const env = import.meta.env as Record<string, string | undefined>;
 
-export const ADSENSE_CLIENT = (env["VITE_ADSENSE_CLIENT"] ?? "").trim();
+export const ADSENSE_CLIENT = (
+  env["VITE_ADSENSE_PUBLISHER_ID"] ??
+  env["VITE_ADSENSE_CLIENT"] ??
+  ""
+).trim();
 
 export const AD_SLOTS = {
   feed: (env["VITE_ADSENSE_SLOT_FEED"] ?? "").trim(),

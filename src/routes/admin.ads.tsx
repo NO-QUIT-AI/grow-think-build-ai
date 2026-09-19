@@ -93,7 +93,7 @@ function AdsDashboard({ userId }: { userId: string }) {
   const checks = [
     {
       ok: /^ca-pub-\d{10,}$/.test(ADSENSE_CLIENT),
-      label: "Publisher ID (VITE_ADSENSE_CLIENT) set hai",
+      label: "Publisher ID (VITE_ADSENSE_PUBLISHER_ID) set hai",
     },
     { ok: AD_SLOTS.feed.length > 0, label: "Feed ad unit ID set hai" },
     { ok: AD_SLOTS.footer.length > 0, label: "Footer ad unit ID set hai" },
