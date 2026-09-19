@@ -400,6 +400,54 @@ export type Database = {
         }
         Relationships: []
       }
+      nqai_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          reason: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          reason?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      nqai_wallets: {
+        Row: {
+          balance: number
+          last_mined_at: string | null
+          streak: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          last_mined_at?: string | null
+          streak?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          last_mined_at?: string | null
+          streak?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       post_comments: {
         Row: {
           comment: string
@@ -523,7 +571,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      nqai_award: {
+        Args: { _amount: number; _reason: string; _user: string }
+        Returns: undefined
+      }
+      nqai_mine: { Args: never; Returns: Json }
     }
     Enums: {
       [_ in never]: never
