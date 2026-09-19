@@ -53,11 +53,11 @@ function About() {
       <ul>
         <li>
           Support and general questions:{" "}
-          <a className="underline" href="mailto:support@noquitai.com">support@noquitai.com</a>
+          <a className="underline" href="mailto:noquitai1@gmail.com">noquitai1@gmail.com</a>
         </li>
         <li>
           Privacy and data requests:{" "}
-          <a className="underline" href="mailto:privacy@noquitai.com">privacy@noquitai.com</a>
+          <a className="underline" href="mailto:noquitai1@gmail.com">noquitai1@gmail.com</a>
         </li>
       </ul>
       <p>We usually reply within 2 business days.</p>

@@ -75,7 +75,7 @@ function Privacy() {
       <h2>Your rights</h2>
       <p>
         You can request a copy of your data, ask us to correct it, or ask us to delete it by
-        contacting us at <a className="underline" href="mailto:support@noquitai.com">support@noquitai.com</a>.
+        contacting us at <a className="underline" href="mailto:noquitai1@gmail.com">noquitai1@gmail.com</a>.
       </p>
     </LegalPage>
   );
