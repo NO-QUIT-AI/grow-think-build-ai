@@ -9,7 +9,11 @@ export const Route = createFileRoute("/ads.txt")({
     handlers: {
       GET: () => {
         const raw =
-          process.env["ADSENSE_PUBLISHER_ID"] ?? process.env["VITE_ADSENSE_CLIENT"] ?? "";
+          process.env["ADSENSE_PUBLISHER_ID"] ??
+          process.env["NEXT_PUBLIC_ADSENSE_PUBLISHER_ID"] ??
+          process.env["VITE_ADSENSE_PUBLISHER_ID"] ??
+          process.env["VITE_ADSENSE_CLIENT"] ??
+          "";
         const pub = raw.trim().replace(/^ca-pub-/, "");
         const body = /^\d{10,}$/.test(pub)
           ? `google.com, pub-${pub}, DIRECT, f08c47fec0942fa0\n`
