@@ -547,7 +547,7 @@ function ChatThread({
             accept="image/*"
             className="hidden"
             onChange={(event) => {
-              pickImage(event.target.files?.[0]);
+              void pickImage(event.target.files?.[0]);
               event.target.value = "";
             }}
           />
