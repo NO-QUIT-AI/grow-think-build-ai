@@ -76,3 +76,41 @@ export function timeUntil(iso: string | null): string {
   const minutes = Math.floor((ms % 3_600_000) / 60_000);
   return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
 }
+
+export type AdMineResult = MineResult & { reason?: string | undefined; multiplier: number };
+
+/** Mining sirf ad dekhne ke baad — base 1 coin x invite multiplier. */
+export async function mineWithAd(adWatched: boolean): Promise<AdMineResult> {
+  const { data, error } = await supabase.rpc("nqai_mine_ad", { _ad_watched: adWatched });
+  if (error) throw error;
+  const raw = data as unknown as Record<string, unknown>;
+  return {
+    ok: Boolean(raw["ok"]),
+    reason: (raw["reason"] as string | undefined) ?? undefined,
+    reward: raw["reward"] != null ? Number(raw["reward"]) : undefined,
+    balance: Number(raw["balance"] ?? 0),
+    streak: Number(raw["streak"] ?? 0),
+    multiplier: Number(raw["multiplier"] ?? 1),
+    next_at: (raw["next_at"] as string | null) ?? null,
+  };
+}
+
+/** Invite link share karne par rozana +1 coin. */
+export async function claimShareBonus(): Promise<{ ok: boolean; balance: number; next_at: string | null }> {
+  const { data, error } = await supabase.rpc("nqai_share_bonus");
+  if (error) throw error;
+  const raw = data as unknown as Record<string, unknown>;
+  return {
+    ok: Boolean(raw["ok"]),
+    balance: Number(raw["balance"] ?? 0),
+    next_at: (raw["next_at"] as string | null) ?? null,
+  };
+}
+
+export async function fetchInviteCount(userId: string): Promise<number> {
+  const { count } = await supabase
+    .from("referrals")
+    .select("id", { count: "exact", head: true })
+    .eq("inviter_id", userId);
+  return count ?? 0;
+}
