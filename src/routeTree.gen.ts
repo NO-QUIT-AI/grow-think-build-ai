@@ -20,6 +20,7 @@ import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as AdminAdsRouteImport } from './routes/admin.ads'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiEditImageRouteImport } from './routes/api/edit-image'
 import { Route as ApiMindRouteImport } from './routes/api/mind'
@@ -81,6 +82,11 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAdsRoute = AdminAdsRouteImport.update({
+  id: '/admin/ads',
+  path: '/admin/ads',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
@@ -119,6 +125,7 @@ export interface FileRoutesByFullPath {
   '/messages': typeof MessagesRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/admin/ads': typeof AdminAdsRoute
   '/api/chat': typeof ApiChatRoute
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/mind': typeof ApiMindRouteWithChildren
@@ -137,6 +144,7 @@ export interface FileRoutesByTo {
   '/messages': typeof MessagesRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/admin/ads': typeof AdminAdsRoute
   '/api/chat': typeof ApiChatRoute
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/mind': typeof ApiMindRouteWithChildren
@@ -156,6 +164,7 @@ export interface FileRoutesById {
   '/messages': typeof MessagesRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/admin/ads': typeof AdminAdsRoute
   '/api/chat': typeof ApiChatRoute
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/mind': typeof ApiMindRouteWithChildren
@@ -176,6 +185,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/privacy'
     | '/terms'
+    | '/admin/ads'
     | '/api/chat'
     | '/api/edit-image'
     | '/api/mind'
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/privacy'
     | '/terms'
+    | '/admin/ads'
     | '/api/chat'
     | '/api/edit-image'
     | '/api/mind'
@@ -212,6 +223,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/privacy'
     | '/terms'
+    | '/admin/ads'
     | '/api/chat'
     | '/api/edit-image'
     | '/api/mind'
@@ -231,6 +243,7 @@ export interface RootRouteChildren {
   MessagesRoute: typeof MessagesRoute
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
+  AdminAdsRoute: typeof AdminAdsRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiEditImageRoute: typeof ApiEditImageRoute
   ApiMindRoute: typeof ApiMindRouteWithChildren
@@ -316,6 +329,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/ads': {
+      id: '/admin/ads'
+      path: '/admin/ads'
+      fullPath: '/admin/ads'
+      preLoaderRoute: typeof AdminAdsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -377,6 +397,7 @@ const rootRouteChildren: RootRouteChildren = {
   MessagesRoute: MessagesRoute,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
+  AdminAdsRoute: AdminAdsRoute,
   ApiChatRoute: ApiChatRoute,
   ApiEditImageRoute: ApiEditImageRoute,
   ApiMindRoute: ApiMindRouteWithChildren,

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 
 import { ADSENSE_CLIENT, AD_SLOTS, adsEnabled, type AdSlotName } from "@/lib/adsense";
+import { logAdImpression } from "@/lib/ads-stats";
 import { cn } from "@/lib/utils";
 
 declare global {
@@ -35,10 +36,14 @@ export function AdSlot({
     try {
       (window.adsbygoogle = window.adsbygoogle ?? []).push({});
       pushed.current = true;
+      void logAdImpression(
+        name,
+        typeof window !== "undefined" ? window.location.pathname : undefined,
+      );
     } catch {
       /* ad blocked or script unavailable — ignore silently */
     }
-  }, [active]);
+  }, [active, name]);
 
   if (!active) {
     if (import.meta.env.PROD) return null;

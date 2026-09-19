@@ -15,6 +15,13 @@
       "when": 1789842797500,
       "tag": "0001_nqai_ad_mining",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789843232730,
+      "tag": "0002_ad_impressions_tracking",
+      "breakpoints": true
     }
   ]
 }
