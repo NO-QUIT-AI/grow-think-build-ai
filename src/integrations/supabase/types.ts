@@ -428,6 +428,7 @@ export type Database = {
         Row: {
           balance: number
           last_mined_at: string | null
+          last_share_at: string | null
           streak: number
           updated_at: string
           user_id: string
@@ -435,6 +436,7 @@ export type Database = {
         Insert: {
           balance?: number
           last_mined_at?: string | null
+          last_share_at?: string | null
           streak?: number
           updated_at?: string
           user_id: string
@@ -442,6 +444,7 @@ export type Database = {
         Update: {
           balance?: number
           last_mined_at?: string | null
+          last_share_at?: string | null
           streak?: number
           updated_at?: string
           user_id?: string
@@ -575,7 +578,10 @@ export type Database = {
         Args: { _amount: number; _reason: string; _user: string }
         Returns: undefined
       }
+      nqai_invite_multiplier: { Args: { _user: string }; Returns: number }
       nqai_mine: { Args: never; Returns: Json }
+      nqai_mine_ad: { Args: { _ad_watched: boolean }; Returns: Json }
+      nqai_share_bonus: { Args: never; Returns: Json }
     }
     Enums: {
       [_ in never]: never

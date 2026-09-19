@@ -1,18 +1,21 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Coins, Loader2, Pickaxe, Sparkles } from "lucide-react";
+import { Coins, Loader2, Pickaxe, Share2, Sparkles, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 import { AdSlot } from "@/components/ads/AdSlot";
 import { CommunityShell } from "@/components/community/CommunityShell";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { inviteLink } from "@/lib/referral";
 import {
   COIN,
+  claimShareBonus,
+  fetchInviteCount,
   fetchTransactions,
   fetchWallet,
   formatCoins,
-  mine,
+  mineWithAd,
   timeUntil,
   type NqaiTx,
   type NqaiWallet,
@@ -25,12 +28,12 @@ export const Route = createFileRoute("/earn")({
       {
         name: "description",
         content:
-          "NO QUIT AI par roz mining kar ke NQAI coins kamao, community me post aur comment kar ke points barhao aur dosto ko invite kar ke bonus lo.",
+          "NO QUIT AI par ad dekh kar roz NQAI coins mine karo, invite link share kar ke daily bonus lo aur dost invite kar ke mining speed barhao.",
       },
       { property: "og:title", content: "Earn NQAI Coins — NO QUIT AI" },
       {
         property: "og:description",
-        content: "Daily mining, community activity and invites all earn NQAI coins.",
+        content: "Watch an ad to mine daily NQAI coins and boost your speed by inviting friends.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -57,27 +60,44 @@ function EarnPage() {
   return <Earn userId={user.id} />;
 }
 
+const AD_SECONDS = 15;
+
 const RULES = [
-  { label: "Daily mining (24 ghante baad)", value: "+5 se +15" },
+  { label: "Ad dekh kar daily mining", value: "+1 x speed" },
+  { label: "Invite link daily share", value: "+1" },
+  { label: "Har invite se mining speed", value: "+1x (max 10x)" },
   { label: "Community post", value: "+2" },
   { label: "Comment / madad", value: "+1" },
   { label: "Dost invite join kare", value: "+20" },
-  { label: "Invite se join karna", value: "+10" },
 ];
 
 function Earn({ userId }: { userId: string }) {
   const [wallet, setWallet] = useState<NqaiWallet | null>(null);
   const [txs, setTxs] = useState<NqaiTx[]>([]);
+  const [invites, setInvites] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [watching, setWatching] = useState(false);
+  const [left, setLeft] = useState(AD_SECONDS);
+  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const multiplier = Math.min(1 + invites, 10);
 
   const load = useCallback(async () => {
-    const [w, t] = await Promise.all([fetchWallet(userId), fetchTransactions(userId)]);
+    const [w, t, c] = await Promise.all([
+      fetchWallet(userId),
+      fetchTransactions(userId),
+      fetchInviteCount(userId),
+    ]);
     setWallet(w);
     setTxs(t);
+    setInvites(c);
   }, [userId]);
 
   useEffect(() => {
     void load();
+    return () => {
+      if (timer.current) clearInterval(timer.current);
+    };
   }, [load]);
 
   const nextAt = wallet?.last_mined_at
@@ -85,14 +105,34 @@ function Earn({ userId }: { userId: string }) {
     : null;
   const ready = !nextAt || new Date(nextAt).getTime() <= Date.now();
 
-  async function onMine() {
+  function startAd() {
+    if (watching || !ready) return;
+    setWatching(true);
+    setLeft(AD_SECONDS);
+    timer.current = setInterval(() => {
+      setLeft((value) => {
+        if (value <= 1) {
+          if (timer.current) clearInterval(timer.current);
+          timer.current = null;
+          setWatching(false);
+          void finishMining();
+          return 0;
+        }
+        return value - 1;
+      });
+    }, 1000);
+  }
+
+  async function finishMining() {
     setBusy(true);
     try {
-      const result = await mine();
+      const result = await mineWithAd(true);
       if (result.ok) {
-        toast.success(`+${formatCoins(result.reward ?? 0)} ${COIN} mil gaye!`);
-      } else {
+        toast.success(`+${formatCoins(result.reward ?? 0)} ${COIN} mil gaye! (speed ${result.multiplier}x)`);
+      } else if (result.reason === "cooldown") {
         toast.info(`Agli mining ${timeUntil(result.next_at)} baad.`);
+      } else {
+        toast.info("Pehle ad poora dekhna zaroori hai.");
       }
       await load();
     } catch {
@@ -102,24 +142,61 @@ function Earn({ userId }: { userId: string }) {
     }
   }
 
+  async function shareInvite() {
+    const link = inviteLink(userId);
+    try {
+      if (typeof navigator !== "undefined" && navigator.share) {
+        await navigator.share({ title: "NO QUIT AI", text: "Join NO QUIT AI", url: link });
+      } else {
+        await navigator.clipboard.writeText(link);
+        toast.success("Invite link copy ho gaya");
+      }
+    } catch {
+      /* share cancel */
+    }
+    try {
+      const result = await claimShareBonus();
+      if (result.ok) toast.success(`+1 ${COIN} share bonus mil gaya!`);
+      else toast.info(`Agla share bonus ${timeUntil(result.next_at)} baad.`);
+      await load();
+    } catch {
+      /* ignore */
+    }
+  }
+
   return (
-    <CommunityShell userId={userId} title={`${COIN} Coins`} subtitle="Roz mining karo, points kamao">
+    <CommunityShell userId={userId} title={`${COIN} Coins`} subtitle="Ad dekho, mine karo, speed barhao">
       <section className="rounded-2xl border border-border bg-card p-5 text-center">
         <Coins className="mx-auto h-7 w-7 text-primary" />
         <p className="mt-2 text-3xl font-semibold">
           {wallet ? formatCoins(wallet.balance) : "—"}{" "}
           <span className="text-base text-muted-foreground">{COIN}</span>
         </p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Streak: {wallet?.streak ?? 0} din · streak jitni lambi, reward utna zyada
+        <p className="mt-1 flex items-center justify-center gap-1 text-xs text-muted-foreground">
+          <Zap className="h-3 w-3 text-primary" /> Mining speed {multiplier}x · {invites} invite ·
+          streak {wallet?.streak ?? 0} din
         </p>
-        <Button className="mt-4 w-full" onClick={() => void onMine()} disabled={busy || !ready}>
-          {busy ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Pickaxe className="mr-2 h-4 w-4" />
-          )}
-          {ready ? "Aaj ki mining karo" : `Agli mining ${timeUntil(nextAt)} baad`}
+
+        {watching ? (
+          <div className="mt-4">
+            <AdSlot name="feed" label="Ad — mining chal rahi hai" />
+            <p className="text-xs text-muted-foreground">
+              Ad dekhte raho… {left}s baad {formatCoins(multiplier)} {COIN} mil jayenge
+            </p>
+          </div>
+        ) : (
+          <Button className="mt-4 w-full" onClick={startAd} disabled={busy || !ready}>
+            {busy ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Pickaxe className="mr-2 h-4 w-4" />
+            )}
+            {ready ? `Ad dekh kar mine karo (+${formatCoins(multiplier)})` : `Agli mining ${timeUntil(nextAt)} baad`}
+          </Button>
+        )}
+
+        <Button variant="outline" className="mt-2 w-full" onClick={() => void shareInvite()}>
+          <Share2 className="mr-2 h-4 w-4" /> Invite link share karo (+1 daily)
         </Button>
       </section>
 
@@ -135,6 +212,9 @@ function Earn({ userId }: { userId: string }) {
             </li>
           ))}
         </ul>
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          Jitne zyada dost invite honge, mining speed utni zyada — 1 invite = 2x, 2 invite = 3x (max 10x).
+        </p>
       </section>
 
       <AdSlot name="footer" className="mt-4" />
