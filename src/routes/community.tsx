@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   Heart,
@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { AdSlot } from "@/components/ads/AdSlot";
 import { CommunityShell } from "@/components/community/CommunityShell";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -327,12 +328,14 @@ function Feed({ userId }: { userId: string }) {
       )}
 
       <div className="space-y-3">
-        {visiblePosts?.map((post) => {
+        {visiblePosts?.map((post, index) => {
           const author = profiles[post.user_id];
           const liked = likedIds.has(post.id);
           const isOpen = openComments === post.id;
           return (
-            <article key={post.id} className="panel p-3">
+            <Fragment key={post.id}>
+            {index > 0 && index % 5 === 0 && <AdSlot name="feed" />}
+            <article className="panel p-3">
               <div className="flex items-center gap-2">
                 <Link
                   to="/u/$username"
@@ -443,9 +446,12 @@ function Feed({ userId }: { userId: string }) {
                 </div>
               )}
             </article>
+            </Fragment>
           );
         })}
       </div>
+
+      <AdSlot name="footer" className="mt-4" />
     </CommunityShell>
   );
 }

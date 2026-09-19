@@ -10,8 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdsDottxtRouteImport } from './routes/ads[.]txt'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CommunityRouteImport } from './routes/community'
+import { Route as EarnRouteImport } from './routes/earn'
 import { Route as InviteRouteImport } from './routes/invite'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as MessagesRouteImport } from './routes/messages'
@@ -26,6 +28,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdsDottxtRoute = AdsDottxtRouteImport.update({
+  id: '/ads.txt',
+  path: '/ads.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -34,6 +41,11 @@ const AuthRoute = AuthRouteImport.update({
 const CommunityRoute = CommunityRouteImport.update({
   id: '/community',
   path: '/community',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EarnRoute = EarnRouteImport.update({
+  id: '/earn',
+  path: '/earn',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InviteRoute = InviteRouteImport.update({
@@ -79,8 +91,10 @@ const ApiMindThinkRoute = ApiMindThinkRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ads.txt': typeof AdsDottxtRoute
   '/auth': typeof AuthRoute
   '/community': typeof CommunityRoute
+  '/earn': typeof EarnRoute
   '/invite': typeof InviteRoute
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRoute
@@ -92,8 +106,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ads.txt': typeof AdsDottxtRoute
   '/auth': typeof AuthRoute
   '/community': typeof CommunityRoute
+  '/earn': typeof EarnRoute
   '/invite': typeof InviteRoute
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRoute
@@ -106,8 +122,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ads.txt': typeof AdsDottxtRoute
   '/auth': typeof AuthRoute
   '/community': typeof CommunityRoute
+  '/earn': typeof EarnRoute
   '/invite': typeof InviteRoute
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRoute
@@ -121,8 +139,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/ads.txt'
     | '/auth'
     | '/community'
+    | '/earn'
     | '/invite'
     | '/leaderboard'
     | '/messages'
@@ -134,8 +154,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/ads.txt'
     | '/auth'
     | '/community'
+    | '/earn'
     | '/invite'
     | '/leaderboard'
     | '/messages'
@@ -147,8 +169,10 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/ads.txt'
     | '/auth'
     | '/community'
+    | '/earn'
     | '/invite'
     | '/leaderboard'
     | '/messages'
@@ -161,8 +185,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdsDottxtRoute: typeof AdsDottxtRoute
   AuthRoute: typeof AuthRoute
   CommunityRoute: typeof CommunityRoute
+  EarnRoute: typeof EarnRoute
   InviteRoute: typeof InviteRoute
   LeaderboardRoute: typeof LeaderboardRoute
   MessagesRoute: typeof MessagesRoute
@@ -181,6 +207,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ads.txt': {
+      id: '/ads.txt'
+      path: '/ads.txt'
+      fullPath: '/ads.txt'
+      preLoaderRoute: typeof AdsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -193,6 +226,13 @@ declare module '@tanstack/react-router' {
       path: '/community'
       fullPath: '/community'
       preLoaderRoute: typeof CommunityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/earn': {
+      id: '/earn'
+      path: '/earn'
+      fullPath: '/earn'
+      preLoaderRoute: typeof EarnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/invite': {
@@ -267,8 +307,10 @@ const ApiMindRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdsDottxtRoute: AdsDottxtRoute,
   AuthRoute: AuthRoute,
   CommunityRoute: CommunityRoute,
+  EarnRoute: EarnRoute,
   InviteRoute: InviteRoute,
   LeaderboardRoute: LeaderboardRoute,
   MessagesRoute: MessagesRoute,

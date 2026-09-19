@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Bell, Home, MessageCircle, Sparkles, Trophy, Users } from "lucide-react";
+import { Bell, Coins, Home, MessageCircle, Sparkles, Trophy, Users } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -109,6 +109,7 @@ const NAV = [
   { to: "/community", label: "Feed", icon: Home },
   { to: "/messages", label: "Chat", icon: MessageCircle },
   { to: "/leaderboard", label: "Top", icon: Trophy },
+  { to: "/earn", label: "Earn", icon: Coins },
 ] as const;
 
 export function CommunityShell({
