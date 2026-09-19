@@ -1,6 +1,13 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 
-import { ADSENSE_CLIENT, AD_SLOTS, adsEnabled, type AdSlotName } from "@/lib/adsense";
+import {
+  ensureAdsScript,
+  getAdsConfig,
+  isAdsActive,
+  subscribeAdsConfig,
+  type AdSlotName,
+  type AdsConfig,
+} from "@/lib/adsense";
 import { logAdImpression } from "@/lib/ads-stats";
 import { cn } from "@/lib/utils";
 
@@ -26,14 +33,20 @@ export function AdSlot({
 }) {
   const ref = useRef<HTMLModElement | null>(null);
   const pushed = useRef(false);
-  const slot = AD_SLOTS[name];
-  const active = adsEnabled && slot.length > 0;
+  const config: AdsConfig = useSyncExternalStore(
+    subscribeAdsConfig,
+    getAdsConfig,
+    getAdsConfig,
+  );
+  const slot = config.slots[name];
+  const active = isAdsActive(config) && slot.length > 0;
 
   useEffect(() => {
     if (!active || pushed.current || !ref.current) return;
     // Guard against double-push in StrictMode / re-renders.
     if (ref.current.getAttribute("data-adsbygoogle-status")) return;
     try {
+      ensureAdsScript(config.client);
       (window.adsbygoogle = window.adsbygoogle ?? []).push({});
       pushed.current = true;
       void logAdImpression(
@@ -43,7 +56,7 @@ export function AdSlot({
     } catch {
       /* ad blocked or script unavailable — ignore silently */
     }
-  }, [active, name]);
+  }, [active, name, config.client]);
 
   if (!active) {
     if (import.meta.env.PROD) return null;
@@ -66,7 +79,7 @@ export function AdSlot({
         ref={ref}
         className="adsbygoogle block w-full"
         style={{ display: "block" }}
-        data-ad-client={ADSENSE_CLIENT}
+        data-ad-client={config.client}
         data-ad-slot={slot}
         data-ad-format="auto"
         data-full-width-responsive="true"
