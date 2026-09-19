@@ -35,7 +35,8 @@ export function estimateEarnings(views: number, rpmUsd: number) {
 }
 
 export const OWNER_EMAIL = (
-  (import.meta.env as Record<string, string | undefined>)["VITE_OWNER_EMAIL"] ?? ""
+  (import.meta.env as Record<string, string | undefined>)["VITE_OWNER_EMAIL"] ??
+  "noquitai1@gmail.com"
 )
   .trim()
   .toLowerCase();
