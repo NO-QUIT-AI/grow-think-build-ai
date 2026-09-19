@@ -106,6 +106,8 @@ function Board({ meId }: { meId: string }) {
           </Link>
         ))}
       </div>
+
+      <AdSlot name="footer" className="mt-4" />
     </CommunityShell>
   );
 }

@@ -446,9 +446,12 @@ function Feed({ userId }: { userId: string }) {
                 </div>
               )}
             </article>
+            </Fragment>
           );
         })}
       </div>
+
+      <AdSlot name="footer" className="mt-4" />
     </CommunityShell>
   );
 }
