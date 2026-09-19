@@ -12,7 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { ADSENSE_SCRIPT_SRC, adsEnabled } from "@/lib/adsense";
+import { initAdsConfig } from "@/lib/adsense";
 
 function NotFoundComponent() {
   return (
@@ -109,16 +109,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       { rel: "manifest", href: "/manifest.webmanifest" },
     ],
-    // AdSense loader: single instance, only when configured in production.
-    scripts: adsEnabled
-      ? [
-          {
-            src: ADSENSE_SCRIPT_SRC,
-            async: true,
-            crossOrigin: "anonymous",
-          },
-        ]
-      : [],
+    // AdSense loader script is injected at runtime from initAdsConfig() so
+    // the publisher ID stays in env vars only — never hard-coded here.
+    scripts: [],
   }),
   shellComponent: RootShell,
   component: RootComponent,
