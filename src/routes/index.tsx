@@ -13,6 +13,7 @@ import { MindPanel } from "@/components/nova/MindPanel";
 import { InviteDialog } from "@/components/nova/InviteDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { redeemReferral } from "@/lib/referral";
+import { LegalFooter } from "@/components/legal/LegalPage";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -138,6 +139,7 @@ function Home() {
           <MindPanel userId={user.id} refreshKey={refreshKey} />
         </TabsContent>
       </Tabs>
+      <LegalFooter />
     </main>
   );
 }
