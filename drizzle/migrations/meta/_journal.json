@@ -8,6 +8,13 @@
       "when": 1789837757500,
       "tag": "0000_nqai_coin_points_system",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789842797500,
+      "tag": "0001_nqai_ad_mining",
+      "breakpoints": true
     }
   ]
 }
