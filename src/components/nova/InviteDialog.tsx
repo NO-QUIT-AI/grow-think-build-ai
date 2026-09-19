@@ -49,7 +49,7 @@ export function InviteDialog({
   }
 
   async function share() {
-    const text = `NO QUIT AI join karo — AI jo khud sochti hai aur apps banati hai:\n${link}`;
+    const text = `NO QUIT AI join karo — chat karo aur websites, apps aur domain names banwao:\n${link}`;
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
         await navigator.share({ title: "NO QUIT AI", text, url: link });
