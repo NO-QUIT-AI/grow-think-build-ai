@@ -114,6 +114,11 @@ function Inbox({ meId }: { meId: string }) {
   );
   const otherId = active ? (active.user1_id === meId ? active.user2_id : active.user1_id) : null;
 
+  useEffect(() => {
+    if (!otherId) return;
+    void fetchFriendState(meId, otherId).then(({ state }) => setFriendState(state));
+  }, [meId, otherId]);
+
   const loadMessages = useCallback(async (conversationId: string) => {
     const { data } = await supabase
       .from("dm_messages")
