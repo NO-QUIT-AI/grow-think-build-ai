@@ -2,8 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Check,
   Code2,
+  Copy,
   Download,
   ExternalLink,
+  FileArchive,
+  FileDown,
   Loader2,
   Monitor,
   Save,
