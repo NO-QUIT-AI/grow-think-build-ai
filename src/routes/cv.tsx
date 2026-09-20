@@ -124,7 +124,10 @@ function CvBuilder({ userId }: { userId: string }) {
 
   async function pickPhoto(file: File | undefined) {
     if (!file) return;
-    if (!file.type.startsWith("image/")) return toast.error("Sirf image file chunein");
+    if (!file.type.startsWith("image/")) {
+      toast.error("Sirf image file chunein");
+      return;
+    }
     setBusy("photo");
     try {
       set("photo", await compressPhoto(file));
