@@ -106,6 +106,8 @@ function Feed({ userId }: { userId: string }) {
   const [appLink, setAppLink] = useState("");
   const [showExtra, setShowExtra] = useState(false);
   const [posting, setPosting] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
     const [{ data: postRows }, { data: likeRows }, { data: followRows }] = await Promise.all([
