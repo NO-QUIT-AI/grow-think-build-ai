@@ -2,6 +2,7 @@
   "name": "NO QUIT AI — Build Anything",
   "short_name": "NO QUIT AI",
   "description": "Command do aur websites, domains aur app blueprints bana lo — NO QUIT AI.",
+  "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
