@@ -35,18 +35,29 @@ const TYPE_TEXT: Record<string, string> = {
 
 function NotificationBell({ userId }: { userId: string }) {
   const [items, setItems] = useState<Notification[]>([]);
+  const [requests, setRequests] = useState<FriendRequest[]>([]);
   const [actors, setActors] = useState<Record<string, CommunityProfile>>({});
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const { data } = await supabase
-      .from("notifications")
-      .select("id, actor_id, type, body, read, created_at")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(30);
+    const [{ data }, pending] = await Promise.all([
+      supabase
+        .from("notifications")
+        .select("id, actor_id, type, body, read, created_at")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(30),
+      fetchIncomingRequests(userId),
+    ]);
     const rows = (data ?? []) as Notification[];
     setItems(rows);
-    setActors(await fetchProfiles(rows.map((r) => r.actor_id ?? "")));
+    setRequests(pending);
+    setActors(
+      await fetchProfiles([
+        ...rows.map((r) => r.actor_id ?? ""),
+        ...pending.map((r) => r.sender_id),
+      ]),
+    );
   }, [userId]);
 
   useEffect(() => {
@@ -58,18 +69,35 @@ function NotificationBell({ userId }: { userId: string }) {
         { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` },
         () => void load(),
       )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "friend_requests", filter: `receiver_id=eq.${userId}` },
+        () => void load(),
+      )
       .subscribe();
     return () => {
       void supabase.removeChannel(channel);
     };
   }, [load, userId]);
 
-  const unread = items.filter((item) => !item.read).length;
+  const feed = items.filter((item) => item.type !== "friend_request");
+  const unread = items.filter((item) => !item.read).length + requests.length;
 
   async function markAllRead() {
-    if (unread === 0) return;
-    await supabase.from("notifications").update({ read: true }).eq("user_id", userId).eq("read", false);
-    void load();
+    if (items.some((item) => !item.read)) {
+      await supabase.from("notifications").update({ read: true }).eq("user_id", userId).eq("read", false);
+      void load();
+    }
+  }
+
+  async function respond(request: FriendRequest, accept: boolean) {
+    setBusyId(request.id);
+    try {
+      await respondFriendRequest(request.id, accept);
+      await load();
+    } finally {
+      setBusyId(null);
+    }
   }
 
   return (
@@ -87,12 +115,39 @@ function NotificationBell({ userId }: { userId: string }) {
       <PopoverContent align="end" className="w-80 p-0">
         <div className="border-b border-border px-3 py-2 text-xs font-medium">Notifications</div>
         <div className="max-h-80 overflow-y-auto">
-          {items.length === 0 && (
+          {requests.map((request) => (
+            <div key={request.id} className="border-b border-border/60 px-3 py-2">
+              <p className="text-xs">
+                <span className="font-medium">{nameOf(actors[request.sender_id])}</span> ne aapko
+                friend request bheji hai
+              </p>
+              <div className="mt-2 flex gap-2">
+                <Button
+                  size="sm"
+                  className="btn-green h-7 flex-1 text-[11px]"
+                  disabled={busyId === request.id}
+                  onClick={() => void respond(request, true)}
+                >
+                  Accept
+                </Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="h-7 flex-1 text-[11px]"
+                  disabled={busyId === request.id}
+                  onClick={() => void respond(request, false)}
+                >
+                  Reject
+                </Button>
+              </div>
+            </div>
+          ))}
+          {feed.length === 0 && requests.length === 0 && (
             <p className="px-3 py-6 text-center text-xs text-muted-foreground">
               Abhi koi notification nahi.
             </p>
           )}
-          {items.map((item) => (
+          {feed.map((item) => (
             <div key={item.id} className="border-b border-border/60 px-3 py-2 last:border-0">
               <p className="text-xs">
                 <span className="font-medium">{nameOf(actors[item.actor_id ?? ""])}</span>{" "}
