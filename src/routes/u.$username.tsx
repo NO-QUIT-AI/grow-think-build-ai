@@ -10,12 +10,15 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   PROFILE_COLUMNS,
   ensureConversation,
+  fetchProfiles,
   initials,
   nameOf,
   notify,
   timeAgo,
   type CommunityProfile,
 } from "@/lib/community";
+import { fetchFriendState, sendFriendRequest, type FriendState } from "@/lib/friends";
+import { FriendButton } from "@/routes/leaderboard";
 
 export const Route = createFileRoute("/u/$username")({
   head: ({ params }) => ({
