@@ -77,6 +77,8 @@ function ProfileView({ meId }: { meId: string }) {
   const [followingCount, setFollowingCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [friendState, setFriendState] = useState<FriendState>("none");
+  const [myName, setMyName] = useState("Ek member");
 
   const load = useCallback(async () => {
     const { data } = await supabase
