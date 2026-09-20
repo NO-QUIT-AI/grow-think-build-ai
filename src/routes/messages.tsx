@@ -232,24 +232,40 @@ function Inbox({ meId }: { meId: string }) {
           <div ref={bottomRef} />
         </div>
 
-        <div className="mt-2 flex items-end gap-2">
-          <Textarea
-            value={draft}
-            onChange={(event) => setDraft(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" && !event.shiftKey) {
-                event.preventDefault();
-                void send();
-              }
-            }}
-            rows={1}
-            placeholder="Message likho…"
-            className="max-h-28 min-h-10 resize-none text-sm"
-          />
-          <Button size="icon" disabled={!draft.trim()} onClick={() => void send()} aria-label="Message bhejo">
-            <Send className="h-4 w-4" />
-          </Button>
-        </div>
+        {friendState !== "friends" ? (
+          <div className="panel mt-2 flex items-center gap-2 p-3 text-xs text-muted-foreground">
+            <Lock className="h-4 w-4 shrink-0" />
+            <span>
+              {friendState === "outgoing"
+                ? "Request Pending…"
+                : "Pehle friend request accept hone ka intezar karo"}
+            </span>
+          </div>
+        ) : (
+          <div className="mt-2 flex items-end gap-2">
+            <Textarea
+              value={draft}
+              onChange={(event) => setDraft(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey) {
+                  event.preventDefault();
+                  void send();
+                }
+              }}
+              rows={1}
+              placeholder="Message likho…"
+              className="max-h-28 min-h-10 resize-none text-sm"
+            />
+            <Button
+              size="icon"
+              disabled={!draft.trim()}
+              onClick={() => void send()}
+              aria-label="Message bhejo"
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </CommunityShell>
     );
   }
