@@ -265,7 +265,6 @@ export function ChatPanel({
               prev.map((t) => (t.id === id ? { ...t, updated_at: new Date().toISOString() } : t)),
             )
           }
-          onNewChat={startNewChat}
         />
       )}
     </div>
@@ -279,7 +278,6 @@ function ChatThread({
   initialMessages,
   onWorkChanged,
   onTouched,
-  onNewChat,
 }: {
   userId: string;
   conversationId: string | null;
@@ -287,7 +285,6 @@ function ChatThread({
   initialMessages: UIMessage[];
   onWorkChanged: () => void;
   onTouched: (id: string) => void;
-  onNewChat: () => void;
 }) {
   const [input, setInput] = useState("");
   const [attached, setAttached] = useState<string | null>(null);
