@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Loader2, Send } from "lucide-react";
+import { ArrowLeft, Loader2, Lock, Send } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import {
   timeAgo,
   type CommunityProfile,
 } from "@/lib/community";
+import { fetchFriendState, type FriendState } from "@/lib/friends";
 
 type Search = { u?: string | undefined };
 
@@ -85,6 +86,7 @@ function Inbox({ meId }: { meId: string }) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [messages, setMessages] = useState<DirectMessage[]>([]);
   const [draft, setDraft] = useState("");
+  const [friendState, setFriendState] = useState<FriendState>("none");
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const loadConversations = useCallback(async () => {
@@ -111,6 +113,11 @@ function Inbox({ meId }: { meId: string }) {
     [conversations, activeId],
   );
   const otherId = active ? (active.user1_id === meId ? active.user2_id : active.user1_id) : null;
+
+  useEffect(() => {
+    if (!otherId) return;
+    void fetchFriendState(meId, otherId).then(({ state }) => setFriendState(state));
+  }, [meId, otherId]);
 
   const loadMessages = useCallback(async (conversationId: string) => {
     const { data } = await supabase
@@ -150,6 +157,10 @@ function Inbox({ meId }: { meId: string }) {
   async function send() {
     const value = draft.trim();
     if (!value || !activeId || !otherId) return;
+    if (friendState !== "friends") {
+      toast.error("Pehle friend request accept hone ka intezar karo");
+      return;
+    }
     setDraft("");
     const { error } = await supabase
       .from("dm_messages")
@@ -221,24 +232,40 @@ function Inbox({ meId }: { meId: string }) {
           <div ref={bottomRef} />
         </div>
 
-        <div className="mt-2 flex items-end gap-2">
-          <Textarea
-            value={draft}
-            onChange={(event) => setDraft(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" && !event.shiftKey) {
-                event.preventDefault();
-                void send();
-              }
-            }}
-            rows={1}
-            placeholder="Message likho…"
-            className="max-h-28 min-h-10 resize-none text-sm"
-          />
-          <Button size="icon" disabled={!draft.trim()} onClick={() => void send()} aria-label="Message bhejo">
-            <Send className="h-4 w-4" />
-          </Button>
-        </div>
+        {friendState !== "friends" ? (
+          <div className="panel mt-2 flex items-center gap-2 p-3 text-xs text-muted-foreground">
+            <Lock className="h-4 w-4 shrink-0" />
+            <span>
+              {friendState === "outgoing"
+                ? "Request Pending…"
+                : "Pehle friend request accept hone ka intezar karo"}
+            </span>
+          </div>
+        ) : (
+          <div className="mt-2 flex items-end gap-2">
+            <Textarea
+              value={draft}
+              onChange={(event) => setDraft(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey) {
+                  event.preventDefault();
+                  void send();
+                }
+              }}
+              rows={1}
+              placeholder="Message likho…"
+              className="max-h-28 min-h-10 resize-none text-sm"
+            />
+            <Button
+              size="icon"
+              disabled={!draft.trim()}
+              onClick={() => void send()}
+              aria-label="Message bhejo"
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </CommunityShell>
     );
   }

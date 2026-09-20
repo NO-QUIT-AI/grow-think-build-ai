@@ -267,6 +267,33 @@ export type Database = {
         }
         Relationships: []
       }
+      friend_requests: {
+        Row: {
+          created_at: string
+          id: string
+          receiver_id: string
+          sender_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          receiver_id: string
+          sender_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          receiver_id?: string
+          sender_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       knowledge: {
         Row: {
           confidence: number
@@ -626,6 +653,7 @@ export type Database = {
     }
     Functions: {
       ad_stats: { Args: never; Returns: Json }
+      are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
       nqai_award: {
         Args: { _amount: number; _reason: string; _user: string }
         Returns: undefined

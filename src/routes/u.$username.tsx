@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Loader2, MessageCircle, Sparkles, Trophy, UserMinus, UserPlus } from "lucide-react";
+import { Loader2, Sparkles, Trophy, UserMinus, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -10,12 +10,15 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   PROFILE_COLUMNS,
   ensureConversation,
+  fetchProfiles,
   initials,
   nameOf,
   notify,
   timeAgo,
   type CommunityProfile,
 } from "@/lib/community";
+import { fetchFriendState, sendFriendRequest, type FriendState } from "@/lib/friends";
+import { FriendButton } from "@/routes/leaderboard";
 
 export const Route = createFileRoute("/u/$username")({
   head: ({ params }) => ({
@@ -74,6 +77,8 @@ function ProfileView({ meId }: { meId: string }) {
   const [followingCount, setFollowingCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [friendState, setFriendState] = useState<FriendState>("none");
+  const [myName, setMyName] = useState("Ek member");
 
   const load = useCallback(async () => {
     const { data } = await supabase
@@ -108,6 +113,15 @@ function ProfileView({ meId }: { meId: string }) {
     setFollowers(followerRes.count ?? 0);
     setFollowingCount(followingRes.count ?? 0);
     setIsFollowing(Boolean(mineRes.data));
+
+    if (row.id !== meId) {
+      const [{ state }, mine] = await Promise.all([
+        fetchFriendState(meId, row.id),
+        fetchProfiles([meId]),
+      ]);
+      setFriendState(state);
+      setMyName(nameOf(mine[meId]));
+    }
   }, [username, meId]);
 
   useEffect(() => {
@@ -137,6 +151,20 @@ function ProfileView({ meId }: { meId: string }) {
       void navigate({ to: "/messages", search: { u: profile.id } });
     } catch {
       toast.error("Chat open nahi hui");
+    }
+  }
+
+  async function addFriend() {
+    if (!profile || busy) return;
+    setBusy(true);
+    try {
+      await sendFriendRequest(meId, profile.id, myName);
+      setFriendState("outgoing");
+      toast.success("Friend request bhej di");
+    } catch {
+      toast.error("Request nahi gayi");
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -203,14 +231,13 @@ function ProfileView({ meId }: { meId: string }) {
               {isFollowing ? <UserMinus className="h-3.5 w-3.5" /> : <UserPlus className="h-3.5 w-3.5" />}
               {isFollowing ? "Following" : "Follow"}
             </Button>
-            <Button
-              size="sm"
-              variant="secondary"
-              className="flex-1 gap-1 text-xs"
-              onClick={() => void openChat()}
-            >
-              <MessageCircle className="h-3.5 w-3.5" /> Message
-            </Button>
+            <FriendButton
+              state={friendState}
+              busy={busy}
+              className="flex-1"
+              onAdd={() => void addFriend()}
+              onMessage={() => void openChat()}
+            />
           </div>
         )}
       </section>
