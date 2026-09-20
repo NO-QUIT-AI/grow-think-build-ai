@@ -4,11 +4,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowUp,
   Brain,
-  Check,
   Download,
   ImagePlus,
   Loader2,
-  MessageSquarePlus,
+  Menu,
+  Plus,
   Sparkles,
   Trash2,
   Wrench,
@@ -20,15 +20,13 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
-
-const ACTIVE_KEY = "noquit_active_conversation";
 
 const TOOL_LABELS: Record<string, string> = {
   "tool-recall_knowledge": "Memory recall ki",
@@ -41,7 +39,7 @@ const TOOL_LABELS: Record<string, string> = {
 const SUGGESTIONS = [
   "Mujhe apne coffee brand ke liye domain bana do",
   "Ek expense tracker app ka pura structure bna do",
-  "Yaad rakho: main Roman Urdu me baat karta hoon",
+  "Mujhe ek professional CV bana do",
 ];
 
 type Thread = { id: string; title: string; updated_at: string };
@@ -51,6 +49,14 @@ function messageText(message: UIMessage) {
     .map((part) => (part.type === "text" ? part.text : ""))
     .join("")
     .trim();
+}
+
+function formatDate(value: string) {
+  const d = new Date(value);
+  const today = new Date();
+  const sameDay = d.toDateString() === today.toDateString();
+  if (sameDay) return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleDateString([], { day: "2-digit", month: "short", year: "2-digit" });
 }
 
 // Phone photos are huge; shrink them in the browser so the upload never fails.
@@ -106,9 +112,13 @@ export function ChatPanel({
   userId: string;
   onWorkChanged: () => void;
 }) {
-  const [threads, setThreads] = useState<Thread[] | null>(null);
+  const [threads, setThreads] = useState<Thread[]>([]);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  // null = draft (naya chat jo abhi save nahi hua)
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const [initialMessages, setInitialMessages] = useState<UIMessage[] | null>(null);
+  const [initialMessages, setInitialMessages] = useState<UIMessage[]>([]);
+  const [threadKey, setThreadKey] = useState(() => `draft-${Date.now()}`);
+  const [loadingThread, setLoadingThread] = useState(false);
 
   const loadThreads = useCallback(async () => {
     const { data } = await supabase
@@ -116,20 +126,26 @@ export function ChatPanel({
       .select("id, title, updated_at")
       .eq("user_id", userId)
       .order("updated_at", { ascending: false })
-      .limit(30);
+      .limit(50);
     const rows = (data ?? []) as Thread[];
     setThreads(rows);
     return rows;
   }, [userId]);
 
+  useEffect(() => {
+    void loadThreads();
+  }, [loadThreads]);
+
+  const startNewChat = useCallback(() => {
+    setConversationId(null);
+    setInitialMessages([]);
+    setThreadKey(`draft-${Date.now()}`);
+    setHistoryOpen(false);
+  }, []);
+
   const openThread = useCallback(async (id: string) => {
-    setConversationId(id);
-    setInitialMessages(null);
-    try {
-      localStorage.setItem(ACTIVE_KEY, id);
-    } catch {
-      /* storage blocked */
-    }
+    setHistoryOpen(false);
+    setLoadingThread(true);
     const { data: rows } = await supabase
       .from("messages")
       .select("id, role, content")
@@ -142,27 +158,30 @@ export function ChatPanel({
         parts: [{ type: "text" as const, text: row.content }],
       })),
     );
+    setConversationId(id);
+    setThreadKey(id);
+    setLoadingThread(false);
   }, []);
 
-  const newThread = useCallback(async () => {
-    const { data: created, error } = await supabase
-      .from("conversations")
-      .insert({ user_id: userId, title: "Naya chat" })
-      .select("id, title, updated_at")
-      .single();
-    if (error || !created) {
-      toast.error("Naya chat nahi ban saka");
-      return;
-    }
-    setThreads((prev) => [created as Thread, ...(prev ?? [])]);
-    setConversationId(created.id);
-    setInitialMessages([]);
-    try {
-      localStorage.setItem(ACTIVE_KEY, created.id);
-    } catch {
-      /* storage blocked */
-    }
-  }, [userId]);
+  // Pehla message bhejte hi chat save ho jati hai.
+  const ensureConversation = useCallback(
+    async (firstMessage: string) => {
+      const title = firstMessage.slice(0, 48) || "Naya chat";
+      const { data: created, error } = await supabase
+        .from("conversations")
+        .insert({ user_id: userId, title })
+        .select("id, title, updated_at")
+        .single();
+      if (error || !created) {
+        toast.error("Chat save nahi ho saki");
+        return null;
+      }
+      setThreads((prev) => [created as Thread, ...prev]);
+      setConversationId(created.id);
+      return created.id;
+    },
+    [userId],
+  );
 
   async function deleteThread(id: string) {
     await supabase.from("messages").delete().eq("conversation_id", id);
@@ -171,100 +190,82 @@ export function ChatPanel({
       toast.error("Chat delete nahi hui");
       return;
     }
-    const rows = await loadThreads();
-    if (conversationId === id) {
-      const next = rows[0];
-      if (next) void openThread(next.id);
-      else void newThread();
-    }
+    setThreads((prev) => prev.filter((t) => t.id !== id));
+    if (conversationId === id) startNewChat();
     toast.success("Chat delete ho gayi");
   }
-
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      const rows = await loadThreads();
-      if (!active) return;
-      let saved: string | null = null;
-      try {
-        saved = localStorage.getItem(ACTIVE_KEY);
-      } catch {
-        /* storage blocked */
-      }
-      const target = rows.find((r) => r.id === saved) ?? rows[0];
-      if (target) void openThread(target.id);
-      else void newThread();
-    })();
-    return () => {
-      active = false;
-    };
-  }, [loadThreads, openThread, newThread]);
-
-  const activeTitle = threads?.find((t) => t.id === conversationId)?.title ?? "Chat";
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="mb-2 flex items-center gap-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="min-w-0 flex-1 justify-start text-xs">
-              <span className="truncate">{activeTitle}</span>
+        <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
+          <SheetTrigger asChild>
+            <Button variant="outline" size="sm" className="gap-1.5 text-xs" aria-label="Chat history">
+              <Menu className="h-4 w-4" /> History
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="max-h-72 w-72 overflow-y-auto">
-            <DropdownMenuLabel className="text-xs">Recent chats</DropdownMenuLabel>
-            {threads?.length === 0 && (
-              <p className="px-2 py-2 text-xs text-muted-foreground">Koi purani chat nahi</p>
-            )}
-            {threads?.map((thread) => (
-              <DropdownMenuItem
-                key={thread.id}
-                onSelect={() => void openThread(thread.id)}
-                className="flex items-center gap-2 text-xs"
-              >
-                {thread.id === conversationId ? (
-                  <Check className="h-3.5 w-3.5 shrink-0 text-primary" />
-                ) : (
-                  <span className="w-3.5 shrink-0" />
-                )}
-                <span className="min-w-0 flex-1 truncate">{thread.title}</span>
-                <button
-                  aria-label="Chat delete karo"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    void deleteThread(thread.id);
-                  }}
-                  className="shrink-0 text-muted-foreground hover:text-destructive"
+          </SheetTrigger>
+          <SheetContent side="left" className="w-[85vw] max-w-sm p-0">
+            <SheetHeader className="border-b border-border px-4 py-3">
+              <SheetTitle className="text-sm">Purani chats</SheetTitle>
+            </SheetHeader>
+            <div className="max-h-[calc(100vh-4rem)] overflow-y-auto p-2">
+              {threads.length === 0 && (
+                <p className="px-2 py-4 text-xs text-muted-foreground">Abhi koi chat save nahi hui</p>
+              )}
+              {threads.map((thread) => (
+                <div
+                  key={thread.id}
+                  className={`mb-1 flex items-center gap-2 rounded-lg px-2 py-2 transition-colors hover:bg-secondary ${
+                    thread.id === conversationId ? "bg-secondary" : ""
+                  }`}
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <Button size="sm" variant="secondary" className="gap-1 text-xs" onClick={() => void newThread()}>
-          <MessageSquarePlus className="h-3.5 w-3.5" /> Naya chat
+                  <button
+                    onClick={() => void openThread(thread.id)}
+                    className="min-w-0 flex-1 text-left"
+                  >
+                    <span className="block truncate text-xs font-medium">{thread.title}</span>
+                    <span className="block text-[11px] text-muted-foreground">
+                      {formatDate(thread.updated_at)}
+                    </span>
+                  </button>
+                  <button
+                    aria-label="Chat delete karo"
+                    onClick={() => void deleteThread(thread.id)}
+                    className="shrink-0 text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </SheetContent>
+        </Sheet>
+
+        <div className="flex-1" />
+
+        <Button size="sm" className="btn-green gap-1.5 text-xs" onClick={startNewChat}>
+          <Plus className="h-4 w-4" /> New Chat
         </Button>
       </div>
 
-      {!conversationId || !initialMessages ? (
+      {loadingThread ? (
         <div className="flex flex-1 items-center justify-center py-20 text-muted-foreground">
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Memory load ho rahi hai…
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Chat load ho rahi hai…
         </div>
       ) : (
         <ChatThread
-          key={conversationId}
+          key={threadKey}
           userId={userId}
           conversationId={conversationId}
+          ensureConversation={ensureConversation}
           initialMessages={initialMessages}
           onWorkChanged={onWorkChanged}
-          onTitle={(title) => {
+          onTouched={(id) =>
             setThreads((prev) =>
-              (prev ?? []).map((t) => (t.id === conversationId ? { ...t, title } : t)),
-            );
-            void supabase.from("conversations").update({ title }).eq("id", conversationId);
-          }}
+              prev.map((t) => (t.id === id ? { ...t, updated_at: new Date().toISOString() } : t)),
+            )
+          }
+          onNewChat={startNewChat}
         />
       )}
     </div>
@@ -274,15 +275,19 @@ export function ChatPanel({
 function ChatThread({
   userId,
   conversationId,
+  ensureConversation,
   initialMessages,
   onWorkChanged,
-  onTitle,
+  onTouched,
+  onNewChat,
 }: {
   userId: string;
-  conversationId: string;
+  conversationId: string | null;
+  ensureConversation: (firstMessage: string) => Promise<string | null>;
   initialMessages: UIMessage[];
   onWorkChanged: () => void;
-  onTitle: (title: string) => void;
+  onTouched: (id: string) => void;
+  onNewChat: () => void;
 }) {
   const [input, setInput] = useState("");
   const [attached, setAttached] = useState<string | null>(null);
@@ -290,7 +295,11 @@ function ChatThread({
   const [edits, setEdits] = useState<{ id: string; before: string; after: string; prompt: string }[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const titled = useRef(initialMessages.length > 0);
+  const convRef = useRef<string | null>(conversationId);
+
+  useEffect(() => {
+    if (conversationId) convRef.current = conversationId;
+  }, [conversationId]);
 
   async function pickImage(file: File | undefined) {
     if (!file) return;
@@ -361,14 +370,14 @@ function ChatThread({
   );
 
   const { messages, sendMessage, status, error } = useChat({
-    id: conversationId,
     messages: initialMessages,
     transport,
     onFinish: async ({ message }) => {
       const text = messageText(message);
-      if (!text) return;
+      const id = convRef.current;
+      if (!text || !id) return;
       await supabase.from("messages").insert({
-        conversation_id: conversationId,
+        conversation_id: id,
         user_id: userId,
         role: "assistant",
         content: text,
@@ -376,7 +385,8 @@ function ChatThread({
       await supabase
         .from("conversations")
         .update({ updated_at: new Date().toISOString() })
-        .eq("id", conversationId);
+        .eq("id", id);
+      onTouched(id);
       onWorkChanged();
     },
     onError: (err) => toast.error(err.message || "AI se jawab nahi mila"),
@@ -397,12 +407,14 @@ function ChatThread({
     if (!value || busy) return;
 
     setInput("");
-    if (!titled.current) {
-      titled.current = true;
-      onTitle(value.slice(0, 48));
+    let id = convRef.current;
+    if (!id) {
+      id = await ensureConversation(value);
+      if (!id) return;
+      convRef.current = id;
     }
     await supabase.from("messages").insert({
-      conversation_id: conversationId,
+      conversation_id: id,
       user_id: userId,
       role: "user",
       content: value,
@@ -503,7 +515,7 @@ function ChatThread({
         {(busy || editing) && (
           <div className="flex items-center gap-2 px-1 text-xs text-muted-foreground">
             <Brain className="h-4 w-4 text-primary node-pulse" />{" "}
-            {editing ? "Image edit ho rahi hai…" : "NO QUIT AI soch rahi hai aur seekh rahi hai…"}
+            {editing ? "Image edit ho rahi hai…" : "NO QUIT AI soch rahi hai…"}
           </div>
         )}
         {error && (
@@ -570,7 +582,7 @@ function ChatThread({
                 void submit(input);
               }
             }}
-            placeholder={attached ? "Image me kya change karna hai…" : "NO QUIT AI se kuch bhi poochho…"}
+            placeholder={attached ? "Image me kya change karna hai…" : "Naya sawal pucho..."}
             rows={1}
             className="max-h-40 min-h-11 resize-none border-0 bg-transparent focus-visible:ring-0"
           />
