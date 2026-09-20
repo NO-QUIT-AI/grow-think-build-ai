@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Loader2, MessageCircle, Sparkles, Trophy, UserMinus, UserPlus } from "lucide-react";
+import { Loader2, Sparkles, Trophy, UserMinus, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";

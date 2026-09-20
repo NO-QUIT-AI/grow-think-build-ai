@@ -16,6 +16,7 @@ import {
   timeAgo,
   type CommunityProfile,
 } from "@/lib/community";
+import { fetchFriendState, type FriendState } from "@/lib/friends";
 
 type Search = { u?: string | undefined };
 
