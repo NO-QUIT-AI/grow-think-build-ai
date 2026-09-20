@@ -270,6 +270,44 @@ export function StudioPanel({
         </div>
       </div>
 
+      {active?.project_type === "website" && html && (
+        <div className="flex flex-wrap gap-2">
+          {isCv && (
+            <Button
+              size="sm"
+              className="btn-green h-9 flex-1 gap-1.5 rounded-xl text-xs sm:flex-none"
+              onClick={downloadPdf}
+            >
+              <FileDown className="h-4 w-4" /> Download PDF
+            </Button>
+          )}
+          <Button
+            size="sm"
+            className="btn-green h-9 flex-1 gap-1.5 rounded-xl text-xs sm:flex-none"
+            onClick={() => void downloadZip()}
+          >
+            <FileArchive className="h-4 w-4" /> Download ZIP
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-9 flex-1 gap-1.5 rounded-xl border-primary/40 text-xs sm:flex-none"
+            onClick={() => void copyLink()}
+          >
+            <Copy className="h-4 w-4" /> Copy Link
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-9 flex-1 gap-1.5 rounded-xl border-primary/40 text-xs sm:flex-none"
+            onClick={openInTab}
+          >
+            <ExternalLink className="h-4 w-4" /> Preview
+          </Button>
+        </div>
+      )}
+
+
       {active?.project_type !== "website" ? (
         <div className="panel flex-1 overflow-auto p-4">
           <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold">
