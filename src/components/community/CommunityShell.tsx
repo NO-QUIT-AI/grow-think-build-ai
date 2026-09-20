@@ -11,6 +11,11 @@ import {
 } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchProfiles, nameOf, timeAgo, type CommunityProfile } from "@/lib/community";
+import {
+  fetchIncomingRequests,
+  respondFriendRequest,
+  type FriendRequest,
+} from "@/lib/friends";
 
 type Notification = {
   id: string;
