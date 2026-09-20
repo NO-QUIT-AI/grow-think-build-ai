@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   Heart,
@@ -305,11 +305,27 @@ function Feed({ userId }: { userId: string }) {
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Image aur link add karo"
-            onClick={() => setShowExtra((value) => !value)}
+            aria-label="Screenshot upload karo"
+            disabled={uploading}
+            onClick={() => fileRef.current?.click()}
           >
-            <ImageIcon className="h-4 w-4" />
+            {uploading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <ImageIcon className="h-4 w-4" />
+            )}
           </Button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              event.target.value = "";
+              if (file) void uploadImage(file);
+            }}
+          />
           <Button
             variant="ghost"
             size="icon"
@@ -320,8 +336,8 @@ function Feed({ userId }: { userId: string }) {
           </Button>
           <Button
             size="sm"
-            className="ml-auto rounded-full px-4 text-xs"
-            disabled={posting || !text.trim()}
+            className="btn-green ml-auto rounded-full px-5 text-xs"
+            disabled={posting || uploading || !text.trim()}
             onClick={() => void createPost()}
           >
             {posting ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null}
