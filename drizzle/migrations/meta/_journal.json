@@ -43,6 +43,13 @@
       "when": 1789939230814,
       "tag": "0005_friend_requests_chat_privacy",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789942810814,
+      "tag": "0006_nqai_mining_pi_style",
+      "breakpoints": true
     }
   ]
 }
