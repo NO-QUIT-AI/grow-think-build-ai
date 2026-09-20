@@ -101,9 +101,109 @@ export function StudioPanel({
     const blob = new Blob([html], { type: "text/html" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = `${(active?.prompt ?? "site").replace(/\s+/g, "-").toLowerCase()}.html`;
+    link.download = `${fileBase()}.html`;
     link.click();
   }
+
+  /** Detects a CV/resume build so we can offer a PDF export. */
+  const isCv = /\b(cv|resume|curriculum\s*vitae)\b/i.test(
+    `${active?.prompt ?? ""} ${html.slice(0, 3000)}`,
+  );
+
+  /** Builds a clean file name — person ka naam CV me, warna prompt se. */
+  function fileBase() {
+    const heading = html.match(/<h1[^>]*>([^<]{2,60})<\/h1>/i)?.[1];
+    const raw = (heading || active?.prompt || "build").replace(/&[a-z]+;/gi, " ");
+    const slug =
+      raw
+        .replace(/[^a-zA-Z0-9\s-]/g, " ")
+        .trim()
+        .split(/\s+/)
+        .slice(0, 3)
+        .join("-") || "build";
+    return isCv ? `${slug}-CV` : slug;
+  }
+
+  /** Print-to-PDF: header/footer/nav print me hide, title se file ka naam. */
+  function downloadPdf() {
+    if (!html) return;
+    const title = fileBase();
+    const printCss =
+      `<title>${title}</title>` +
+      "<style>@media print{header,footer,nav,.no-print,[data-no-print]{display:none !important}" +
+      "body{margin:0;background:#fff !important;color:#000}" +
+      "@page{margin:12mm}}</style>";
+    const doc = /<\/head>/i.test(html)
+      ? html.replace(/<\/head>/i, `${printCss}</head>`)
+      : `${printCss}${html}`;
+
+    const frame = document.createElement("iframe");
+    frame.setAttribute("aria-hidden", "true");
+    frame.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0;";
+    frame.onload = () => {
+      try {
+        frame.contentWindow?.focus();
+        frame.contentWindow?.print();
+      } catch {
+        toast.error("Print window nahi khul saki");
+      }
+      window.setTimeout(() => frame.remove(), 60_000);
+    };
+    document.body.appendChild(frame);
+    frame.srcdoc = doc;
+    toast.success("Print window khul rahi hai — 'Save as PDF' choose karein");
+  }
+
+  /** Puri build ko index.html + style.css + script.js ke ZIP me export karta hai. */
+  async function downloadZip() {
+    if (!html) return;
+    const { default: JSZip } = await import("jszip");
+    const styles = [...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)]
+      .map((m) => m[1])
+      .join("\n\n");
+    const scripts = [...html.matchAll(/<script(?![^>]*\ssrc=)[^>]*>([\s\S]*?)<\/script>/gi)]
+      .map((m) => m[1])
+      .join("\n\n");
+
+    let page = html
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+      .replace(/<script(?![^>]*\ssrc=)[^>]*>[\s\S]*?<\/script>/gi, "");
+    if (styles.trim() && /<\/head>/i.test(page)) {
+      page = page.replace(/<\/head>/i, '  <link rel="stylesheet" href="style.css" />\n</head>');
+    }
+    if (scripts.trim() && /<\/body>/i.test(page)) {
+      page = page.replace(/<\/body>/i, '  <script src="script.js"></script>\n</body>');
+    }
+
+    const zip = new JSZip();
+    zip.file("index.html", page);
+    if (styles.trim()) zip.file("style.css", styles);
+    if (scripts.trim()) zip.file("script.js", scripts);
+    zip.file(
+      "README.txt",
+      `${active?.prompt ?? "NO QUIT AI build"}\n\nNO QUIT AI se banaya gaya. index.html ko browser me kholein.\n`,
+    );
+
+    const blob = await zip.generateAsync({ type: "blob" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `${fileBase()}.zip`;
+    link.click();
+    window.setTimeout(() => URL.revokeObjectURL(link.href), 30_000);
+    toast.success("ZIP download ho gaya");
+  }
+
+  async function copyLink() {
+    if (!html) return;
+    const url = URL.createObjectURL(new Blob([html], { type: "text/html" }));
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copy ho gaya — isi browser me khulega");
+    } catch {
+      toast.error("Copy nahi ho saka");
+    }
+  }
+
 
   if (memories.length === 0) {
     return (
