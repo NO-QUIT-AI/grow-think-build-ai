@@ -152,6 +152,17 @@
   box-shadow: var(--shadow-panel);
 }
 
+@utility btn-green {
+  background-image: var(--gradient-green);
+  color: var(--primary-foreground);
+  border: 1px solid oklch(0.75 0.16 158 / 0.5);
+  box-shadow: 0 10px 30px -14px oklch(0.75 0.16 158 / 0.8);
+}
+
+@utility btn-green-hover {
+  filter: brightness(1.05);
+}
+
 @utility glow {
   box-shadow: var(--shadow-glow);
 }
