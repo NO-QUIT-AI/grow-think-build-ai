@@ -187,8 +187,8 @@ export function downloadCvPdf(data: CvData) {
   };
   document.body.appendChild(frame);
   frame.srcdoc = renderCvHtml(data).replace(
-    "<title>",
-    `<title>${cvFileName(data)}</title><title hidden>`,
+    /<title>[\s\S]*?<\/title>/i,
+    `<title>${cvFileName(data)}</title>`,
   );
 }
 

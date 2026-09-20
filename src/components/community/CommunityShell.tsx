@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Bell, Coins, Home, MessageCircle, Sparkles, Trophy, Users } from "lucide-react";
+import { Bell, Coins, FileText, Home, MessageCircle, Sparkles, Trophy, Users } from "lucide-react";
 
 import { LegalFooter } from "@/components/legal/LegalPage";
 import { Button } from "@/components/ui/button";
@@ -110,6 +110,7 @@ const NAV = [
   { to: "/community", label: "Feed", icon: Home },
   { to: "/messages", label: "Chat", icon: MessageCircle },
   { to: "/leaderboard", label: "Top", icon: Trophy },
+  { to: "/cv", label: "CV", icon: FileText },
   { to: "/earn", label: "Earn", icon: Coins },
 ] as const;
 

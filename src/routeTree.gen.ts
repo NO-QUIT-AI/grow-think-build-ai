@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CommunityRouteImport } from './routes/community'
+import { Route as CvRouteImport } from './routes/cv'
 import { Route as EarnRouteImport } from './routes/earn'
 import { Route as InviteRouteImport } from './routes/invite'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
@@ -45,6 +46,11 @@ const AuthRoute = AuthRouteImport.update({
 const CommunityRoute = CommunityRouteImport.update({
   id: '/community',
   path: '/community',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CvRoute = CvRouteImport.update({
+  id: '/cv',
+  path: '/cv',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EarnRoute = EarnRouteImport.update({
@@ -118,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/community': typeof CommunityRoute
+  '/cv': typeof CvRoute
   '/earn': typeof EarnRoute
   '/invite': typeof InviteRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -137,6 +144,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/community': typeof CommunityRoute
+  '/cv': typeof CvRoute
   '/earn': typeof EarnRoute
   '/invite': typeof InviteRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -157,6 +165,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/community': typeof CommunityRoute
+  '/cv': typeof CvRoute
   '/earn': typeof EarnRoute
   '/invite': typeof InviteRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -178,6 +187,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/community'
+    | '/cv'
     | '/earn'
     | '/invite'
     | '/leaderboard'
@@ -197,6 +207,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/community'
+    | '/cv'
     | '/earn'
     | '/invite'
     | '/leaderboard'
@@ -216,6 +227,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/community'
+    | '/cv'
     | '/earn'
     | '/invite'
     | '/leaderboard'
@@ -236,6 +248,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRoute
   CommunityRoute: typeof CommunityRoute
+  CvRoute: typeof CvRoute
   EarnRoute: typeof EarnRoute
   InviteRoute: typeof InviteRoute
   LeaderboardRoute: typeof LeaderboardRoute
@@ -278,6 +291,13 @@ declare module '@tanstack/react-router' {
       path: '/community'
       fullPath: '/community'
       preLoaderRoute: typeof CommunityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cv': {
+      id: '/cv'
+      path: '/cv'
+      fullPath: '/cv'
+      preLoaderRoute: typeof CvRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/earn': {
@@ -390,6 +410,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AuthRoute: AuthRoute,
   CommunityRoute: CommunityRoute,
+  CvRoute: CvRoute,
   EarnRoute: EarnRoute,
   InviteRoute: InviteRoute,
   LeaderboardRoute: LeaderboardRoute,
