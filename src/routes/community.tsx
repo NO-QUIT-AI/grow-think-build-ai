@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   Heart,
@@ -106,6 +106,8 @@ function Feed({ userId }: { userId: string }) {
   const [appLink, setAppLink] = useState("");
   const [showExtra, setShowExtra] = useState(false);
   const [posting, setPosting] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
     const [{ data: postRows }, { data: likeRows }, { data: followRows }] = await Promise.all([
@@ -150,6 +152,36 @@ function Feed({ userId }: { userId: string }) {
     return posts;
   }, [posts, filter, following, userId]);
 
+  /** Uploads a screenshot to storage and keeps a long-lived link for the post. */
+  async function uploadImage(file: File) {
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Image 10MB se choti honi chahiye");
+      return;
+    }
+    setUploading(true);
+    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const path = `${userId}/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage
+      .from("community-images")
+      .upload(path, file, { contentType: file.type || "image/jpeg", upsert: false });
+    if (error) {
+      setUploading(false);
+      toast.error(`Image upload nahi hui: ${error.message}`);
+      return;
+    }
+    const { data } = await supabase.storage
+      .from("community-images")
+      .createSignedUrl(path, 60 * 60 * 24 * 3650);
+    setUploading(false);
+    if (!data?.signedUrl) {
+      toast.error("Image link nahi bana");
+      return;
+    }
+    setImageUrl(data.signedUrl);
+    setShowExtra(true);
+    toast.success("Screenshot lag gaya");
+  }
+
   async function createPost() {
     const value = text.trim();
     if (!value || posting) return;
@@ -162,7 +194,7 @@ function Feed({ userId }: { userId: string }) {
     });
     setPosting(false);
     if (error) {
-      toast.error("Post nahi ho saki");
+      toast.error(`Post nahi ho saki: ${error.message}`);
       return;
     }
     setText("");
@@ -273,11 +305,27 @@ function Feed({ userId }: { userId: string }) {
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Image aur link add karo"
-            onClick={() => setShowExtra((value) => !value)}
+            aria-label="Screenshot upload karo"
+            disabled={uploading}
+            onClick={() => fileRef.current?.click()}
           >
-            <ImageIcon className="h-4 w-4" />
+            {uploading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <ImageIcon className="h-4 w-4" />
+            )}
           </Button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              event.target.value = "";
+              if (file) void uploadImage(file);
+            }}
+          />
           <Button
             variant="ghost"
             size="icon"
@@ -288,8 +336,8 @@ function Feed({ userId }: { userId: string }) {
           </Button>
           <Button
             size="sm"
-            className="ml-auto rounded-full px-4 text-xs"
-            disabled={posting || !text.trim()}
+            className="btn-green ml-auto rounded-full px-5 text-xs"
+            disabled={posting || uploading || !text.trim()}
             onClick={() => void createPost()}
           >
             {posting ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null}
