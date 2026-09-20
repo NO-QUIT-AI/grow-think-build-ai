@@ -110,6 +110,7 @@ export async function claimShareBonus(): Promise<{ ok: boolean; balance: number;
 export type MiningState = {
   total_coins: number;
   mining_rate: number;
+  total_invites: number;
   is_mining: boolean;
   session_start: string | null;
   ends_at: string | null;
@@ -126,6 +127,7 @@ function toMiningState(data: unknown): MiningState {
   return {
     total_coins: Number(raw["total_coins"] ?? 0),
     mining_rate: Number(raw["mining_rate"] ?? 0.5),
+    total_invites: Number(raw["total_invites"] ?? 0),
     is_mining: Boolean(raw["is_mining"]),
     session_start: (raw["session_start"] as string | null) ?? null,
     ends_at: (raw["ends_at"] as string | null) ?? null,

@@ -50,6 +50,13 @@
       "when": 1789942810814,
       "tag": "0006_nqai_mining_pi_style",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789943318640,
+      "tag": "0007_nqai_referral_speed_boost",
+      "breakpoints": true
     }
   ]
 }

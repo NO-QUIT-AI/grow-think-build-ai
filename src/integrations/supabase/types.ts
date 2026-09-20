@@ -485,6 +485,7 @@ export type Database = {
           mining_rate: number
           session_start: string | null
           total_coins: number
+          total_invites: number
           updated_at: string
           user_id: string
         }
@@ -494,6 +495,7 @@ export type Database = {
           mining_rate?: number
           session_start?: string | null
           total_coins?: number
+          total_invites?: number
           updated_at?: string
           user_id: string
         }
@@ -503,6 +505,7 @@ export type Database = {
           mining_rate?: number
           session_start?: string | null
           total_coins?: number
+          total_invites?: number
           updated_at?: string
           user_id?: string
         }
