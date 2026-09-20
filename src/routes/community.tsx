@@ -150,6 +150,36 @@ function Feed({ userId }: { userId: string }) {
     return posts;
   }, [posts, filter, following, userId]);
 
+  /** Uploads a screenshot to storage and keeps a long-lived link for the post. */
+  async function uploadImage(file: File) {
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Image 10MB se choti honi chahiye");
+      return;
+    }
+    setUploading(true);
+    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const path = `${userId}/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage
+      .from("community-images")
+      .upload(path, file, { contentType: file.type || "image/jpeg", upsert: false });
+    if (error) {
+      setUploading(false);
+      toast.error(`Image upload nahi hui: ${error.message}`);
+      return;
+    }
+    const { data } = await supabase.storage
+      .from("community-images")
+      .createSignedUrl(path, 60 * 60 * 24 * 3650);
+    setUploading(false);
+    if (!data?.signedUrl) {
+      toast.error("Image link nahi bana");
+      return;
+    }
+    setImageUrl(data.signedUrl);
+    setShowExtra(true);
+    toast.success("Screenshot lag gaya");
+  }
+
   async function createPost() {
     const value = text.trim();
     if (!value || posting) return;
@@ -162,7 +192,7 @@ function Feed({ userId }: { userId: string }) {
     });
     setPosting(false);
     if (error) {
-      toast.error("Post nahi ho saki");
+      toast.error(`Post nahi ho saki: ${error.message}`);
       return;
     }
     setText("");
