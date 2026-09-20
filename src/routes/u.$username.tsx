@@ -231,14 +231,13 @@ function ProfileView({ meId }: { meId: string }) {
               {isFollowing ? <UserMinus className="h-3.5 w-3.5" /> : <UserPlus className="h-3.5 w-3.5" />}
               {isFollowing ? "Following" : "Follow"}
             </Button>
-            <Button
-              size="sm"
-              variant="secondary"
-              className="flex-1 gap-1 text-xs"
-              onClick={() => void openChat()}
-            >
-              <MessageCircle className="h-3.5 w-3.5" /> Message
-            </Button>
+            <FriendButton
+              state={friendState}
+              busy={busy}
+              className="flex-1"
+              onAdd={() => void addFriend()}
+              onMessage={() => void openChat()}
+            />
           </div>
         )}
       </section>
