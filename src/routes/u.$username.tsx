@@ -154,6 +154,20 @@ function ProfileView({ meId }: { meId: string }) {
     }
   }
 
+  async function addFriend() {
+    if (!profile || busy) return;
+    setBusy(true);
+    try {
+      await sendFriendRequest(meId, profile.id, myName);
+      setFriendState("outgoing");
+      toast.success("Friend request bhej di");
+    } catch {
+      toast.error("Request nahi gayi");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   if (profile === undefined) {
     return (
       <main className="flex min-h-screen items-center justify-center">
