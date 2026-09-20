@@ -157,6 +157,10 @@ function Inbox({ meId }: { meId: string }) {
   async function send() {
     const value = draft.trim();
     if (!value || !activeId || !otherId) return;
+    if (friendState !== "friends") {
+      toast.error("Pehle friend request accept hone ka intezar karo");
+      return;
+    }
     setDraft("");
     const { error } = await supabase
       .from("dm_messages")
