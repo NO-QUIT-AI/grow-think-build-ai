@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CommunityRouteImport } from './routes/community'
+import { Route as CvRouteImport } from './routes/cv'
 import { Route as EarnRouteImport } from './routes/earn'
 import { Route as InviteRouteImport } from './routes/invite'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
@@ -21,6 +22,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AdminAdsRouteImport } from './routes/admin.ads'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as ApiCvPolishRouteImport } from './routes/api/cv-polish'
 import { Route as ApiEditImageRouteImport } from './routes/api/edit-image'
 import { Route as ApiMindRouteImport } from './routes/api/mind'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
@@ -44,6 +46,11 @@ const AuthRoute = AuthRouteImport.update({
 const CommunityRoute = CommunityRouteImport.update({
   id: '/community',
   path: '/community',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CvRoute = CvRouteImport.update({
+  id: '/cv',
+  path: '/cv',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EarnRoute = EarnRouteImport.update({
@@ -86,6 +93,11 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCvPolishRoute = ApiCvPolishRouteImport.update({
+  id: '/api/cv-polish',
+  path: '/api/cv-polish',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiEditImageRoute = ApiEditImageRouteImport.update({
   id: '/api/edit-image',
   path: '/api/edit-image',
@@ -112,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/community': typeof CommunityRoute
+  '/cv': typeof CvRoute
   '/earn': typeof EarnRoute
   '/invite': typeof InviteRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -120,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/admin/ads': typeof AdminAdsRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/cv-polish': typeof ApiCvPolishRoute
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/mind': typeof ApiMindRouteWithChildren
   '/u/$username': typeof UUsernameRoute
@@ -130,6 +144,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/community': typeof CommunityRoute
+  '/cv': typeof CvRoute
   '/earn': typeof EarnRoute
   '/invite': typeof InviteRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -138,6 +153,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/admin/ads': typeof AdminAdsRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/cv-polish': typeof ApiCvPolishRoute
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/mind': typeof ApiMindRouteWithChildren
   '/u/$username': typeof UUsernameRoute
@@ -149,6 +165,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/community': typeof CommunityRoute
+  '/cv': typeof CvRoute
   '/earn': typeof EarnRoute
   '/invite': typeof InviteRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -157,6 +174,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/admin/ads': typeof AdminAdsRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/cv-polish': typeof ApiCvPolishRoute
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/mind': typeof ApiMindRouteWithChildren
   '/u/$username': typeof UUsernameRoute
@@ -169,6 +187,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/community'
+    | '/cv'
     | '/earn'
     | '/invite'
     | '/leaderboard'
@@ -177,6 +196,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin/ads'
     | '/api/chat'
+    | '/api/cv-polish'
     | '/api/edit-image'
     | '/api/mind'
     | '/u/$username'
@@ -187,6 +207,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/community'
+    | '/cv'
     | '/earn'
     | '/invite'
     | '/leaderboard'
@@ -195,6 +216,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin/ads'
     | '/api/chat'
+    | '/api/cv-polish'
     | '/api/edit-image'
     | '/api/mind'
     | '/u/$username'
@@ -205,6 +227,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/community'
+    | '/cv'
     | '/earn'
     | '/invite'
     | '/leaderboard'
@@ -213,6 +236,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin/ads'
     | '/api/chat'
+    | '/api/cv-polish'
     | '/api/edit-image'
     | '/api/mind'
     | '/u/$username'
@@ -224,6 +248,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRoute
   CommunityRoute: typeof CommunityRoute
+  CvRoute: typeof CvRoute
   EarnRoute: typeof EarnRoute
   InviteRoute: typeof InviteRoute
   LeaderboardRoute: typeof LeaderboardRoute
@@ -232,6 +257,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   AdminAdsRoute: typeof AdminAdsRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiCvPolishRoute: typeof ApiCvPolishRoute
   ApiEditImageRoute: typeof ApiEditImageRoute
   ApiMindRoute: typeof ApiMindRouteWithChildren
   UUsernameRoute: typeof UUsernameRoute
@@ -265,6 +291,13 @@ declare module '@tanstack/react-router' {
       path: '/community'
       fullPath: '/community'
       preLoaderRoute: typeof CommunityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cv': {
+      id: '/cv'
+      path: '/cv'
+      fullPath: '/cv'
+      preLoaderRoute: typeof CvRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/earn': {
@@ -323,6 +356,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/cv-polish': {
+      id: '/api/cv-polish'
+      path: '/api/cv-polish'
+      fullPath: '/api/cv-polish'
+      preLoaderRoute: typeof ApiCvPolishRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/edit-image': {
       id: '/api/edit-image'
       path: '/api/edit-image'
@@ -370,6 +410,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AuthRoute: AuthRoute,
   CommunityRoute: CommunityRoute,
+  CvRoute: CvRoute,
   EarnRoute: EarnRoute,
   InviteRoute: InviteRoute,
   LeaderboardRoute: LeaderboardRoute,
@@ -378,6 +419,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   AdminAdsRoute: AdminAdsRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiCvPolishRoute: ApiCvPolishRoute,
   ApiEditImageRoute: ApiEditImageRoute,
   ApiMindRoute: ApiMindRouteWithChildren,
   UUsernameRoute: UUsernameRoute,
