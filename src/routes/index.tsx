@@ -80,11 +80,17 @@ function Home() {
           </h1>
           <p className="text-xs text-muted-foreground">Websites · Apps · Domains — bas command do</p>
         </div>
+        <Button variant="ghost" size="icon" asChild aria-label="CV Maker">
+          <Link to="/cv">
+            <FileText className="h-4 w-4" />
+          </Link>
+        </Button>
         <Button variant="ghost" size="icon" asChild aria-label="Community">
           <Link to="/community">
             <Users className="h-4 w-4" />
           </Link>
         </Button>
+
         <Button variant="ghost" size="icon" asChild aria-label="NQAI coins">
           <Link to="/earn">
             <Coins className="h-4 w-4" />
