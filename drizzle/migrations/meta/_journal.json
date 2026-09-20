@@ -29,6 +29,13 @@
       "when": 1789929244965,
       "tag": "0003_community_images_storage_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789938389766,
+      "tag": "0004_create_cv_documents",
+      "breakpoints": true
     }
   ]
 }
