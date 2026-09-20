@@ -67,7 +67,7 @@ function EarnPage() {
 const RULES = [
   { label: "Mining (24 ghante)", value: "0.5 / ghanta" },
   { label: "Invite link daily share", value: "+1" },
-  { label: "Dost invite se join kare", value: "+10 dono ko" },
+  { label: "Dost invite se join kare", value: "+10 dono ko · +0.1 speed" },
   { label: "Community post", value: "+2" },
   { label: "Comment / madad", value: "+1" },
 ];
@@ -177,8 +177,9 @@ function Earn({ userId }: { userId: string }) {
         </p>
         <p className="mt-1 flex items-center justify-center gap-1 text-xs text-muted-foreground">
           <Zap className="h-3 w-3 text-primary" /> Mining speed {formatCoins(mining?.mining_rate ?? 0.5)}/ghanta ·{" "}
-          {invites} invite
+          {mining?.total_invites ?? invites} invite
         </p>
+        <p className="mt-0.5 text-[11px] text-muted-foreground">1 invite = +0.1 speed 🚀</p>
 
         {mining?.is_mining && !sessionOver ? (
           <div className="mt-4 rounded-xl border border-border bg-background/50 p-4">
