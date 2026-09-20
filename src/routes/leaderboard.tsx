@@ -1,18 +1,23 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Loader2, Trophy } from "lucide-react";
+import { Clock, Loader2, MessageCircle, Trophy, UserPlus } from "lucide-react";
+import { toast } from "sonner";
 
 import { AdSlot } from "@/components/ads/AdSlot";
+import { Button } from "@/components/ui/button";
 import { CommunityShell } from "@/components/community/CommunityShell";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import {
   PROFILE_COLUMNS,
+  ensureConversation,
+  fetchProfiles,
   handleOf,
   initials,
   nameOf,
   type CommunityProfile,
 } from "@/lib/community";
+import { fetchFriendStates, sendFriendRequest, type FriendState } from "@/lib/friends";
 
 export const Route = createFileRoute("/leaderboard")({
   head: () => ({
