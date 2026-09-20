@@ -86,6 +86,7 @@ function Inbox({ meId }: { meId: string }) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [messages, setMessages] = useState<DirectMessage[]>([]);
   const [draft, setDraft] = useState("");
+  const [friendState, setFriendState] = useState<FriendState>("none");
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const loadConversations = useCallback(async () => {
