@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
-import { Route as AdsDottxtRouteImport } from './routes/ads[.]txt'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as EarnRouteImport } from './routes/earn'
@@ -35,11 +34,6 @@ const IndexRoute = IndexRouteImport.update({
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdsDottxtRoute = AdsDottxtRouteImport.update({
-  id: '/ads.txt',
-  path: '/ads.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -116,7 +110,6 @@ const ApiMindThinkRoute = ApiMindThinkRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/ads.txt': typeof AdsDottxtRoute
   '/auth': typeof AuthRoute
   '/community': typeof CommunityRoute
   '/earn': typeof EarnRoute
@@ -135,7 +128,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/ads.txt': typeof AdsDottxtRoute
   '/auth': typeof AuthRoute
   '/community': typeof CommunityRoute
   '/earn': typeof EarnRoute
@@ -155,7 +147,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/ads.txt': typeof AdsDottxtRoute
   '/auth': typeof AuthRoute
   '/community': typeof CommunityRoute
   '/earn': typeof EarnRoute
@@ -176,7 +167,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
-    | '/ads.txt'
     | '/auth'
     | '/community'
     | '/earn'
@@ -195,7 +185,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
-    | '/ads.txt'
     | '/auth'
     | '/community'
     | '/earn'
@@ -214,7 +203,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
-    | '/ads.txt'
     | '/auth'
     | '/community'
     | '/earn'
@@ -234,7 +222,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  AdsDottxtRoute: typeof AdsDottxtRoute
   AuthRoute: typeof AuthRoute
   CommunityRoute: typeof CommunityRoute
   EarnRoute: typeof EarnRoute
@@ -264,13 +251,6 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ads.txt': {
-      id: '/ads.txt'
-      path: '/ads.txt'
-      fullPath: '/ads.txt'
-      preLoaderRoute: typeof AdsDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -388,7 +368,6 @@ const ApiMindRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  AdsDottxtRoute: AdsDottxtRoute,
   AuthRoute: AuthRoute,
   CommunityRoute: CommunityRoute,
   EarnRoute: EarnRoute,
