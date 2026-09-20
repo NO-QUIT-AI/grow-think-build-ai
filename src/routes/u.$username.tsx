@@ -113,6 +113,15 @@ function ProfileView({ meId }: { meId: string }) {
     setFollowers(followerRes.count ?? 0);
     setFollowingCount(followingRes.count ?? 0);
     setIsFollowing(Boolean(mineRes.data));
+
+    if (row.id !== meId) {
+      const [{ state }, mine] = await Promise.all([
+        fetchFriendState(meId, row.id),
+        fetchProfiles([meId]),
+      ]);
+      setFriendState(state);
+      setMyName(nameOf(mine[meId]));
+    }
   }, [username, meId]);
 
   useEffect(() => {
