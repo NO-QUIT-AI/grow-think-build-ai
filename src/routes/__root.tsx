@@ -110,9 +110,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       { rel: "manifest", href: "/manifest.webmanifest" },
     ],
-    // AdSense loader script is injected at runtime from initAdsConfig() so
-    // the publisher ID stays in env vars only — never hard-coded here.
-    scripts: [],
+    // AdSense loader script in <head> so Google can verify the site.
+    scripts: [
+      {
+        src: "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2482034823952749",
+        async: true,
+        crossOrigin: "anonymous",
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,

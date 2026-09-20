@@ -79,6 +79,11 @@ let scriptInjected = false;
 export function ensureAdsScript(client: string): void {
   if (scriptInjected || typeof document === "undefined") return;
   if (!isAdsActive({ ...config, client })) return;
+  // Script is already in <head> from the root route — never inject twice.
+  if (document.querySelector('script[src*="adsbygoogle.js"]')) {
+    scriptInjected = true;
+    return;
+  }
   scriptInjected = true;
   const script = document.createElement("script");
   script.async = true;
