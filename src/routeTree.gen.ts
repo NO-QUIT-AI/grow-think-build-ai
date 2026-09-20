@@ -21,6 +21,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AdminAdsRouteImport } from './routes/admin.ads'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as ApiCvPolishRouteImport } from './routes/api/cv-polish'
 import { Route as ApiEditImageRouteImport } from './routes/api/edit-image'
 import { Route as ApiMindRouteImport } from './routes/api/mind'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
@@ -86,6 +87,11 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCvPolishRoute = ApiCvPolishRouteImport.update({
+  id: '/api/cv-polish',
+  path: '/api/cv-polish',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiEditImageRoute = ApiEditImageRouteImport.update({
   id: '/api/edit-image',
   path: '/api/edit-image',
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/admin/ads': typeof AdminAdsRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/cv-polish': typeof ApiCvPolishRoute
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/mind': typeof ApiMindRouteWithChildren
   '/u/$username': typeof UUsernameRoute
@@ -138,6 +145,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/admin/ads': typeof AdminAdsRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/cv-polish': typeof ApiCvPolishRoute
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/mind': typeof ApiMindRouteWithChildren
   '/u/$username': typeof UUsernameRoute
@@ -157,6 +165,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/admin/ads': typeof AdminAdsRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/cv-polish': typeof ApiCvPolishRoute
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/mind': typeof ApiMindRouteWithChildren
   '/u/$username': typeof UUsernameRoute
@@ -177,6 +186,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin/ads'
     | '/api/chat'
+    | '/api/cv-polish'
     | '/api/edit-image'
     | '/api/mind'
     | '/u/$username'
@@ -195,6 +205,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin/ads'
     | '/api/chat'
+    | '/api/cv-polish'
     | '/api/edit-image'
     | '/api/mind'
     | '/u/$username'
@@ -213,6 +224,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin/ads'
     | '/api/chat'
+    | '/api/cv-polish'
     | '/api/edit-image'
     | '/api/mind'
     | '/u/$username'
@@ -232,6 +244,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   AdminAdsRoute: typeof AdminAdsRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiCvPolishRoute: typeof ApiCvPolishRoute
   ApiEditImageRoute: typeof ApiEditImageRoute
   ApiMindRoute: typeof ApiMindRouteWithChildren
   UUsernameRoute: typeof UUsernameRoute
@@ -323,6 +336,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/cv-polish': {
+      id: '/api/cv-polish'
+      path: '/api/cv-polish'
+      fullPath: '/api/cv-polish'
+      preLoaderRoute: typeof ApiCvPolishRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/edit-image': {
       id: '/api/edit-image'
       path: '/api/edit-image'
@@ -378,6 +398,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   AdminAdsRoute: AdminAdsRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiCvPolishRoute: ApiCvPolishRoute,
   ApiEditImageRoute: ApiEditImageRoute,
   ApiMindRoute: ApiMindRouteWithChildren,
   UUsernameRoute: UUsernameRoute,
