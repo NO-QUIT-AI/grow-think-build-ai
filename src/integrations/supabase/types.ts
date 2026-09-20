@@ -478,6 +478,36 @@ export type Database = {
         }
         Relationships: []
       }
+      nqai_mining: {
+        Row: {
+          is_mining: boolean
+          last_claim_time: string | null
+          mining_rate: number
+          session_start: string | null
+          total_coins: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          is_mining?: boolean
+          last_claim_time?: string | null
+          mining_rate?: number
+          session_start?: string | null
+          total_coins?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          is_mining?: boolean
+          last_claim_time?: string | null
+          mining_rate?: number
+          session_start?: string | null
+          total_coins?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       nqai_transactions: {
         Row: {
           amount: number
@@ -658,10 +688,13 @@ export type Database = {
         Args: { _amount: number; _reason: string; _user: string }
         Returns: undefined
       }
+      nqai_claim_mining: { Args: never; Returns: Json }
       nqai_invite_multiplier: { Args: { _user: string }; Returns: number }
       nqai_mine: { Args: never; Returns: Json }
       nqai_mine_ad: { Args: { _ad_watched: boolean }; Returns: Json }
+      nqai_mining_state: { Args: never; Returns: Json }
       nqai_share_bonus: { Args: never; Returns: Json }
+      nqai_start_mining: { Args: never; Returns: Json }
     }
     Enums: {
       [_ in never]: never

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Coins, Loader2, Pickaxe, Share2, Sparkles, Zap } from "lucide-react";
+import { Coins, Loader2, Pickaxe, Share2, Sparkles, Timer, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 import { AdSlot } from "@/components/ads/AdSlot";
@@ -10,13 +10,17 @@ import { useAuth } from "@/hooks/useAuth";
 import { inviteLink } from "@/lib/referral";
 import {
   COIN,
+  claimMining,
   claimShareBonus,
+  countdown,
   fetchInviteCount,
+  fetchMiningState,
   fetchTransactions,
   fetchWallet,
   formatCoins,
-  mineWithAd,
+  startMining,
   timeUntil,
+  type MiningState,
   type NqaiTx,
   type NqaiWallet,
 } from "@/lib/nqai";
@@ -60,83 +64,82 @@ function EarnPage() {
   return <Earn userId={user.id} />;
 }
 
-const AD_SECONDS = 15;
-
 const RULES = [
-  { label: "Ad dekh kar daily mining", value: "+1 x speed" },
+  { label: "Mining (24 ghante)", value: "0.5 / ghanta" },
   { label: "Invite link daily share", value: "+1" },
-  { label: "Har invite se mining speed", value: "+1x (max 10x)" },
+  { label: "Dost invite se join kare", value: "+10 dono ko" },
   { label: "Community post", value: "+2" },
   { label: "Comment / madad", value: "+1" },
-  { label: "Dost invite join kare", value: "+20" },
 ];
 
 function Earn({ userId }: { userId: string }) {
   const [wallet, setWallet] = useState<NqaiWallet | null>(null);
+  const [mining, setMining] = useState<MiningState | null>(null);
   const [txs, setTxs] = useState<NqaiTx[]>([]);
   const [invites, setInvites] = useState(0);
   const [busy, setBusy] = useState(false);
-  const [watching, setWatching] = useState(false);
-  const [left, setLeft] = useState(AD_SECONDS);
-  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const multiplier = Math.min(1 + invites, 10);
+  const [, setTick] = useState(0);
+  const skew = useRef(0);
 
   const load = useCallback(async () => {
-    const [w, t, c] = await Promise.all([
+    const [w, m, t, c] = await Promise.all([
       fetchWallet(userId),
+      fetchMiningState(),
       fetchTransactions(userId),
       fetchInviteCount(userId),
     ]);
     setWallet(w);
+    setMining(m);
+    if (m.server_time) skew.current = new Date(m.server_time).getTime() - Date.now();
     setTxs(t);
     setInvites(c);
   }, [userId]);
 
   useEffect(() => {
     void load();
-    return () => {
-      if (timer.current) clearInterval(timer.current);
-    };
   }, [load]);
 
-  const nextAt = wallet?.last_mined_at
-    ? new Date(new Date(wallet.last_mined_at).getTime() + 24 * 3600 * 1000).toISOString()
-    : null;
-  const ready = !nextAt || new Date(nextAt).getTime() <= Date.now();
+  useEffect(() => {
+    const id = setInterval(() => setTick((v) => v + 1), 1000);
+    return () => clearInterval(id);
+  }, []);
 
-  function startAd() {
-    if (watching || !ready) return;
-    setWatching(true);
-    setLeft(AD_SECONDS);
-    timer.current = setInterval(() => {
-      setLeft((value) => {
-        if (value <= 1) {
-          if (timer.current) clearInterval(timer.current);
-          timer.current = null;
-          setWatching(false);
-          void finishMining();
-          return 0;
-        }
-        return value - 1;
-      });
-    }, 1000);
-  }
+  const now = Date.now() + skew.current;
+  const sessionOver = mining?.ends_at ? new Date(mining.ends_at).getTime() <= now : false;
+  const canClaim =
+    !!mining?.is_mining &&
+    (!mining.next_claim_at || new Date(mining.next_claim_at).getTime() <= now);
 
-  async function finishMining() {
+  async function onStart() {
     setBusy(true);
     try {
-      const result = await mineWithAd(true);
+      const result = await startMining();
+      if (result.ok === false && result.reason === "already_mining") toast.info("Mining pehle se chal rahi hai.");
+      else toast.success("Mining shuru! 0.5 NQAI har ghanta.");
+      await load();
+    } catch {
+      toast.error("Mining shuru nahi ho saki, dobara try karo.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function onClaim() {
+    setBusy(true);
+    try {
+      const result = await claimMining();
       if (result.ok) {
-        toast.success(`+${formatCoins(result.reward ?? 0)} ${COIN} mil gaye! (speed ${result.multiplier}x)`);
+        toast.success(`+${formatCoins(result.reward ?? 0)} ${COIN} claim ho gaye!`);
       } else if (result.reason === "cooldown") {
-        toast.info(`Agli mining ${timeUntil(result.next_at)} baad.`);
+        toast.info(`Agla claim ${countdown(result.next_claim_at, skew.current)} baad.`);
+      } else if (result.reason === "not_mining") {
+        toast.info("Pehle mining start karo.");
       } else {
-        toast.info("Pehle ad poora dekhna zaroori hai.");
+        toast.info("Abhi kuch mine nahi hua — thori dair baad claim karo.");
       }
       await load();
     } catch {
-      toast.error("Mining abhi nahi ho saki, thori dair baad try karo.");
+      toast.error("Claim nahi ho saka, thori dair baad try karo.");
     } finally {
       setBusy(false);
     }
@@ -165,33 +168,55 @@ function Earn({ userId }: { userId: string }) {
   }
 
   return (
-    <CommunityShell userId={userId} title={`${COIN} Coins`} subtitle="Ad dekho, mine karo, speed barhao">
+    <CommunityShell userId={userId} title={`${COIN} Coins`} subtitle="Mining chalao, har ghanta coins kamao">
       <section className="rounded-2xl border border-border bg-card p-5 text-center">
         <Coins className="mx-auto h-7 w-7 text-primary" />
-        <p className="mt-2 text-3xl font-semibold">
+        <p className="mt-2 text-4xl font-semibold tracking-tight">
           {wallet ? formatCoins(wallet.balance) : "—"}{" "}
           <span className="text-base text-muted-foreground">{COIN}</span>
         </p>
         <p className="mt-1 flex items-center justify-center gap-1 text-xs text-muted-foreground">
-          <Zap className="h-3 w-3 text-primary" /> Mining speed {multiplier}x · {invites} invite ·
-          streak {wallet?.streak ?? 0} din
+          <Zap className="h-3 w-3 text-primary" /> Mining speed {formatCoins(mining?.mining_rate ?? 0.5)}/ghanta ·{" "}
+          {invites} invite
         </p>
 
-        {watching ? (
-          <div className="mt-4">
-            <AdSlot name="feed" label="Ad — mining chal rahi hai" />
-            <p className="text-xs text-muted-foreground">
-              Ad dekhte raho… {left}s baad {formatCoins(multiplier)} {COIN} mil jayenge
+        {mining?.is_mining && !sessionOver ? (
+          <div className="mt-4 rounded-xl border border-border bg-background/50 p-4">
+            <p className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
+              <Timer className="h-3.5 w-3.5 text-primary" /> Session baqi
+            </p>
+            <p className="mt-1 font-mono text-2xl tabular-nums text-primary">
+              {countdown(mining.ends_at, skew.current)} remaining
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Ab tak mine hua: <span className="font-medium text-foreground">{formatCoins(mining.pending)} {COIN}</span>
             </p>
           </div>
         ) : (
-          <Button className="mt-4 w-full" onClick={startAd} disabled={busy || !ready}>
-            {busy ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Pickaxe className="mr-2 h-4 w-4" />
-            )}
-            {ready ? `Ad dekh kar mine karo (+${formatCoins(multiplier)})` : `Agli mining ${timeUntil(nextAt)} baad`}
+          <p className="mt-4 text-xs text-muted-foreground">
+            {sessionOver ? "24 ghante pooray — claim kar ke dobara start karo." : "Mining band hai — start karo."}
+          </p>
+        )}
+
+        {mining?.is_mining ? (
+          <Button
+            className="btn-green btn-green-hover mt-3 w-full shadow-[0_0_20px_-4px_oklch(0.78_0.17_160)]"
+            onClick={() => void onClaim()}
+            disabled={busy || !canClaim}
+          >
+            {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Pickaxe className="mr-2 h-4 w-4" />}
+            {canClaim
+              ? "Claim & Restart"
+              : `Claim ${countdown(mining.next_claim_at, skew.current)} baad`}
+          </Button>
+        ) : (
+          <Button
+            className="btn-green btn-green-hover mt-3 w-full shadow-[0_0_20px_-4px_oklch(0.78_0.17_160)]"
+            onClick={() => void onStart()}
+            disabled={busy}
+          >
+            {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Pickaxe className="mr-2 h-4 w-4" />}
+            Start Mining
           </Button>
         )}
 
@@ -213,7 +238,7 @@ function Earn({ userId }: { userId: string }) {
           ))}
         </ul>
         <p className="mt-2 text-[11px] text-muted-foreground">
-          Jitne zyada dost invite honge, mining speed utni zyada — 1 invite = 2x, 2 invite = 3x (max 10x).
+          Time server se check hota hai — 24 ghante me sirf ek claim. Session khatam hone par "Claim & Restart" dabao.
         </p>
       </section>
 

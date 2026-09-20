@@ -107,6 +107,65 @@ export async function claimShareBonus(): Promise<{ ok: boolean; balance: number;
   };
 }
 
+export type MiningState = {
+  total_coins: number;
+  mining_rate: number;
+  is_mining: boolean;
+  session_start: string | null;
+  ends_at: string | null;
+  next_claim_at: string | null;
+  pending: number;
+  server_time: string | null;
+  ok?: boolean | undefined;
+  reason?: string | undefined;
+  reward?: number | undefined;
+};
+
+function toMiningState(data: unknown): MiningState {
+  const raw = (data ?? {}) as Record<string, unknown>;
+  return {
+    total_coins: Number(raw["total_coins"] ?? 0),
+    mining_rate: Number(raw["mining_rate"] ?? 0.5),
+    is_mining: Boolean(raw["is_mining"]),
+    session_start: (raw["session_start"] as string | null) ?? null,
+    ends_at: (raw["ends_at"] as string | null) ?? null,
+    next_claim_at: (raw["next_claim_at"] as string | null) ?? null,
+    pending: Number(raw["pending"] ?? 0),
+    server_time: (raw["server_time"] as string | null) ?? null,
+    ok: raw["ok"] == null ? undefined : Boolean(raw["ok"]),
+    reason: (raw["reason"] as string | undefined) ?? undefined,
+    reward: raw["reward"] != null ? Number(raw["reward"]) : undefined,
+  };
+}
+
+export async function fetchMiningState(): Promise<MiningState> {
+  const { data, error } = await supabase.rpc("nqai_mining_state");
+  if (error) throw error;
+  return toMiningState(data);
+}
+
+export async function startMining(): Promise<MiningState> {
+  const { data, error } = await supabase.rpc("nqai_start_mining");
+  if (error) throw error;
+  return toMiningState(data);
+}
+
+export async function claimMining(): Promise<MiningState> {
+  const { data, error } = await supabase.rpc("nqai_claim_mining");
+  if (error) throw error;
+  return toMiningState(data);
+}
+
+/** HH:MM:SS countdown to an ISO time. */
+export function countdown(iso: string | null, skewMs = 0): string {
+  if (!iso) return "00:00:00";
+  const ms = new Date(iso).getTime() - (Date.now() + skewMs);
+  if (ms <= 0) return "00:00:00";
+  const s = Math.floor(ms / 1000);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${pad(Math.floor(s / 3600))}:${pad(Math.floor((s % 3600) / 60))}:${pad(s % 60)}`;
+}
+
 export async function fetchInviteCount(userId: string): Promise<number> {
   const { count } = await supabase
     .from("referrals")
