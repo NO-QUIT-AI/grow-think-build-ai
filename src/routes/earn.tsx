@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Coins, Loader2, Pickaxe, Share2, Sparkles, Zap } from "lucide-react";
+import { Coins, Loader2, Pickaxe, Share2, Sparkles, Timer, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 import { AdSlot } from "@/components/ads/AdSlot";
@@ -10,13 +10,17 @@ import { useAuth } from "@/hooks/useAuth";
 import { inviteLink } from "@/lib/referral";
 import {
   COIN,
+  claimMining,
   claimShareBonus,
+  countdown,
   fetchInviteCount,
+  fetchMiningState,
   fetchTransactions,
   fetchWallet,
   formatCoins,
-  mineWithAd,
+  startMining,
   timeUntil,
+  type MiningState,
   type NqaiTx,
   type NqaiWallet,
 } from "@/lib/nqai";
