@@ -115,7 +115,7 @@ function Earn({ userId }: { userId: string }) {
     try {
       const result = await startMining();
       if (result.ok === false && result.reason === "already_mining") toast.info("Mining pehle se chal rahi hai.");
-      else toast.success("Mining shuru! 0.5 NQAI har ghanta.");
+      else toast.success(`Mining shuru! ${formatCoins(result.mining_rate)} ${COIN} har ghanta.`);
       await load();
     } catch {
       toast.error("Mining shuru nahi ho saki, dobara try karo.");
