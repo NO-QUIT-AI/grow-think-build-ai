@@ -16,6 +16,8 @@ import {
   respondFriendRequest,
   type FriendRequest,
 } from "@/lib/friends";
+import { useT } from "@/i18n/LanguageContext";
+import { LanguageSelector } from "@/components/LanguageSelector";
 
 type Notification = {
   id: string;
@@ -34,6 +36,7 @@ const TYPE_TEXT: Record<string, string> = {
 };
 
 function NotificationBell({ userId }: { userId: string }) {
+  const t = useT();
   const [items, setItems] = useState<Notification[]>([]);
   const [requests, setRequests] = useState<FriendRequest[]>([]);
   const [actors, setActors] = useState<Record<string, CommunityProfile>>({});
@@ -186,6 +189,7 @@ export function CommunityShell({
   children: React.ReactNode;
 }) {
   const navigate = useNavigate();
+  const t = useT();
   const [me, setMe] = useState<CommunityProfile | null>(null);
 
   useEffect(() => {
@@ -199,11 +203,12 @@ export function CommunityShell({
           <h1 className="text-lg font-semibold leading-tight">{title}</h1>
           {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
         </div>
+        <LanguageSelector />
         <NotificationBell userId={userId} />
         <Button
           variant="ghost"
           size="icon"
-          aria-label="Mera profile"
+          aria-label={t("profile")}
           onClick={() =>
             me?.username && navigate({ to: "/u/$username", params: { username: me.username } })
           }
@@ -227,7 +232,7 @@ export function CommunityShell({
               activeProps={{ className: "text-primary" }}
             >
               <item.icon className="h-4 w-4" />
-              {item.label}
+              {t(item.key)}
             </Link>
           ))}
         </div>
