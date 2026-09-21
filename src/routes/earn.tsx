@@ -84,7 +84,7 @@ function Earn({ userId }: { userId: string }) {
   const skew = useRef(0);
 
   const load = useCallback(async () => {
-    const [w, m, t, c] = await Promise.all([
+    const [w, m, txRows, c] = await Promise.all([
       fetchWallet(userId),
       fetchMiningState(),
       fetchTransactions(userId),
@@ -93,7 +93,7 @@ function Earn({ userId }: { userId: string }) {
     setWallet(w);
     setMining(m);
     if (m.server_time) skew.current = new Date(m.server_time).getTime() - Date.now();
-    setTxs(t);
+    setTxs(txRows);
     setInvites(c);
   }, [userId]);
 
