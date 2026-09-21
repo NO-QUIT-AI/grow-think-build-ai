@@ -124,34 +124,18 @@ export function StudioPanel({
     return isCv ? `${slug}-CV` : slug;
   }
 
-  /** Print-to-PDF: header/footer/nav print me hide, title se file ka naam. */
-  function downloadPdf() {
+  /** Seedha PDF download — preview jaisa hi design, koi printer dialog nahi. */
+  async function downloadPdf() {
     if (!html) return;
-    const title = fileBase();
-    const printCss =
-      `<title>${title}</title>` +
-      "<style>@media print{header,footer,nav,.no-print,[data-no-print]{display:none !important}" +
-      "body{margin:0;background:#fff !important;color:#000}" +
-      "@page{margin:12mm}}</style>";
-    const doc = /<\/head>/i.test(html)
-      ? html.replace(/<\/head>/i, `${printCss}</head>`)
-      : `${printCss}${html}`;
-
-    const frame = document.createElement("iframe");
-    frame.setAttribute("aria-hidden", "true");
-    frame.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0;";
-    frame.onload = () => {
-      try {
-        frame.contentWindow?.focus();
-        frame.contentWindow?.print();
-      } catch {
-        toast.error("Print window nahi khul saki");
-      }
-      window.setTimeout(() => frame.remove(), 60_000);
-    };
-    document.body.appendChild(frame);
-    frame.srcdoc = doc;
-    toast.success("Print window khul rahi hai — 'Save as PDF' choose karein");
+    setPdfBusy(true);
+    try {
+      await downloadHtmlAsPdf(html, `${fileBase()}.pdf`);
+      toast.success("PDF download ho gaya");
+    } catch {
+      toast.error("PDF nahi ban saka");
+    } finally {
+      setPdfBusy(false);
+    }
   }
 
   /** Puri build ko index.html + style.css + script.js ke ZIP me export karta hai. */
