@@ -8,11 +8,10 @@ import { CommunityShell } from "@/components/community/CommunityShell";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useT } from "@/i18n/LanguageContext";
-import { inviteLink } from "@/lib/referral";
+import { fetchInviteCode, inviteLink } from "@/lib/referral";
 import {
   COIN,
   claimMining,
-  claimShareBonus,
   countdown,
   fetchInviteCount,
   fetchMiningState,
@@ -20,7 +19,6 @@ import {
   fetchWallet,
   formatCoins,
   startMining,
-  timeUntil,
   type MiningState,
   type NqaiTx,
   type NqaiWallet,
@@ -67,7 +65,6 @@ function EarnPage() {
 
 const RULES = [
   { key: "rule_mining", valueKey: "rule_mining_v" },
-  { key: "rule_share", value: "+1" },
   { key: "rule_referral", valueKey: "rule_referral_v" },
   { key: "rule_post", value: "+2" },
   { key: "rule_comment", value: "+1" },
@@ -79,17 +76,20 @@ function Earn({ userId }: { userId: string }) {
   const [mining, setMining] = useState<MiningState | null>(null);
   const [txs, setTxs] = useState<NqaiTx[]>([]);
   const [invites, setInvites] = useState(0);
+  const [inviteCode, setInviteCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [, setTick] = useState(0);
   const skew = useRef(0);
 
   const load = useCallback(async () => {
-    const [w, m, txRows, c] = await Promise.all([
+    const [w, m, txRows, c, code] = await Promise.all([
       fetchWallet(userId),
       fetchMiningState(),
       fetchTransactions(userId),
       fetchInviteCount(userId),
+      fetchInviteCode(userId),
     ]);
+    setInviteCode(code);
     setWallet(w);
     setMining(m);
     if (m.server_time) skew.current = new Date(m.server_time).getTime() - Date.now();
@@ -148,24 +148,17 @@ function Earn({ userId }: { userId: string }) {
   }
 
   async function shareInvite() {
-    const link = inviteLink(userId);
+    const link = inviteLink(inviteCode);
+    const text = `NO QUIT AI join karo — mera invite code: ${inviteCode}\n${link}`;
     try {
       if (typeof navigator !== "undefined" && navigator.share) {
-        await navigator.share({ title: "NO QUIT AI", text: "Join NO QUIT AI", url: link });
+        await navigator.share({ title: "NO QUIT AI", text, url: link });
       } else {
         await navigator.clipboard.writeText(link);
         toast.success("Invite link copy ho gaya");
       }
     } catch {
       /* share cancel */
-    }
-    try {
-      const result = await claimShareBonus();
-      if (result.ok) toast.success(`+1 ${COIN} share bonus mil gaya!`);
-      else toast.info(`Agla share bonus ${timeUntil(result.next_at)} baad.`);
-      await load();
-    } catch {
-      /* ignore */
     }
   }
 
@@ -230,8 +223,18 @@ function Earn({ userId }: { userId: string }) {
           </Button>
         )}
 
+        <div className="mt-3 rounded-xl border border-border bg-background/50 p-3">
+          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Invite code</p>
+          <p className="font-mono text-xl font-semibold tracking-[0.2em] text-primary">
+            {inviteCode || "—"}
+          </p>
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            +10 {COIN} sirf tab milte hain jab koi naya user is code se join kare.
+          </p>
+        </div>
+
         <Button variant="outline" className="mt-2 w-full" onClick={() => void shareInvite()}>
-          <Share2 className="mr-2 h-4 w-4" /> {t("earn_share")}
+          <Share2 className="mr-2 h-4 w-4" /> {t("shareInvite")}
         </Button>
       </section>
 

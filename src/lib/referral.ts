@@ -1,12 +1,12 @@
 import { supabase } from "@/integrations/supabase/client";
 
 const KEY = "nqa_ref";
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const CODE = /^[A-Za-z0-9-]{4,64}$/;
 
 export function storeReferral(ref: string | null | undefined) {
-  if (typeof window === "undefined" || !ref || !UUID.test(ref)) return;
+  if (typeof window === "undefined" || !ref || !CODE.test(ref)) return;
   try {
-    window.localStorage.setItem(KEY, ref);
+    window.localStorage.setItem(KEY, ref.trim().toUpperCase());
   } catch {
     /* storage blocked */
   }
@@ -21,19 +21,39 @@ export function readReferral(): string | null {
   }
 }
 
-/** Signup/sign-in ke baad invite ko record karta hai (sirf ek baar). */
-export async function redeemReferral(userId: string) {
-  const inviter = readReferral();
-  if (!inviter || inviter === userId) return;
-  await supabase.from("referrals").insert({ inviter_id: inviter, invited_user_id: userId });
+/** Har user ka apna unique invite code. */
+export async function fetchInviteCode(userId: string): Promise<string> {
+  const { data } = await supabase
+    .from("profiles")
+    .select("invite_code")
+    .eq("id", userId)
+    .maybeSingle();
+  return data?.invite_code ?? "";
+}
+
+/**
+ * Signup/sign-in ke baad invite code redeem karta hai (sirf ek baar).
+ * Points sirf isi waqt milte hain — jab naya user kisi ke code se join kare.
+ */
+export async function redeemReferral(): Promise<boolean> {
+  const code = readReferral();
+  if (!code) return false;
   try {
-    window.localStorage.removeItem(KEY);
+    const { data, error } = await supabase.rpc("nqai_redeem_invite", { _code: code });
+    if (error) return false;
+    const ok = Boolean((data as Record<string, unknown> | null)?.["ok"]);
+    try {
+      window.localStorage.removeItem(KEY);
+    } catch {
+      /* ignore */
+    }
+    return ok;
   } catch {
-    /* ignore */
+    return false;
   }
 }
 
-export function inviteLink(userId: string) {
+export function inviteLink(code: string) {
   const origin = typeof window === "undefined" ? "" : window.location.origin;
-  return `${origin}/invite?ref=${userId}`;
+  return `${origin}/invite?ref=${code}`;
 }

@@ -57,6 +57,13 @@
       "when": 1789943318640,
       "tag": "0007_nqai_referral_speed_boost",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1789986104458,
+      "tag": "0008_unique_invite_codes_referral_only_rewards",
+      "breakpoints": true
     }
   ]
 }
