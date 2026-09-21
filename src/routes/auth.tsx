@@ -63,18 +63,18 @@ function AuthPage() {
         });
         if (error) throw error;
         if (!data.session) {
-          toast.success("Account ban gaya! Email me confirmation link bheja hai.");
+           toast.success(t("signup"));
           setMode("signin");
           return;
         }
-        toast.success("Account ban gaya!");
+         toast.success(t("signup"));
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       }
       navigate({ to: "/" });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Kuch ghalat ho gaya");
+       toast.error(error instanceof Error ? error.message : t("requestFailed"));
     } finally {
       setBusy(false);
     }
@@ -85,7 +85,7 @@ function AuthPage() {
       redirect_uri: window.location.origin,
     });
     if (result.error) {
-      toast.error("Google sign-in fail hui");
+       toast.error(t("requestFailed"));
       return;
     }
     if (result.redirected) return;

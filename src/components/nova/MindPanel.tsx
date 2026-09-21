@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 const PROJECT_TYPES = ["all", "website", "blueprint", "domains"] as const;
 type ProjectType = (typeof PROJECT_TYPES)[number];
@@ -30,6 +31,7 @@ type Memory = {
 };
 
 export function MindPanel({ userId, refreshKey }: { userId: string; refreshKey: number }) {
+  const { lang, t } = useLanguage();
   const [memories, setMemories] = useState<Memory[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -75,7 +77,8 @@ export function MindPanel({ userId, refreshKey }: { userId: string; refreshKey: 
         if (!token) return;
         const res = await fetch(`/api/mind/think${manual ? "?manual=1" : ""}`, {
           method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ lang }),
         });
         const json = (await res.json().catch(() => null)) as
           | { ok: boolean; error?: string }
@@ -91,7 +94,7 @@ export function MindPanel({ userId, refreshKey }: { userId: string; refreshKey: 
         setThinking(false);
       }
     },
-    [],
+    [lang],
   );
 
   useEffect(() => {
@@ -171,7 +174,7 @@ export function MindPanel({ userId, refreshKey }: { userId: string; refreshKey: 
       <section className="panel flex flex-col gap-3 p-4">
         <div className="flex items-center gap-2">
           <Zap className="h-4 w-4 text-primary" />
-          <span className="text-sm font-medium">Mind</span>
+           <span className="text-sm font-medium">{t("mind")}</span>
           <span className="ml-auto text-2xl font-semibold text-gradient">{thoughts.length}</span>
         </div>
 
@@ -227,7 +230,7 @@ export function MindPanel({ userId, refreshKey }: { userId: string; refreshKey: 
       <div className="panel flex flex-col gap-3 p-4">
         <div className="flex items-center gap-2">
           <Brain className="h-4 w-4 text-primary" />
-          <span className="text-sm font-medium">Memories — NO QUIT AI ki self-grown library</span>
+           <span className="text-sm font-medium">{t("memory")}</span>
           <span className="ml-auto text-2xl font-semibold text-gradient">{memories.length}</span>
         </div>
 
@@ -236,7 +239,7 @@ export function MindPanel({ userId, refreshKey }: { userId: string; refreshKey: 
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Memories me search karo…"
+             placeholder={`${t("memory")}…`}
             className="h-9 border-border bg-secondary pl-9 text-sm"
           />
           {search && (
@@ -260,7 +263,7 @@ export function MindPanel({ userId, refreshKey }: { userId: string; refreshKey: 
                   : "border-border bg-secondary text-muted-foreground hover:border-primary"
               }`}
             >
-              {type === "all" ? "Sab" : type}
+               {type === "all" ? t("all") : type}
             </button>
           ))}
           <button
@@ -288,14 +291,14 @@ export function MindPanel({ userId, refreshKey }: { userId: string; refreshKey: 
 
       {loading && memories.length === 0 && (
         <div className="flex items-center justify-center py-10 text-muted-foreground">
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Memories load ho rahi hain…
+           <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("loading")}
         </div>
       )}
 
       {filtered.length === 0 && !loading && (
         <div className="panel mt-2 flex flex-col items-center gap-2 p-8 text-center">
           <Sparkles className="h-6 w-6 text-primary node-pulse" />
-          <p className="text-sm font-medium">Koi memory nahi mili</p>
+           <p className="text-sm font-medium">{t("emptyMemory")}</p>
           <p className="text-xs text-muted-foreground">
             Chat me kuch banwayen — har domain, blueprint aur website yahan save hoti hai.
           </p>

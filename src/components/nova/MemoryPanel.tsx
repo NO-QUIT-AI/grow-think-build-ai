@@ -3,6 +3,7 @@ import { BrainCircuit, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { useT } from "@/i18n/LanguageContext";
 
 type Knowledge = {
   id: string;
@@ -14,6 +15,7 @@ type Knowledge = {
 };
 
 export function MemoryPanel({ userId, refreshKey }: { userId: string; refreshKey: number }) {
+  const t = useT();
   const [items, setItems] = useState<Knowledge[]>([]);
 
   useEffect(() => {
@@ -35,14 +37,14 @@ export function MemoryPanel({ userId, refreshKey }: { userId: string; refreshKey
       <div className="panel flex items-center justify-between p-4">
         <div className="flex items-center gap-2 text-sm">
           <BrainCircuit className="h-4 w-4 text-primary" />
-          Self-grown memory
+           {t("savedMemory")}
         </div>
         <span className="text-2xl font-semibold text-gradient">{items.length}</span>
       </div>
 
       {items.length === 0 && (
         <p className="px-1 text-sm text-muted-foreground">
-          Abhi memory khali hai. Chat karo — NO QUIT AI khud seekh kar yahan add karti rahegi.
+           {t("emptyMemory")}
         </p>
       )}
 
@@ -65,7 +67,7 @@ export function MemoryPanel({ userId, refreshKey }: { userId: string; refreshKey
               </span>
             ))}
             <span className="ml-auto text-[11px] text-accent">
-              confidence {Math.round(item.confidence * 100)}%
+               {t("confidence")} {Math.round(item.confidence * 100)}%
             </span>
           </div>
         </article>

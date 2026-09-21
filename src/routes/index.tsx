@@ -79,9 +79,9 @@ function Home() {
         />
         <div className="flex-1">
           <h1 className="text-lg font-semibold leading-tight">
-            NO QUIT AI <span className="text-gradient">build studio</span>
+             NO QUIT AI <span className="text-gradient">{t("buildStudio")}</span>
           </h1>
-          <p className="text-xs text-muted-foreground">Websites · Apps · Domains — bas command do</p>
+           <p className="text-xs text-muted-foreground">{t("homeTagline")}</p>
         </div>
         <Button variant="ghost" size="icon" asChild aria-label={t("cv")}>
           <Link to="/cv">
@@ -120,11 +120,11 @@ function Home() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col">
         <TabsList className="mb-3 grid w-full grid-cols-5 gap-0.5">
-          <TabsTrigger value="chat" className="px-1 text-[11px]">Chat</TabsTrigger>
-          <TabsTrigger value="memory" className="px-1 text-[11px]">Memory</TabsTrigger>
-          <TabsTrigger value="builds" className="px-1 text-[11px]">Builds</TabsTrigger>
-          <TabsTrigger value="studio" className="px-1 text-[11px]">Studio</TabsTrigger>
-          <TabsTrigger value="mind" className="px-1 text-[11px]">Mind</TabsTrigger>
+          <TabsTrigger value="chat" className="px-1 text-[11px]">{t("chat")}</TabsTrigger>
+          <TabsTrigger value="memory" className="px-1 text-[11px]">{t("memory")}</TabsTrigger>
+          <TabsTrigger value="builds" className="px-1 text-[11px]">{t("builds")}</TabsTrigger>
+          <TabsTrigger value="studio" className="px-1 text-[11px]">{t("studio")}</TabsTrigger>
+          <TabsTrigger value="mind" className="px-1 text-[11px]">{t("mind")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="chat" className="mt-0 flex min-h-0 flex-1 flex-col">

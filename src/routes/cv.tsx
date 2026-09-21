@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/i18n/LanguageContext";
 import {
   ACCENTS,
   compressPhoto,
@@ -99,6 +100,7 @@ function Field({
 }
 
 function CvBuilder({ userId }: { userId: string }) {
+  const { lang, t } = useLanguage();
   const [saved, setSaved] = useState<CvRecord[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [data, setData] = useState<CvData>(emptyCv());
@@ -156,7 +158,7 @@ function CvBuilder({ userId }: { userId: string }) {
   async function handlePolish() {
     setBusy("ai");
     try {
-      const result = await polishCv(data);
+      const result = await polishCv(data, lang);
       setData((prev) => ({
         ...prev,
         summary: result.summary || prev.summary,
@@ -182,7 +184,7 @@ function CvBuilder({ userId }: { userId: string }) {
   }
 
   return (
-    <CommunityShell userId={userId} title="CV Maker" subtitle="Banao, update karo, PDF download karo">
+    <CommunityShell userId={userId} title={t("cvMaker")} subtitle={t("cvSubtitle")}>
       <div className="flex flex-col gap-3">
         {/* Saved CVs */}
         <div className="panel flex flex-wrap items-center gap-2 p-2">
@@ -217,7 +219,7 @@ function CvBuilder({ userId }: { userId: string }) {
               setData(emptyCv());
             }}
           >
-            <Plus className="h-3.5 w-3.5" /> Naya CV
+            <Plus className="h-3.5 w-3.5" /> {t("newCv")}
           </Button>
         </div>
 
@@ -256,7 +258,7 @@ function CvBuilder({ userId }: { userId: string }) {
                 ) : (
                   <ImagePlus className="h-4 w-4" />
                 )}
-                Photo lagao
+                {t("addPhoto")}
               </Button>
               {data.photo && (
                 <Button
@@ -265,23 +267,23 @@ function CvBuilder({ userId }: { userId: string }) {
                   className="h-7 gap-1 text-[11px]"
                   onClick={() => set("photo", "")}
                 >
-                  <X className="h-3 w-3" /> Photo hatao
+                   <X className="h-3 w-3" /> {t("removePhoto")}
                 </Button>
               )}
             </div>
           </div>
 
           <div className="grid gap-2 sm:grid-cols-2">
-            <Field label="Poora naam" value={data.name} onChange={(v) => set("name", v)} placeholder="Ali Ahmad" />
-            <Field label="Title / Role" value={data.role} onChange={(v) => set("role", v)} placeholder="Graphic Designer" />
+             <Field label={t("fullName")} value={data.name} onChange={(v) => set("name", v)} placeholder="Ali Ahmad" />
+             <Field label={t("roleTitle")} value={data.role} onChange={(v) => set("role", v)} placeholder="Graphic Designer" />
             <Field label="Email" value={data.email} onChange={(v) => set("email", v)} placeholder="ali@gmail.com" />
-            <Field label="Phone" value={data.phone} onChange={(v) => set("phone", v)} placeholder="+92 300 1234567" />
-            <Field label="Sheher" value={data.location} onChange={(v) => set("location", v)} placeholder="Lahore, Pakistan" />
-            <Field label="Link (portfolio/LinkedIn)" value={data.links} onChange={(v) => set("links", v)} />
+             <Field label={t("phone")} value={data.phone} onChange={(v) => set("phone", v)} placeholder="+92 300 1234567" />
+             <Field label={t("city")} value={data.location} onChange={(v) => set("location", v)} placeholder="Lahore, Pakistan" />
+             <Field label={t("portfolioLink")} value={data.links} onChange={(v) => set("links", v)} />
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-[11px] text-muted-foreground">Color:</span>
+             <span className="text-[11px] text-muted-foreground">{t("color")}</span>
             {ACCENTS.map((color) => (
               <button
                 key={color}
@@ -298,11 +300,11 @@ function CvBuilder({ userId }: { userId: string }) {
 
         {/* Summary */}
         <div className="panel space-y-2 p-3">
-          <span className="text-[11px] font-medium text-muted-foreground">Profile / Summary</span>
+           <span className="text-[11px] font-medium text-muted-foreground">{t("profileSummary")}</span>
           <Textarea
             value={data.summary}
             onChange={(event) => set("summary", event.target.value)}
-            placeholder="Apne baare me 2-3 lines — tajruba, strength, kya kaam dhoond rahe ho."
+             placeholder={t("summaryPlaceholder")}
             className="min-h-20 rounded-xl text-sm"
           />
         </div>
@@ -310,7 +312,7 @@ function CvBuilder({ userId }: { userId: string }) {
         {/* Experience */}
         <div className="panel space-y-3 p-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold">Experience</span>
+             <span className="text-sm font-semibold">{t("experience")}</span>
             <Button
               size="sm"
               variant="outline"
@@ -319,14 +321,14 @@ function CvBuilder({ userId }: { userId: string }) {
                 set("experience", [...data.experience, { role: "", company: "", period: "", points: "" }])
               }
             >
-              <Plus className="h-3.5 w-3.5" /> Add
+               <Plus className="h-3.5 w-3.5" /> {t("add")}
             </Button>
           </div>
           {data.experience.map((item, index) => (
             <div key={index} className="space-y-2 rounded-xl border border-border p-2">
               <div className="grid gap-2 sm:grid-cols-3">
                 <Field
-                  label="Role"
+                   label={t("role")}
                   value={item.role}
                   onChange={(v) =>
                     set(
@@ -336,7 +338,7 @@ function CvBuilder({ userId }: { userId: string }) {
                   }
                 />
                 <Field
-                  label="Company"
+                   label={t("company")}
                   value={item.company}
                   onChange={(v) =>
                     set(
@@ -346,7 +348,7 @@ function CvBuilder({ userId }: { userId: string }) {
                   }
                 />
                 <Field
-                  label="Period"
+                   label={t("period")}
                   value={item.period}
                   onChange={(v) =>
                     set(
@@ -359,7 +361,7 @@ function CvBuilder({ userId }: { userId: string }) {
               </div>
               <Textarea
                 value={item.points}
-                placeholder="Har line ek point — jo kaam kiya, jo result mila."
+                 placeholder={t("workPoints")}
                 onChange={(event) =>
                   set(
                     "experience",
@@ -382,7 +384,7 @@ function CvBuilder({ userId }: { userId: string }) {
                     )
                   }
                 >
-                  <Trash2 className="h-3 w-3" /> Hatao
+                   <Trash2 className="h-3 w-3" /> {t("remove")}
                 </Button>
               )}
             </div>
@@ -392,20 +394,20 @@ function CvBuilder({ userId }: { userId: string }) {
         {/* Education */}
         <div className="panel space-y-3 p-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold">Education</span>
+             <span className="text-sm font-semibold">{t("education")}</span>
             <Button
               size="sm"
               variant="outline"
               className="h-8 gap-1 rounded-xl text-xs"
               onClick={() => set("education", [...data.education, { degree: "", school: "", period: "" }])}
             >
-              <Plus className="h-3.5 w-3.5" /> Add
+               <Plus className="h-3.5 w-3.5" /> {t("add")}
             </Button>
           </div>
           {data.education.map((item, index) => (
             <div key={index} className="grid gap-2 rounded-xl border border-border p-2 sm:grid-cols-3">
               <Field
-                label="Degree"
+                 label={t("degree")}
                 value={item.degree}
                 onChange={(v) =>
                   set(
@@ -415,7 +417,7 @@ function CvBuilder({ userId }: { userId: string }) {
                 }
               />
               <Field
-                label="School / University"
+                 label={t("school")}
                 value={item.school}
                 onChange={(v) =>
                   set(
@@ -425,7 +427,7 @@ function CvBuilder({ userId }: { userId: string }) {
                 }
               />
               <Field
-                label="Period"
+                 label={t("period")}
                 value={item.period}
                 onChange={(v) =>
                   set(
@@ -441,13 +443,13 @@ function CvBuilder({ userId }: { userId: string }) {
         {/* Skills */}
         <div className="panel grid gap-2 p-3 sm:grid-cols-2">
           <Field
-            label="Skills (comma se alag)"
+             label={t("skillsLabel")}
             value={data.skills}
             onChange={(v) => set("skills", v)}
             placeholder="Photoshop, Illustrator, Branding"
           />
           <Field
-            label="Languages"
+             label={t("languagesLabel")}
             value={data.languages}
             onChange={(v) => set("languages", v)}
             placeholder="Urdu, English"
@@ -461,7 +463,7 @@ function CvBuilder({ userId }: { userId: string }) {
             className="btn-green h-10 flex-1 gap-1.5 rounded-xl text-xs sm:flex-none"
             onClick={() => downloadCvPdf(data)}
           >
-            <FileDown className="h-4 w-4" /> Download PDF
+             <FileDown className="h-4 w-4" /> {t("downloadPdf")}
           </Button>
           <Button
             size="sm"
@@ -470,7 +472,7 @@ function CvBuilder({ userId }: { userId: string }) {
             onClick={() => void handleSave()}
           >
             {busy === "save" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            Save
+             {t("save")}
           </Button>
           <Button
             size="sm"
@@ -480,7 +482,7 @@ function CvBuilder({ userId }: { userId: string }) {
             onClick={() => void handlePolish()}
           >
             {busy === "ai" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-            AI se behtar karo
+             {t("improveWithAi")}
           </Button>
           <Button
             size="sm"
@@ -488,7 +490,7 @@ function CvBuilder({ userId }: { userId: string }) {
             className="h-10 flex-1 gap-1.5 rounded-xl border-primary/40 text-xs sm:flex-none"
             onClick={() => setShowPreview((prev) => !prev)}
           >
-            <Eye className="h-4 w-4" /> {showPreview ? "Preview band" : "Preview"}
+             <Eye className="h-4 w-4" /> {showPreview ? t("closePreview") : t("preview")}
           </Button>
           <Button
             size="sm"
@@ -512,7 +514,7 @@ function CvBuilder({ userId }: { userId: string }) {
         )}
 
         <p className="px-1 text-[11px] text-muted-foreground">
-          Tip: “Download PDF” dabate hi print window khulegi — wahan se “Save as PDF” choose karein.
+           {t("cvTip")}
         </p>
       </div>
     </CommunityShell>

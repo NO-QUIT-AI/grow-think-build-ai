@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { inviteLink } from "@/lib/referral";
+import { useT } from "@/i18n/LanguageContext";
 
 export function InviteDialog({
   userId,
@@ -23,6 +24,7 @@ export function InviteDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const t = useT();
   const [link, setLink] = useState("");
   const [copied, setCopied] = useState(false);
   const [count, setCount] = useState<number | null>(null);
@@ -41,7 +43,7 @@ export function InviteDialog({
     try {
       await navigator.clipboard.writeText(link);
       setCopied(true);
-      toast.success("Invite link copy ho gaya");
+       toast.success(t("copyLinkSuccess"));
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast.error("Copy nahi ho saka — link manually select karo");
@@ -66,10 +68,10 @@ export function InviteDialog({
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base">
-            <Users className="h-4 w-4 text-primary" /> Invite link
+             <Users className="h-4 w-4 text-primary" /> {t("inviteTitle")}
           </DialogTitle>
           <DialogDescription className="text-xs">
-            Ye link doston ko bhejo — wo sign up kar ke apna NO QUIT AI workspace use kar sakte hain.
+             {t("inviteInfo")}
           </DialogDescription>
         </DialogHeader>
 
@@ -81,15 +83,15 @@ export function InviteDialog({
         </div>
 
         <Button size="sm" className="mt-1 gap-1 text-xs" onClick={() => void share()}>
-          <Share2 className="h-3.5 w-3.5" /> Share karo
+           <Share2 className="h-3.5 w-3.5" /> {t("shareInvite")}
         </Button>
 
         <p className="text-xs text-muted-foreground">
           {count === null
             ? "Invites load ho rahe hain…"
             : count === 0
-              ? "Abhi tak koi join nahi hua — pehla invite bhejo."
-              : `${count} log tumhare link se join kar chuke hain.`}
+               ? t("noInvites")
+               : t("inviteCount", { count })}
         </p>
       </DialogContent>
     </Dialog>

@@ -5,11 +5,18 @@ import { convertToModelMessages, streamText, tool, stepCountIs, type UIMessage }
 import { z } from "zod";
 
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { LANGUAGES, type Lang } from "@/i18n/translations";
 
-const SYSTEM_PROMPT = `Tum "NO QUIT AI" ho — ek AI assistant jo websites, app blueprints aur domain names banati hai.
+const LANGUAGE_NAMES: Record<Lang, string> = { en: "English", ur: "Urdu", hi: "Hindi", ar: "Arabic" };
+
+function validLang(value: unknown): Lang {
+  return typeof value === "string" && LANGUAGES.some((item) => item.code === value) ? (value as Lang) : "en";
+}
+
+const SYSTEM_PROMPT = `You are NO QUIT AI, an AI assistant that creates websites, app blueprints, and domain names.
 
 Rules:
-- User Urdu/Roman-Urdu/English kisi bhi zubaan me baat kare, usi zubaan me jawab do. Default Roman Urdu.
+- Always reply in the explicitly selected app language supplied below. This overrides the language used in the user's message.
 - Har jawab se pehle apni knowledge base recall karo (recall_knowledge tool) jab bhi topic personal ya pehle discuss hua ho.
 - Jab bhi koi nayi durable seekh mile (user ki preference, project detail, koi fact, koi decision), save_knowledge tool se khud usay save karo — user ko kehna nahi parta.
 - Jab user domain maange: create_domains tool chalao (8-12 creative, brandable, short names + reason + extension suggestion). Har naya build automatically Memories me save hota hai.
@@ -87,7 +94,7 @@ export const Route = createFileRoute("/api/chat")({
         if (userError || !userData.user) return new Response("Unauthorized", { status: 401 });
         const userId = userData.user.id;
 
-        const body = (await request.json()) as { messages?: unknown };
+        const body = (await request.json()) as { messages?: unknown; lang?: unknown };
         if (!Array.isArray(body.messages)) {
           return new Response("Messages are required", { status: 400 });
         }
@@ -272,10 +279,12 @@ export const Route = createFileRoute("/api/chat")({
 
 
         const incoming = body.messages as UIMessage[];
+        const lang = validLang(body.lang);
+        const languageInstruction = `Selected app language: ${LANGUAGE_NAMES[lang]}. Write the complete response in this language. Keep code and technical identifiers unchanged.`;
 
         const result = streamText({
           model,
-          system: SYSTEM_PROMPT,
+          system: `${SYSTEM_PROMPT}\n\n${languageInstruction}`,
           messages: await convertToModelMessages(trimMessages(incoming)),
           tools,
           stopWhen: stepCountIs(30),

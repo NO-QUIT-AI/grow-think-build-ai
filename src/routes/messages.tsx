@@ -17,6 +17,7 @@ import {
   type CommunityProfile,
 } from "@/lib/community";
 import { fetchFriendState, type FriendState } from "@/lib/friends";
+import { useT } from "@/i18n/LanguageContext";
 
 type Search = { u?: string | undefined };
 
@@ -79,6 +80,7 @@ function MessagesPage() {
 }
 
 function Inbox({ meId }: { meId: string }) {
+  const t = useT();
   const { u } = Route.useSearch();
   const navigate = useNavigate();
   const [conversations, setConversations] = useState<Conversation[] | null>(null);
@@ -158,7 +160,7 @@ function Inbox({ meId }: { meId: string }) {
     const value = draft.trim();
     if (!value || !activeId || !otherId) return;
     if (friendState !== "friends") {
-      toast.error("Pehle friend request accept hone ka intezar karo");
+       toast.error(t("waitFriend"));
       return;
     }
     setDraft("");
@@ -189,7 +191,7 @@ function Inbox({ meId }: { meId: string }) {
       <CommunityShell userId={meId} title={nameOf(other)} subtitle={`@${other?.username ?? "member"}`}>
         <div className="mb-2 flex items-center gap-2">
           <Button variant="ghost" size="sm" className="gap-1 text-xs" onClick={() => setActiveId(null)}>
-            <ArrowLeft className="h-3.5 w-3.5" /> Inbox
+             <ArrowLeft className="h-3.5 w-3.5" /> {t("inbox")}
           </Button>
           {other?.username && (
             <Button
@@ -200,14 +202,14 @@ function Inbox({ meId }: { meId: string }) {
                 navigate({ to: "/u/$username", params: { username: other.username as string } })
               }
             >
-              Profile
+               {t("openProfile")}
             </Button>
           )}
         </div>
 
         <div className="panel flex min-h-[60vh] flex-1 flex-col gap-2 overflow-y-auto p-3">
           {messages.length === 0 && (
-            <p className="m-auto text-xs text-muted-foreground">Chat shuru karo — salam bhejo 👋</p>
+             <p className="m-auto text-xs text-muted-foreground">{t("startChat")}</p>
           )}
           {messages.map((message) => {
             const mine = message.sender_id === meId;
@@ -237,8 +239,8 @@ function Inbox({ meId }: { meId: string }) {
             <Lock className="h-4 w-4 shrink-0" />
             <span>
               {friendState === "outgoing"
-                ? "Request Pending…"
-                : "Pehle friend request accept hone ka intezar karo"}
+                 ? t("requestPending")
+                 : t("waitFriend")}
             </span>
           </div>
         ) : (
@@ -253,14 +255,14 @@ function Inbox({ meId }: { meId: string }) {
                 }
               }}
               rows={1}
-              placeholder="Message likho…"
+               placeholder={t("writeMessage")}
               className="max-h-28 min-h-10 resize-none text-sm"
             />
             <Button
               size="icon"
               disabled={!draft.trim()}
               onClick={() => void send()}
-              aria-label="Message bhejo"
+               aria-label={t("sendMessage")}
             >
               <Send className="h-4 w-4" />
             </Button>
@@ -271,15 +273,15 @@ function Inbox({ meId }: { meId: string }) {
   }
 
   return (
-    <CommunityShell userId={meId} title="Messages" subtitle="App ke andar private chat">
+    <CommunityShell userId={meId} title={t("messages")} subtitle={t("privateChat")}>
       {conversations === null && (
         <div className="flex items-center justify-center py-10 text-sm text-muted-foreground">
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Inbox load ho raha hai…
+           <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("inboxLoading")}
         </div>
       )}
       {conversations?.length === 0 && (
         <p className="panel p-4 text-sm text-muted-foreground">
-          Abhi koi chat nahi — Community feed se kisi member ki profile khol kar “Message” dabao.
+           {t("emptyInbox")}
         </p>
       )}
       <div className="space-y-2">
@@ -301,7 +303,7 @@ function Inbox({ meId }: { meId: string }) {
               <span className="min-w-0 flex-1">
                 <span className="block text-sm font-medium">{nameOf(other)}</span>
                 <span className="block truncate text-xs text-muted-foreground">
-                  {conversation.last_message ?? "Chat shuru karo"}
+                   {conversation.last_message ?? t("startChat")}
                 </span>
               </span>
               <span className="text-[10px] text-muted-foreground">{timeAgo(conversation.updated_at)}</span>

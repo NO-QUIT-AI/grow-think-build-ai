@@ -19,6 +19,7 @@ import { AdSlot } from "@/components/ads/AdSlot";
 import { CommunityShell } from "@/components/community/CommunityShell";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useT } from "@/i18n/LanguageContext";
 import {
   fetchProfiles,
   handleOf,
@@ -91,6 +92,7 @@ function CommunityPage() {
 }
 
 function Feed({ userId }: { userId: string }) {
+  const t = useT();
   const navigate = useNavigate();
   const [posts, setPosts] = useState<Post[] | null>(null);
   const [profiles, setProfiles] = useState<Record<string, CommunityProfile>>({});
@@ -276,12 +278,12 @@ function Feed({ userId }: { userId: string }) {
   }
 
   return (
-    <CommunityShell userId={userId} title="Community" subtitle="Builders ka apna feed">
+    <CommunityShell userId={userId} title={t("communityTitle")} subtitle={t("communitySubtitle")}>
       <div className="panel mb-4 p-3">
         <Textarea
           value={text}
           onChange={(event) => setText(event.target.value)}
-          placeholder="Aaj kya banaya? Screenshot ya app link share karo…"
+           placeholder={t("postPrompt")}
           rows={3}
           className="resize-none border-0 bg-transparent px-0 text-sm shadow-none focus-visible:ring-0"
         />
@@ -290,13 +292,13 @@ function Feed({ userId }: { userId: string }) {
             <Input
               value={imageUrl}
               onChange={(event) => setImageUrl(event.target.value)}
-              placeholder="Screenshot image URL"
+               placeholder={t("screenshotUrl")}
               className="h-9 text-xs"
             />
             <Input
               value={appLink}
               onChange={(event) => setAppLink(event.target.value)}
-              placeholder="App / demo link"
+               placeholder={t("appDemoLink")}
               className="h-9 text-xs"
             />
           </div>
@@ -305,7 +307,7 @@ function Feed({ userId }: { userId: string }) {
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Screenshot upload karo"
+             aria-label={t("uploadScreenshot")}
             disabled={uploading}
             onClick={() => fileRef.current?.click()}
           >
@@ -329,7 +331,7 @@ function Feed({ userId }: { userId: string }) {
           <Button
             variant="ghost"
             size="icon"
-            aria-label="App link add karo"
+             aria-label={t("addAppLink")}
             onClick={() => setShowExtra(true)}
           >
             <Link2 className="h-4 w-4" />
@@ -341,7 +343,7 @@ function Feed({ userId }: { userId: string }) {
             onClick={() => void createPost()}
           >
             {posting ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null}
-            Post
+             {t("post")}
           </Button>
         </div>
       </div>
@@ -358,20 +360,20 @@ function Feed({ userId }: { userId: string }) {
                 : "rounded-full border border-border bg-secondary px-3 py-1 text-[11px] text-muted-foreground"
             }
           >
-            {value === "trending" ? "Trending" : value === "newest" ? "Newest" : "My Friends"}
+             {value === "trending" ? t("trending") : value === "newest" ? t("newest") : t("myFriends")}
           </button>
         ))}
       </div>
 
       {visiblePosts === null && (
         <div className="flex items-center justify-center py-10 text-sm text-muted-foreground">
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Feed load ho raha hai…
+           <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("feedLoading")}
         </div>
       )}
 
       {visiblePosts?.length === 0 && (
         <p className="panel p-4 text-sm text-muted-foreground">
-          Yahan abhi kuch nahi — pehli post tum karo aur community shuru karo.
+           {t("emptyFeed")}
         </p>
       )}
 
@@ -437,7 +439,7 @@ function Feed({ userId }: { userId: string }) {
                   rel="noreferrer"
                   className="mt-2 inline-flex items-center gap-1 text-xs text-primary underline-offset-2 hover:underline"
                 >
-                  <Link2 className="h-3 w-3" /> App dekho
+                   <Link2 className="h-3 w-3" /> {t("viewApp")}
                 </a>
               )}
 
@@ -460,7 +462,7 @@ function Feed({ userId }: { userId: string }) {
                   <MessageSquare className="h-4 w-4" /> {post.comments_count}
                 </button>
                 <button onClick={() => remix(post)} className="ml-auto flex items-center gap-1 text-primary">
-                  <Repeat2 className="h-4 w-4" /> Remix this App
+                   <Repeat2 className="h-4 w-4" /> {t("remixApp")}
                 </button>
               </div>
 
@@ -478,7 +480,7 @@ function Feed({ userId }: { userId: string }) {
                     <Textarea
                       value={commentText}
                       onChange={(event) => setCommentText(event.target.value)}
-                      placeholder="Comment likho…"
+                       placeholder={t("writeComment")}
                       rows={1}
                       className="max-h-24 min-h-10 resize-none text-sm"
                     />
@@ -486,7 +488,7 @@ function Feed({ userId }: { userId: string }) {
                       size="icon"
                       disabled={!commentText.trim()}
                       onClick={() => void sendComment(post)}
-                      aria-label="Comment bhejo"
+                       aria-label={t("sendComment")}
                     >
                       <Send className="h-4 w-4" />
                     </Button>

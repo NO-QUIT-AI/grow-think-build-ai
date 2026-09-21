@@ -28,12 +28,12 @@ type Notification = {
   created_at: string;
 };
 
-const TYPE_TEXT: Record<string, string> = {
-  like: "ne aapki post like ki",
-  comment: "ne aapki post par comment kiya",
-  follow: "ne aapko follow kiya",
-  message: "ne aapko message bheja",
-};
+const TYPE_TEXT = {
+  like: "notificationsLike",
+  comment: "notificationsComment",
+  follow: "notificationsFollow",
+  message: "notificationsMessage",
+} as const;
 
 function NotificationBell({ userId }: { userId: string }) {
   const t = useT();
@@ -154,7 +154,7 @@ function NotificationBell({ userId }: { userId: string }) {
             <div key={item.id} className="border-b border-border/60 px-3 py-2 last:border-0">
               <p className="text-xs">
                 <span className="font-medium">{nameOf(actors[item.actor_id ?? ""])}</span>{" "}
-                {TYPE_TEXT[item.type] ?? item.type}
+                 {item.type in TYPE_TEXT ? t(TYPE_TEXT[item.type as keyof typeof TYPE_TEXT]) : item.type}
               </p>
               {item.body && (
                 <p className="mt-0.5 line-clamp-2 text-[11px] text-muted-foreground">{item.body}</p>
