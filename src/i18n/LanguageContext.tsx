@@ -65,10 +65,23 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }
 
+// Fallback used if a component renders outside the provider (e.g. during
+// route code-splitting / error boundaries). English, read-only.
+const fallbackValue: LanguageValue = {
+  lang: "en",
+  dir: "ltr",
+  setLang: () => {},
+  t: (key, values) => {
+    const template: string = translations.en[key] ?? key;
+    return Object.entries(values ?? {}).reduce<string>(
+      (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
+      template,
+    );
+  },
+};
+
 export function useLanguage(): LanguageValue {
-  const ctx = useContext(LanguageContext);
-  if (!ctx) throw new Error("useLanguage must be used inside LanguageProvider");
-  return ctx;
+  return useContext(LanguageContext) ?? fallbackValue;
 }
 
 export function useT() {
