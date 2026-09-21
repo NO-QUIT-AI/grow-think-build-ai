@@ -18,6 +18,7 @@ import {
   type CommunityProfile,
 } from "@/lib/community";
 import { fetchFriendStates, sendFriendRequest, type FriendState } from "@/lib/friends";
+import { useT } from "@/i18n/LanguageContext";
 
 export const Route = createFileRoute("/leaderboard")({
   head: () => ({
@@ -59,6 +60,7 @@ function LeaderboardPage() {
 }
 
 function Board({ meId }: { meId: string }) {
+  const t = useT();
   const navigate = useNavigate();
   const [rows, setRows] = useState<CommunityProfile[] | null>(null);
   const [states, setStates] = useState<Record<string, FriendState>>({});
@@ -91,9 +93,9 @@ function Board({ meId }: { meId: string }) {
     try {
       await sendFriendRequest(meId, otherId, myName);
       setStates((prev) => ({ ...prev, [otherId]: "outgoing" }));
-      toast.success("Friend request bhej di");
+       toast.success(t("friendSent"));
     } catch {
-      toast.error("Request nahi gayi");
+       toast.error(t("requestFailed"));
     } finally {
       setBusyId(null);
     }
@@ -104,15 +106,15 @@ function Board({ meId }: { meId: string }) {
       await ensureConversation(meId, otherId);
       void navigate({ to: "/messages", search: { u: otherId } });
     } catch {
-      toast.error("Chat open nahi hui");
+       toast.error(t("chatOpenFailed"));
     }
   }
 
   return (
-    <CommunityShell userId={meId} title="Top Builders" subtitle="Sab se zyada reputation points">
+    <CommunityShell userId={meId} title={t("topBuilders")} subtitle={t("topSubtitle")}>
       {rows === null && (
         <div className="flex items-center justify-center py-10 text-sm text-muted-foreground">
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Leaderboard load ho raha hai…
+           <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("leaderboardLoading")}
         </div>
       )}
 
@@ -188,6 +190,7 @@ export function FriendButton({
   onMessage: () => void;
   className?: string;
 }) {
+  const t = useT();
   if (state === "friends") {
     return (
       <Button
@@ -196,21 +199,21 @@ export function FriendButton({
         className={`h-8 gap-1 text-[11px] ${className ?? ""}`}
         onClick={onMessage}
       >
-        <MessageCircle className="h-3.5 w-3.5" /> Message
+         <MessageCircle className="h-3.5 w-3.5" /> {t("message")}
       </Button>
     );
   }
   if (state === "outgoing") {
     return (
       <Button size="sm" variant="secondary" className={`h-8 text-[11px] ${className ?? ""}`} disabled>
-        <Clock className="mr-1 h-3.5 w-3.5" /> Requested
+         <Clock className="mr-1 h-3.5 w-3.5" /> {t("requested")}
       </Button>
     );
   }
   if (state === "incoming") {
     return (
       <Button size="sm" variant="secondary" className={`h-8 text-[11px] ${className ?? ""}`} disabled>
-        Bell me Accept karo
+         {t("acceptFromBell")}
       </Button>
     );
   }
@@ -221,7 +224,7 @@ export function FriendButton({
       disabled={busy}
       onClick={onAdd}
     >
-      <UserPlus className="h-3.5 w-3.5" /> Add Friend
+       <UserPlus className="h-3.5 w-3.5" /> {t("addFriend")}
     </Button>
   );
 }
