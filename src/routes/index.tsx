@@ -41,6 +41,7 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const navigate = useNavigate();
+  const t = useT();
   const { user, loading, signOut } = useAuth();
   const [refreshKey, setRefreshKey] = useState(0);
   const [activeTab, setActiveTab] = useState("chat");
