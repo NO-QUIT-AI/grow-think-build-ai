@@ -14,6 +14,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { InstallAppBanner } from "@/components/InstallAppBanner";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { initAdsConfig } from "@/lib/adsense";
+import { LanguageProvider } from "@/i18n/LanguageContext";
 
 function NotFoundComponent() {
   return (
@@ -150,10 +151,12 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
-      <InstallAppBanner />
-      <Toaster position="top-center" richColors />
+      <LanguageProvider>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+        <InstallAppBanner />
+        <Toaster position="top-center" richColors />
+      </LanguageProvider>
     </QueryClientProvider>
   );
 }
