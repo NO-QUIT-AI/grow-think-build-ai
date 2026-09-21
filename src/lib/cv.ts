@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { downloadHtmlAsPdf } from "@/lib/html-pdf";
 import type { Lang } from "@/i18n/translations";
 
 export type CvExperience = { role: string; company: string; period: string; points: string };
