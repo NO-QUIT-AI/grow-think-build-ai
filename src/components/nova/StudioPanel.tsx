@@ -48,6 +48,7 @@ export function StudioPanel({
   const [device, setDevice] = useState<"mobile" | "desktop">("desktop");
   const [saving, setSaving] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  const [pdfBusy, setPdfBusy] = useState(false);
 
   useEffect(() => {
     supabase
