@@ -65,12 +65,12 @@ function EarnPage() {
 }
 
 const RULES = [
-  { label: "Mining (24 ghante)", value: "0.5 / ghanta" },
-  { label: "Invite link daily share", value: "+1" },
-  { label: "Dost invite se join kare", value: "+10 dono ko · +0.1 speed" },
-  { label: "Community post", value: "+2" },
-  { label: "Comment / madad", value: "+1" },
-];
+  { key: "rule_mining", valueKey: "rule_mining_v" },
+  { key: "rule_share", value: "+1" },
+  { key: "rule_referral", valueKey: "rule_referral_v" },
+  { key: "rule_post", value: "+2" },
+  { key: "rule_comment", value: "+1" },
+] as const;
 
 function Earn({ userId }: { userId: string }) {
   const [wallet, setWallet] = useState<NqaiWallet | null>(null);
