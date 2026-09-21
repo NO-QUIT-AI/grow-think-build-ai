@@ -16,6 +16,8 @@ import {
   respondFriendRequest,
   type FriendRequest,
 } from "@/lib/friends";
+import { useT } from "@/i18n/LanguageContext";
+import { LanguageSelector } from "@/components/LanguageSelector";
 
 type Notification = {
   id: string;
@@ -34,6 +36,7 @@ const TYPE_TEXT: Record<string, string> = {
 };
 
 function NotificationBell({ userId }: { userId: string }) {
+  const t = useT();
   const [items, setItems] = useState<Notification[]>([]);
   const [requests, setRequests] = useState<FriendRequest[]>([]);
   const [actors, setActors] = useState<Record<string, CommunityProfile>>({});
@@ -103,7 +106,7 @@ function NotificationBell({ userId }: { userId: string }) {
   return (
     <Popover onOpenChange={(open) => open && void markAllRead()}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
+        <Button variant="ghost" size="icon" className="relative" aria-label={t("notifications")}>
           <Bell className="h-4 w-4" />
           {unread > 0 && (
             <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-semibold text-primary-foreground">
@@ -113,13 +116,13 @@ function NotificationBell({ userId }: { userId: string }) {
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 p-0">
-        <div className="border-b border-border px-3 py-2 text-xs font-medium">Notifications</div>
+        <div className="border-b border-border px-3 py-2 text-xs font-medium">{t("notifications")}</div>
         <div className="max-h-80 overflow-y-auto">
           {requests.map((request) => (
             <div key={request.id} className="border-b border-border/60 px-3 py-2">
               <p className="text-xs">
-                <span className="font-medium">{nameOf(actors[request.sender_id])}</span> ne aapko
-                friend request bheji hai
+                <span className="font-medium">{nameOf(actors[request.sender_id])}</span>{" "}
+                {t("friendRequestText")}
               </p>
               <div className="mt-2 flex gap-2">
                 <Button
@@ -128,7 +131,7 @@ function NotificationBell({ userId }: { userId: string }) {
                   disabled={busyId === request.id}
                   onClick={() => void respond(request, true)}
                 >
-                  Accept
+                  {t("accept")}
                 </Button>
                 <Button
                   size="sm"
@@ -137,14 +140,14 @@ function NotificationBell({ userId }: { userId: string }) {
                   disabled={busyId === request.id}
                   onClick={() => void respond(request, false)}
                 >
-                  Reject
+                  {t("reject")}
                 </Button>
               </div>
             </div>
           ))}
           {feed.length === 0 && requests.length === 0 && (
             <p className="px-3 py-6 text-center text-xs text-muted-foreground">
-              Abhi koi notification nahi.
+              {t("noNotifications")}
             </p>
           )}
           {feed.map((item) => (
@@ -166,12 +169,12 @@ function NotificationBell({ userId }: { userId: string }) {
 }
 
 const NAV = [
-  { to: "/", label: "Studio", icon: Sparkles },
-  { to: "/community", label: "Feed", icon: Home },
-  { to: "/messages", label: "Chat", icon: MessageCircle },
-  { to: "/leaderboard", label: "Top", icon: Trophy },
-  { to: "/cv", label: "CV", icon: FileText },
-  { to: "/earn", label: "Earn", icon: Coins },
+  { to: "/", key: "studio", icon: Sparkles },
+  { to: "/community", key: "feed", icon: Home },
+  { to: "/messages", key: "chat", icon: MessageCircle },
+  { to: "/leaderboard", key: "top", icon: Trophy },
+  { to: "/cv", key: "cv", icon: FileText },
+  { to: "/earn", key: "earn", icon: Coins },
 ] as const;
 
 export function CommunityShell({
@@ -186,6 +189,7 @@ export function CommunityShell({
   children: React.ReactNode;
 }) {
   const navigate = useNavigate();
+  const t = useT();
   const [me, setMe] = useState<CommunityProfile | null>(null);
 
   useEffect(() => {
@@ -199,11 +203,12 @@ export function CommunityShell({
           <h1 className="text-lg font-semibold leading-tight">{title}</h1>
           {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
         </div>
+        <LanguageSelector />
         <NotificationBell userId={userId} />
         <Button
           variant="ghost"
           size="icon"
-          aria-label="Mera profile"
+          aria-label={t("profile")}
           onClick={() =>
             me?.username && navigate({ to: "/u/$username", params: { username: me.username } })
           }
@@ -227,7 +232,7 @@ export function CommunityShell({
               activeProps={{ className: "text-primary" }}
             >
               <item.icon className="h-4 w-4" />
-              {item.label}
+              {t(item.key)}
             </Link>
           ))}
         </div>

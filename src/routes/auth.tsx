@@ -10,6 +10,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import logoAsset from "@/assets/logo.jpg.asset.json";
 import { useAuth } from "@/hooks/useAuth";
+import { useT } from "@/i18n/LanguageContext";
+import { LanguageSelector } from "@/components/LanguageSelector";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -34,6 +36,7 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
+  const t = useT();
   const { user, loading } = useAuth();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
@@ -98,21 +101,22 @@ function AuthPage() {
             alt="NO QUIT AI logo"
             className="h-11 w-11 rounded-2xl border border-border object-cover"
           />
-          <div>
+          <div className="flex-1">
             <h1 className="text-xl font-semibold">NO QUIT AI</h1>
-            <p className="text-xs text-muted-foreground">Build studio</p>
+            <p className="text-xs text-muted-foreground">{t("studio")}</p>
           </div>
+          <LanguageSelector />
         </div>
 
         <form onSubmit={onSubmit} className="space-y-4">
           {mode === "signup" && (
             <div className="space-y-2">
-              <Label htmlFor="name">Naam</Label>
+              <Label htmlFor="name">{t("auth_name")}</Label>
               <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Imran" />
             </div>
           )}
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t("auth_email")}</Label>
             <Input
               id="email"
               type="email"
@@ -123,7 +127,7 @@ function AuthPage() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t("auth_password")}</Label>
             <Input
               id="password"
               type="password"
@@ -136,26 +140,27 @@ function AuthPage() {
           </div>
           <Button type="submit" className="w-full" disabled={busy}>
             {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {mode === "signin" ? "Sign in" : "Create account"}
+            {mode === "signin" ? t("login") : t("signup")}
           </Button>
         </form>
 
         <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
-          <span className="h-px flex-1 bg-border" /> ya <span className="h-px flex-1 bg-border" />
+          <span className="h-px flex-1 bg-border" /> {t("auth_or")}{" "}
+          <span className="h-px flex-1 bg-border" />
         </div>
 
         <Button variant="secondary" className="w-full" onClick={google}>
-          Continue with Google
+          {t("auth_google")}
         </Button>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          {mode === "signin" ? "Naya account chahiye?" : "Pehle se account hai?"}{" "}
+          {mode === "signin" ? t("auth_needAccount") : t("auth_haveAccount")}{" "}
           <button
             type="button"
             className="font-medium text-primary underline-offset-4 hover:underline"
             onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
           >
-            {mode === "signin" ? "Sign up" : "Sign in"}
+            {mode === "signin" ? t("signup") : t("login")}
           </button>
         </p>
       </div>
