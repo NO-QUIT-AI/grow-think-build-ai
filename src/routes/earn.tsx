@@ -7,6 +7,7 @@ import { AdSlot } from "@/components/ads/AdSlot";
 import { CommunityShell } from "@/components/community/CommunityShell";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { useT } from "@/i18n/LanguageContext";
 import { inviteLink } from "@/lib/referral";
 import {
   COIN,
