@@ -463,15 +463,18 @@ function ChatThread({
               >
                 {!isUser && tools.length > 0 && (
                   <div className="mb-2 flex flex-wrap gap-1.5">
-                    {tools.map((part, index) => (
+                    {tools.map((part, index) => {
+                      const label = TOOL_LABELS[part.type];
+                      return (
                       <span
                         key={`${message.id}-tool-${index}`}
                         className="inline-flex items-center gap-1 rounded-full border border-border bg-secondary px-2 py-0.5 text-[11px] text-muted-foreground"
                       >
                         <Wrench className="h-3 w-3 text-accent" />
-                         {TOOL_LABELS[part.type] ? t(TOOL_LABELS[part.type]) : part.type.replace("tool-", "")}
+                          {label ? t(label) : part.type.replace("tool-", "")}
                       </span>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
                 {text ? (

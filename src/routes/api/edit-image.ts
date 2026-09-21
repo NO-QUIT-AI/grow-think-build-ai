@@ -19,7 +19,7 @@ export const Route = createFileRoute("/api/edit-image")({
           hi: "इस तस्वीर को बेहतर, साफ़ और पेशेवर बनाएं।",
           ar: "حسّن هذه الصورة واجعلها نظيفة واحترافية.",
         };
-        const instruction = (prompt ?? "").trim() || defaults[lang ?? "en"] || defaults.en;
+        const instruction = (prompt ?? "").trim() || defaults[lang ?? "en"] || defaults["en"];
 
         const upstream = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
           method: "POST",

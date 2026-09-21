@@ -51,8 +51,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const t = useCallback(
     (key: TranslationKey, values?: Record<string, string | number>) => {
-      const template = translations[lang][key] ?? translations.en[key] ?? key;
-      return Object.entries(values ?? {}).reduce(
+      const template: string = translations[lang][key] ?? translations.en[key] ?? key;
+      return Object.entries(values ?? {}).reduce<string>(
         (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
         template,
       );
