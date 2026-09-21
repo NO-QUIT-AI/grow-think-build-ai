@@ -168,7 +168,7 @@ function Earn({ userId }: { userId: string }) {
   }
 
   return (
-    <CommunityShell userId={userId} title={`${COIN} Coins`} subtitle="Mining chalao, har ghanta coins kamao">
+    <CommunityShell userId={userId} title={`${COIN} Pre-Mining ⛏️`} subtitle="Early mining chal rahi hai, points jama karo">
       <section className="rounded-2xl border border-border bg-card p-5 text-center">
         <Coins className="mx-auto h-7 w-7 text-primary" />
         <p className="mt-2 text-4xl font-semibold tracking-tight">
@@ -192,6 +192,9 @@ function Earn({ userId }: { userId: string }) {
             <p className="mt-1 text-xs text-muted-foreground">
               Ab tak mine hua: <span className="font-medium text-foreground">{formatCoins(mining.pending)} {COIN}</span>
             </p>
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              Ye points Mainnet launch pe 1:1 Real NQAI coin me convert honge. Wallet tab open hoga.
+            </p>
           </div>
         ) : (
           <p className="mt-4 text-xs text-muted-foreground">
@@ -199,6 +202,9 @@ function Earn({ userId }: { userId: string }) {
           </p>
         )}
 
+        <p className="mt-3 inline-flex items-center gap-1 rounded-full border border-border bg-background/50 px-3 py-1 text-[11px] font-medium text-muted-foreground">
+          🔒 Phase 1: Pre-Mining Live
+        </p>
         {mining?.is_mining ? (
           <Button
             className="btn-green btn-green-hover mt-3 w-full shadow-[0_0_20px_-4px_oklch(0.78_0.17_160)]"
