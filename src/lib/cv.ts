@@ -176,21 +176,9 @@ export function cvFileName(data: CvData) {
   return `${slug}-CV`;
 }
 
-/** Hidden iframe se print dialog — wahan se "Save as PDF". */
-export function downloadCvPdf(data: CvData) {
-  const frame = document.createElement("iframe");
-  frame.setAttribute("aria-hidden", "true");
-  frame.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0;";
-  frame.onload = () => {
-    frame.contentWindow?.focus();
-    frame.contentWindow?.print();
-    window.setTimeout(() => frame.remove(), 60_000);
-  };
-  document.body.appendChild(frame);
-  frame.srcdoc = renderCvHtml(data).replace(
-    /<title>[\s\S]*?<\/title>/i,
-    `<title>${cvFileName(data)}</title>`,
-  );
+/** Seedha PDF download — koi printer dialog nahi. */
+export async function downloadCvPdf(data: CvData) {
+  await downloadHtmlAsPdf(renderCvHtml(data), `${cvFileName(data)}.pdf`);
 }
 
 export function downloadCvHtml(data: CvData) {
