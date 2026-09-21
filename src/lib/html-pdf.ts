@@ -40,7 +40,7 @@ export async function downloadHtmlAsPdf(html: string, fileName: string): Promise
 
     const target = (doc.querySelector(".page") as HTMLElement | null) ?? doc.body;
     const width = Math.max(target.scrollWidth, 800);
-    const height = Math.max(target.scrollHeight, 600);
+    const height = Math.ceil(target.getBoundingClientRect().height) || target.scrollHeight;
 
     const canvas = await html2canvas(target, {
       backgroundColor: "#ffffff",
