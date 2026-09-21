@@ -168,7 +168,8 @@ function Earn({ userId }: { userId: string }) {
   }
 
   return (
-    <CommunityShell userId={userId} title={`${COIN} Pre-Mining ⛏️`} subtitle="Early mining chal rahi hai, points jama karo">
+    <CommunityShell userId={userId} title={t("earn_title")} subtitle={t("earn_subtitle")}>
+
       <section className="rounded-2xl border border-border bg-card p-5 text-center">
         <Coins className="mx-auto h-7 w-7 text-primary" />
         <p className="mt-2 text-4xl font-semibold tracking-tight">
