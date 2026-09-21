@@ -34,7 +34,6 @@ const TYPE_TEXT = {
   follow: "notificationsFollow",
   message: "notificationsMessage",
 } as const;
-};
 
 function NotificationBell({ userId }: { userId: string }) {
   const t = useT();
