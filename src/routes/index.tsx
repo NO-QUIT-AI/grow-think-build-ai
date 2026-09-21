@@ -53,7 +53,7 @@ function Home() {
   }, [user, loading, navigate]);
 
   useEffect(() => {
-    if (user) void redeemReferral(user.id);
+    if (user) void redeemReferral();
   }, [user]);
 
   if (loading || !user) {
