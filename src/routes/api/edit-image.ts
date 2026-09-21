@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-type Body = { image?: string; prompt?: string };
+type Body = { image?: string; prompt?: string; lang?: string };
 
 export const Route = createFileRoute("/api/edit-image")({
   server: {
@@ -9,11 +9,17 @@ export const Route = createFileRoute("/api/edit-image")({
         const key = process.env["LOVABLE_API_KEY"];
         if (!key) return new Response("AI is not configured", { status: 500 });
 
-        const { image, prompt } = (await request.json()) as Body;
+        const { image, prompt, lang } = (await request.json()) as Body;
         if (!image || !image.startsWith("data:image/")) {
           return new Response("Image is required", { status: 400 });
         }
-        const instruction = (prompt ?? "").trim() || "Is image ko behtar, clean aur professional bana do.";
+        const defaults: Record<string, string> = {
+          en: "Improve this image and make it clean and professional.",
+          ur: "اس تصویر کو بہتر، صاف اور پروفیشنل بنائیں۔",
+          hi: "इस तस्वीर को बेहतर, साफ़ और पेशेवर बनाएं।",
+          ar: "حسّن هذه الصورة واجعلها نظيفة واحترافية.",
+        };
+        const instruction = (prompt ?? "").trim() || defaults[lang ?? "en"] || defaults.en;
 
         const upstream = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
           method: "POST",

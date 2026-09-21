@@ -3,12 +3,19 @@ import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { generateText } from "ai";
 
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { LANGUAGES, type Lang } from "@/i18n/translations";
 
-type Body = { data?: Record<string, unknown> };
+type Body = { data?: Record<string, unknown>; lang?: unknown };
+
+const LANGUAGE_NAMES: Record<Lang, string> = { en: "English", ur: "Urdu", hi: "Hindi", ar: "Arabic" };
+
+function validLang(value: unknown): Lang {
+  return typeof value === "string" && LANGUAGES.some((item) => item.code === value) ? (value as Lang) : "en";
+}
 
 const SYSTEM = `Tum ek professional CV writer ho. User ka CV data JSON me milta hai.
 Usay behtar banao: strong professional summary (2-3 lines) aur har experience ke liye 3-4 result-focused bullet points (har bullet nayi line par, action verb se shuru).
-Jo zubaan user ne likhi hai wahi rakho (Roman Urdu ho to Roman Urdu, English ho to English).
+Use the explicitly selected app language. Keep names, companies, dates, and technical terms unchanged.
 Jhoote facts, jhooti companies ya jhooti dates mat banao — sirf jo diya hai usay polish karo.
 Sirf JSON return karo is shape me, koi markdown ya extra text nahi:
 {"summary":"...","experience":[{"role":"...","company":"...","period":"...","points":"line1\\nline2"}]}`;
@@ -38,7 +45,7 @@ export const Route = createFileRoute("/api/cv-polish")({
         try {
           const { text } = await generateText({
             model,
-            system: SYSTEM,
+            system: `${SYSTEM}\nSelected language: ${LANGUAGE_NAMES[validLang(body.lang)]}. All generated prose must use this language.`,
             prompt: JSON.stringify(body.data).slice(0, 12_000),
           });
           const json = text.match(/\{[\s\S]*\}/)?.[0];

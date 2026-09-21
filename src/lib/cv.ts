@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import type { Lang } from "@/i18n/translations";
 
 export type CvExperience = { role: string; company: string; period: string; points: string };
 export type CvEducation = { degree: string; school: string; period: string };
@@ -264,7 +265,7 @@ export async function deleteCv(id: string) {
 }
 
 /** AI se summary + experience bullets behtar karwata hai. */
-export async function polishCv(data: CvData): Promise<Partial<CvData>> {
+export async function polishCv(data: CvData, lang: Lang): Promise<Partial<CvData>> {
   const { data: session } = await supabase.auth.getSession();
   const token = session.session?.access_token;
   const response = await fetch("/api/cv-polish", {
@@ -273,7 +274,7 @@ export async function polishCv(data: CvData): Promise<Partial<CvData>> {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
-    body: JSON.stringify({ data: { ...data, photo: "" } }),
+    body: JSON.stringify({ data: { ...data, photo: "" }, lang }),
   });
   if (!response.ok) throw new Error((await response.text()) || "AI se jawab nahi aaya");
   return (await response.json()) as Partial<CvData>;
