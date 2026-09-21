@@ -262,7 +262,8 @@ export function StudioPanel({
             <Button
               size="sm"
               className="btn-green h-9 flex-1 gap-1.5 rounded-xl text-xs sm:flex-none"
-              onClick={downloadPdf}
+              disabled={pdfBusy}
+              onClick={() => void downloadPdf()}
             >
               <FileDown className="h-4 w-4" /> Download PDF
             </Button>
