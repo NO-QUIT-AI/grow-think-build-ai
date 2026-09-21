@@ -461,7 +461,9 @@ function CvBuilder({ userId }: { userId: string }) {
           <Button
             size="sm"
             className="btn-green h-10 flex-1 gap-1.5 rounded-xl text-xs sm:flex-none"
-            onClick={() => downloadCvPdf(data)}
+            onClick={() => {
+              void downloadCvPdf(data).catch(() => toast.error("PDF nahi ban saka"));
+            }}
           >
              <FileDown className="h-4 w-4" /> {t("downloadPdf")}
           </Button>
