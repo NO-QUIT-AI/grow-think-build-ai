@@ -13,7 +13,7 @@ type LanguageValue = {
   lang: Lang;
   dir: "ltr" | "rtl";
   setLang: (lang: Lang) => void;
-  t: (key: TranslationKey) => string;
+  t: (key: TranslationKey, values?: Record<string, string | number>) => string;
 };
 
 const LanguageContext = createContext<LanguageValue | null>(null);
@@ -50,7 +50,13 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const t = useCallback(
-    (key: TranslationKey) => translations[lang][key] ?? translations.en[key] ?? key,
+    (key: TranslationKey, values?: Record<string, string | number>) => {
+      const template = translations[lang][key] ?? translations.en[key] ?? key;
+      return Object.entries(values ?? {}).reduce(
+        (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
+        template,
+      );
+    },
     [lang],
   );
 
