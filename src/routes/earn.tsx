@@ -19,7 +19,6 @@ import {
   fetchWallet,
   formatCoins,
   startMining,
-  timeUntil,
   type MiningState,
   type NqaiTx,
   type NqaiWallet,
