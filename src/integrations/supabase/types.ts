@@ -630,6 +630,7 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          invite_code: string | null
           reputation_points: number
           total_apps_built: number
           updated_at: string
@@ -641,6 +642,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id: string
+          invite_code?: string | null
           reputation_points?: number
           total_apps_built?: number
           updated_at?: string
@@ -652,6 +654,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          invite_code?: string | null
           reputation_points?: number
           total_apps_built?: number
           updated_at?: string
@@ -687,6 +690,7 @@ export type Database = {
     Functions: {
       ad_stats: { Args: never; Returns: Json }
       are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
+      gen_invite_code: { Args: never; Returns: string }
       nqai_award: {
         Args: { _amount: number; _reason: string; _user: string }
         Returns: undefined
@@ -696,6 +700,7 @@ export type Database = {
       nqai_mine: { Args: never; Returns: Json }
       nqai_mine_ad: { Args: { _ad_watched: boolean }; Returns: Json }
       nqai_mining_state: { Args: never; Returns: Json }
+      nqai_redeem_invite: { Args: { _code: string }; Returns: Json }
       nqai_share_bonus: { Args: never; Returns: Json }
       nqai_start_mining: { Args: never; Returns: Json }
     }
