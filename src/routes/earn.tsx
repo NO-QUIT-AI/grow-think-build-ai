@@ -229,7 +229,7 @@ function Earn({ userId }: { userId: string }) {
             {inviteCode || "—"}
           </p>
           <p className="mt-1 text-[11px] text-muted-foreground">
-            +10 {COIN} sirf tab milte hain jab koi naya user is code se join kare.
+            {t("earn_inviteCard")}
           </p>
         </div>
 
@@ -271,6 +271,10 @@ function Earn({ userId }: { userId: string }) {
           ))}
         </ul>
       </section>
+
+      <p className="mt-3 text-center text-[11px] text-muted-foreground">
+        {t("earn_disclaimer")}
+      </p>
     </CommunityShell>
   );
 }
