@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Share, Smartphone, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useT } from "@/i18n/LanguageContext";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -30,6 +31,7 @@ function isStandalone(): boolean {
  * via Share → Add to Home Screen (iPhone/Safari).
  */
 export function InstallAppBanner() {
+  const t = useT();
   const [promptEvent, setPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
   const [ios] = useState(isIos);
@@ -81,27 +83,26 @@ export function InstallAppBanner() {
           <Smartphone className="h-4 w-4 text-primary" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold leading-tight">NO QUIT AI apne mobile par rakho</p>
+           <p className="text-sm font-semibold leading-tight">{t("installTitle")}</p>
           {ios ? (
             <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-              Safari me <Share className="h-3 w-3" /> Share dabao, phir
-              <span className="text-foreground">"Add to Home Screen"</span> chuno.
+               <Share className="h-3 w-3" /> {t("installInfo")}
             </p>
           ) : (
             <p className="mt-1 text-xs text-muted-foreground">
-              Ek tap me home screen par icon — full-screen app ki tarah khulega.
+               {t("installInfo")}
             </p>
           )}
           {!ios && promptEvent && (
             <Button size="sm" className="mt-2 h-7 text-xs" onClick={() => void install()}>
-              Install karo
+               {t("install")}
             </Button>
           )}
         </div>
         <button
           type="button"
           onClick={dismiss}
-          aria-label="Band karo"
+           aria-label={t("close")}
           className="shrink-0 rounded-md p-1 text-muted-foreground hover:bg-accent"
         >
           <X className="h-4 w-4" />
