@@ -98,21 +98,22 @@ function AuthPage() {
             alt="NO QUIT AI logo"
             className="h-11 w-11 rounded-2xl border border-border object-cover"
           />
-          <div>
+          <div className="flex-1">
             <h1 className="text-xl font-semibold">NO QUIT AI</h1>
-            <p className="text-xs text-muted-foreground">Build studio</p>
+            <p className="text-xs text-muted-foreground">{t("studio")}</p>
           </div>
+          <LanguageSelector />
         </div>
 
         <form onSubmit={onSubmit} className="space-y-4">
           {mode === "signup" && (
             <div className="space-y-2">
-              <Label htmlFor="name">Naam</Label>
+              <Label htmlFor="name">{t("auth_name")}</Label>
               <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Imran" />
             </div>
           )}
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t("auth_email")}</Label>
             <Input
               id="email"
               type="email"
