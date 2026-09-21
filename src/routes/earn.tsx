@@ -214,8 +214,8 @@ function Earn({ userId }: { userId: string }) {
           >
             {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Pickaxe className="mr-2 h-4 w-4" />}
             {canClaim
-              ? "Claim & Restart"
-              : `Claim ${countdown(mining.next_claim_at, skew.current)} baad`}
+              ? t("earn_claimRestart")
+              : `${t("earn_claimAfter")} ${countdown(mining.next_claim_at, skew.current)}`}
           </Button>
         ) : (
           <Button
@@ -224,38 +224,38 @@ function Earn({ userId }: { userId: string }) {
             disabled={busy}
           >
             {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Pickaxe className="mr-2 h-4 w-4" />}
-            Start Mining
+            {t("earn_start")}
           </Button>
         )}
 
         <Button variant="outline" className="mt-2 w-full" onClick={() => void shareInvite()}>
-          <Share2 className="mr-2 h-4 w-4" /> Invite link share karo (+1 daily)
+          <Share2 className="mr-2 h-4 w-4" /> {t("earn_share")}
         </Button>
       </section>
 
       <section className="mt-4 rounded-2xl border border-border bg-card p-4">
         <h2 className="flex items-center gap-2 text-sm font-semibold">
-          <Sparkles className="h-4 w-4 text-primary" /> Kaise kamao
+          <Sparkles className="h-4 w-4 text-primary" /> {t("earn_howTo")}
         </h2>
         <ul className="mt-2 space-y-1.5">
           {RULES.map((rule) => (
-            <li key={rule.label} className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">{rule.label}</span>
-              <span className="font-medium">{rule.value}</span>
+            <li key={rule.key} className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">{t(rule.key)}</span>
+              <span className="font-medium">
+                {"valueKey" in rule ? t(rule.valueKey) : rule.value}
+              </span>
             </li>
           ))}
         </ul>
-        <p className="mt-2 text-[11px] text-muted-foreground">
-          Time server se check hota hai — 24 ghante me sirf ek claim. Session khatam hone par "Claim & Restart" dabao.
-        </p>
+        <p className="mt-2 text-[11px] text-muted-foreground">{t("earn_serverNote")}</p>
       </section>
 
       <AdSlot name="footer" className="mt-4" />
 
       <section className="mt-2 rounded-2xl border border-border bg-card p-4">
-        <h2 className="text-sm font-semibold">Recent earnings</h2>
+        <h2 className="text-sm font-semibold">{t("earn_recent")}</h2>
         {txs.length === 0 && (
-          <p className="mt-2 text-xs text-muted-foreground">Abhi koi earning nahi — mining se shuru karo.</p>
+          <p className="mt-2 text-xs text-muted-foreground">{t("earn_noEarnings")}</p>
         )}
         <ul className="mt-2 space-y-1.5">
           {txs.map((tx) => (
