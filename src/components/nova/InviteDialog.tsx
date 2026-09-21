@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { inviteLink } from "@/lib/referral";
+import { fetchInviteCode, inviteLink } from "@/lib/referral";
 import { useT } from "@/i18n/LanguageContext";
 
 export function InviteDialog({
@@ -28,10 +28,14 @@ export function InviteDialog({
   const [link, setLink] = useState("");
   const [copied, setCopied] = useState(false);
   const [count, setCount] = useState<number | null>(null);
+  const [code, setCode] = useState("");
 
   useEffect(() => {
     if (!open) return;
-    setLink(inviteLink(userId));
+    void fetchInviteCode(userId).then((value) => {
+      setCode(value);
+      setLink(inviteLink(value));
+    });
     supabase
       .from("referrals")
       .select("id", { count: "exact", head: true })
