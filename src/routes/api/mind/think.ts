@@ -4,6 +4,9 @@ import { streamText, Output } from "ai";
 import { z } from "zod";
 
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { LANGUAGES, type Lang } from "@/i18n/translations";
+
+const LANGUAGE_NAMES: Record<Lang, string> = { en: "English", ur: "Urdu", hi: "Hindi", ar: "Arabic" };
 
 function userClient(token: string) {
   const url = process.env["SUPABASE_URL"]!;
@@ -23,6 +26,10 @@ export const Route = createFileRoute("/api/mind/think")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const body = (await request.json().catch(() => ({}))) as { lang?: unknown };
+        const lang: Lang = typeof body.lang === "string" && LANGUAGES.some((item) => item.code === body.lang)
+          ? (body.lang as Lang)
+          : "en";
         const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
         if (!token) return new Response("Unauthorized", { status: 401 });
 
@@ -61,7 +68,7 @@ export const Route = createFileRoute("/api/mind/think")({
         const result = streamText({
           model: gateway("google/gemini-3.7-flash"),
           system:
-            "Tum NO QUIT AI ka 'Mind' ho — ek background thinking engine. User ki aakhri 10 memories/builds dekh kar EK naya, concrete, actionable insight ya next-step nikalo. Roman Urdu me, 1-3 lines, short. Jo purani sochein di gayi hain unko repeat mat karo. source_chat me us memory ka prompt ka chhota hissa likho jis se ye soch nikli (agar koi nahi to 'general').",
+            `You are NO QUIT AI's background thinking engine. Produce one new, concrete, actionable insight from the user's latest memories. Write 1–3 short lines in ${LANGUAGE_NAMES[lang]}. Do not repeat old thoughts. source_chat must contain a short piece of the source prompt, or 'general'.`,
           prompt: `Aakhri memories:\n${memoryText}\n\nPurani sochein (repeat na karo):\n${pastText}\n\nAb ek bilkul nayi soch nikalo.`,
           output: Output.object({ schema: ThoughtSchema }),
         });

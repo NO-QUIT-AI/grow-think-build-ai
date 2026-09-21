@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ShortcutAppDialog, type ShortcutTarget } from "@/components/nova/ShortcutAppDialog";
 import { supabase } from "@/integrations/supabase/client";
+import { useT } from "@/i18n/LanguageContext";
 
 type Memory = {
   id: string;
@@ -38,6 +39,7 @@ export function BuildsPanel({
   refreshKey: number;
   onOpenStudio: (memoryId: string) => void;
 }) {
+  const t = useT();
   const [items, setItems] = useState<Memory[]>([]);
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
@@ -59,7 +61,7 @@ export function BuildsPanel({
   async function toggleLike(id: string, liked: boolean) {
     const { error } = await supabase.from("memories").update({ liked: !liked }).eq("id", id);
     if (error) {
-      toast.error("Like update nahi ho saka");
+       toast.error(t("requestFailed"));
       return;
     }
     setItems((prev) => prev.map((item) => (item.id === id ? { ...item, liked: !liked } : item)));
@@ -70,7 +72,7 @@ export function BuildsPanel({
     const { error } = await supabase.from("memories").delete().eq("id", id);
     setDeleting(null);
     if (error) {
-      toast.error("Delete nahi ho saka");
+       toast.error(t("requestFailed"));
       return;
     }
     setItems((prev) => prev.filter((item) => item.id !== id));
@@ -92,7 +94,7 @@ export function BuildsPanel({
   function makeShortcut(item: Memory) {
     const html = item.code || (item.blueprint?.['html'] as string) || "";
     if (!html) {
-      toast.error("Is build ka code nahi mila");
+       toast.error(t("noBuilds"));
       return;
     }
     setShortcut({ name: item.summary?.slice(0, 30) || item.prompt.slice(0, 30), html });
@@ -101,7 +103,7 @@ export function BuildsPanel({
   if (loading && items.length === 0) {
     return (
       <div className="flex items-center justify-center py-10 text-muted-foreground">
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Builds load ho rahe hain…
+         <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("loading")}
       </div>
     );
   }
@@ -110,9 +112,9 @@ export function BuildsPanel({
     return (
       <div className="panel mt-2 flex flex-col items-center gap-2 p-8 text-center">
         <Layers className="h-6 w-6 text-primary node-pulse" />
-        <p className="text-sm font-medium">Abhi koi build nahi</p>
+         <p className="text-sm font-medium">{t("noBuilds")}</p>
         <p className="text-xs text-muted-foreground">
-          NO QUIT AI se kaho: “mujhe domain bana do”, “ek app ka structure bna do”, ya “meri coffee brand ki website bana do”.
+           {t("buildsHint")}
         </p>
       </div>
     );
