@@ -166,12 +166,12 @@ function NotificationBell({ userId }: { userId: string }) {
 }
 
 const NAV = [
-  { to: "/", label: "Studio", icon: Sparkles },
-  { to: "/community", label: "Feed", icon: Home },
-  { to: "/messages", label: "Chat", icon: MessageCircle },
-  { to: "/leaderboard", label: "Top", icon: Trophy },
-  { to: "/cv", label: "CV", icon: FileText },
-  { to: "/earn", label: "Earn", icon: Coins },
+  { to: "/", key: "studio", icon: Sparkles },
+  { to: "/community", key: "feed", icon: Home },
+  { to: "/messages", key: "chat", icon: MessageCircle },
+  { to: "/leaderboard", key: "top", icon: Trophy },
+  { to: "/cv", key: "cv", icon: FileText },
+  { to: "/earn", key: "earn", icon: Coins },
 ] as const;
 
 export function CommunityShell({
