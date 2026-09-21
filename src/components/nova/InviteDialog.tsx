@@ -79,6 +79,13 @@ export function InviteDialog({
           </DialogDescription>
         </DialogHeader>
 
+        <div className="rounded-xl border border-border bg-background/50 p-3 text-center">
+          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Invite code</p>
+          <p className="font-mono text-xl font-semibold tracking-[0.2em] text-primary">
+            {code || "—"}
+          </p>
+        </div>
+
         <div className="flex items-center gap-2">
           <Input readOnly value={link} onFocus={(e) => e.currentTarget.select()} className="text-xs" />
           <Button size="icon" variant="secondary" onClick={() => void copy()} aria-label="Copy link">
