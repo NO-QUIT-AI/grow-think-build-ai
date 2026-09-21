@@ -45,28 +45,59 @@ function Privacy() {
         <li>To provide the AI assistant, builder, community feed and messaging features.</li>
         <li>To operate the NQAI reward system and prevent abuse of it.</li>
         <li>To keep the service secure, debug problems and improve features.</li>
-        <li>To show advertising that keeps the service free.</li>
       </ul>
 
       <h2>Third-party services</h2>
       <ul>
-        <li><strong>Hosting and database:</strong> our infrastructure provider stores your account and content securely.</li>
-        <li><strong>AI models:</strong> prompts you send are processed by AI model providers to generate replies, images and code.</li>
-        <li><strong>Google AdSense:</strong> Google and its partners may use cookies to serve ads based on your visits to this and other sites. You can opt out of personalised advertising at <a className="underline" href="https://www.google.com/settings/ads">google.com/settings/ads</a>, and learn more at <a className="underline" href="https://policies.google.com/technologies/ads">Google&apos;s advertising policies</a>.</li>
+        <li>
+          <strong>Hosting &amp; Database:</strong> Our hosting provider stores your account and
+          content.
+        </li>
+        <li>
+          <strong>AI Provider:</strong> AI prompts you send are processed by our AI provider
+          (DeepSeek) to generate responses.
+        </li>
+        <li>Analytics &amp; Error logging may be used to improve stability.</li>
       </ul>
+
+      <h2>Advertising - Google AdMob</h2>
+      <p>We use Google AdMob to show advertisements in our app/website.</p>
+      <p>
+        AdMob may collect and use your device&apos;s Advertising ID, IP address, and other
+        information to show personalized or non-personalized ads.
+      </p>
+      <p>You can opt-out of personalized ads at any time from your device settings:</p>
+      <ul>
+        <li>
+          Android: Settings &gt; Google &gt; Ads &gt; Opt out of Ads Personalization.
+        </li>
+        <li>iOS: Settings &gt; Privacy &amp; Tracking.</li>
+      </ul>
+      <p>
+        AdMob may use cookies and similar technologies to serve ads. For more information on how
+        Google uses your data, please see Google&apos;s{' '}
+        <a className="underline" href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">
+          Privacy Policy
+        </a>{' '}
+        and Google&apos;s{' '}
+        <a className="underline" href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener noreferrer">
+          Ad Technology
+        </a>
+        .
+      </p>
 
       <h2>Cookies</h2>
       <p>
-        We use essential cookies and local storage to keep you signed in and remember preferences such
-        as your last chat thread. Advertising partners may set their own cookies as described above.
-        You can clear or block cookies in your browser, though some features may stop working.
+        We use essential cookies and local storage to keep you signed in and remember preferences
+        such as your last chat thread. Advertising partners may set their own cookies as described
+        above.
       </p>
 
       <h2>Data retention and deletion</h2>
       <p>
-        We keep your content while your account is active. You can delete individual posts, chats and
-        messages at any time. To delete your whole account and its data, email us and we will action
-        it within 30 days.
+        We keep your content while your account is active. You can delete individual posts, chats
+        and messages at any time. To delete your whole account and its data, email us and we will
+        action it within 30 days.
       </p>
 
       <h2>Children</h2>
@@ -76,6 +107,18 @@ function Privacy() {
       <p>
         You can request a copy of your data, ask us to correct it, or ask us to delete it by
         contacting us at <a className="underline" href="mailto:noquitai1@gmail.com">noquitai1@gmail.com</a>.
+      </p>
+
+      <h2>Disclaimer on NQAI Points</h2>
+      <p>
+        NQAI Points are test points for Phase 1 (Pre-Mining) and currently have no monetary value.
+        Future NQAI rewards will be based on points collected.
+      </p>
+
+      <h2>Contact</h2>
+      <p>
+        If you have questions about this policy, contact us at:{' '}
+        <a className="underline" href="mailto:noquitai1@gmail.com">noquitai1@gmail.com</a>
       </p>
     </LegalPage>
   );
