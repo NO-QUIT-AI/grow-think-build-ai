@@ -14,6 +14,8 @@ import { InviteDialog } from "@/components/nova/InviteDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { redeemReferral } from "@/lib/referral";
 import { LegalFooter } from "@/components/legal/LegalPage";
+import { LanguageSelector } from "@/components/LanguageSelector";
+import { useT } from "@/i18n/LanguageContext";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -80,18 +82,18 @@ function Home() {
           </h1>
           <p className="text-xs text-muted-foreground">Websites · Apps · Domains — bas command do</p>
         </div>
-        <Button variant="ghost" size="icon" asChild aria-label="CV Maker">
+        <Button variant="ghost" size="icon" asChild aria-label={t("cv")}>
           <Link to="/cv">
             <FileText className="h-4 w-4" />
           </Link>
         </Button>
-        <Button variant="ghost" size="icon" asChild aria-label="Community">
+        <Button variant="ghost" size="icon" asChild aria-label={t("community")}>
           <Link to="/community">
             <Users className="h-4 w-4" />
           </Link>
         </Button>
 
-        <Button variant="ghost" size="icon" asChild aria-label="NQAI coins">
+        <Button variant="ghost" size="icon" asChild aria-label={t("earn")}>
           <Link to="/earn">
             <Coins className="h-4 w-4" />
           </Link>
@@ -100,14 +102,18 @@ function Home() {
           variant="ghost"
           size="icon"
           onClick={() => setInviteOpen(true)}
-          aria-label="Invite friends"
+          aria-label={t("share")}
         >
           <UserPlus className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="icon" onClick={() => signOut()} aria-label="Sign out">
+        <Button variant="ghost" size="icon" onClick={() => signOut()} aria-label={t("logout")}>
           <LogOut className="h-4 w-4" />
         </Button>
       </header>
+
+      <div className="mb-3 flex items-center justify-end">
+        <LanguageSelector />
+      </div>
 
       <InviteDialog userId={user.id} open={inviteOpen} onOpenChange={setInviteOpen} />
 
