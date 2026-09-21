@@ -27,20 +27,18 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/i18n/LanguageContext";
+import type { TranslationKey } from "@/i18n/translations";
 
-const TOOL_LABELS: Record<string, string> = {
-  "tool-recall_knowledge": "Memory recall ki",
-  "tool-save_knowledge": "Nayi seekh save ki",
-  "tool-create_domains": "Domain names banaye",
-  "tool-create_app_blueprint": "App blueprint banaya",
-  "tool-build_website": "Website live banayi",
+const TOOL_LABELS: Record<string, TranslationKey> = {
+  "tool-recall_knowledge": "toolRecall",
+  "tool-save_knowledge": "toolSave",
+  "tool-create_domains": "toolDomains",
+  "tool-create_app_blueprint": "toolBlueprint",
+  "tool-build_website": "toolWebsite",
 };
 
-const SUGGESTIONS = [
-  "Mujhe apne coffee brand ke liye domain bana do",
-  "Ek expense tracker app ka pura structure bna do",
-  "Mujhe ek professional CV bana do",
-];
+const SUGGESTION_KEYS: TranslationKey[] = ["chatSuggestionDomain", "chatSuggestionApp", "chatSuggestionCv"];
 
 type Thread = { id: string; title: string; updated_at: string };
 
@@ -112,6 +110,7 @@ export function ChatPanel({
   userId: string;
   onWorkChanged: () => void;
 }) {
+  const { t } = useLanguage();
   const [threads, setThreads] = useState<Thread[]>([]);
   const [historyOpen, setHistoryOpen] = useState(false);
   // null = draft (naya chat jo abhi save nahi hua)
@@ -166,33 +165,33 @@ export function ChatPanel({
   // Pehla message bhejte hi chat save ho jati hai.
   const ensureConversation = useCallback(
     async (firstMessage: string) => {
-      const title = firstMessage.slice(0, 48) || "Naya chat";
+      const title = firstMessage.slice(0, 48) || t("newChat");
       const { data: created, error } = await supabase
         .from("conversations")
         .insert({ user_id: userId, title })
         .select("id, title, updated_at")
         .single();
       if (error || !created) {
-        toast.error("Chat save nahi ho saki");
+        toast.error(t("chatSaveFailed"));
         return null;
       }
       setThreads((prev) => [created as Thread, ...prev]);
       setConversationId(created.id);
       return created.id;
     },
-    [userId],
+    [userId, t],
   );
 
   async function deleteThread(id: string) {
     await supabase.from("messages").delete().eq("conversation_id", id);
     const { error } = await supabase.from("conversations").delete().eq("id", id);
     if (error) {
-      toast.error("Chat delete nahi hui");
+      toast.error(t("chatDeleteFailed"));
       return;
     }
     setThreads((prev) => prev.filter((t) => t.id !== id));
     if (conversationId === id) startNewChat();
-    toast.success("Chat delete ho gayi");
+    toast.success(t("chatDeleted"));
   }
 
   return (
@@ -200,17 +199,17 @@ export function ChatPanel({
       <div className="mb-2 flex items-center gap-2">
         <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
           <SheetTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-1.5 text-xs" aria-label="Chat history">
-              <Menu className="h-4 w-4" /> History
+            <Button variant="outline" size="sm" className="gap-1.5 text-xs" aria-label={t("history")}>
+              <Menu className="h-4 w-4" /> {t("history")}
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-[85vw] max-w-sm p-0">
             <SheetHeader className="border-b border-border px-4 py-3">
-              <SheetTitle className="text-sm">Purani chats</SheetTitle>
+              <SheetTitle className="text-sm">{t("oldChats")}</SheetTitle>
             </SheetHeader>
             <div className="max-h-[calc(100vh-4rem)] overflow-y-auto p-2">
               {threads.length === 0 && (
-                <p className="px-2 py-4 text-xs text-muted-foreground">Abhi koi chat save nahi hui</p>
+                <p className="px-2 py-4 text-xs text-muted-foreground">{t("noSavedChats")}</p>
               )}
               {threads.map((thread) => (
                 <div
@@ -229,7 +228,7 @@ export function ChatPanel({
                     </span>
                   </button>
                   <button
-                    aria-label="Chat delete karo"
+                    aria-label={t("deleteChat")}
                     onClick={() => void deleteThread(thread.id)}
                     className="shrink-0 text-muted-foreground hover:text-destructive"
                   >
@@ -244,13 +243,13 @@ export function ChatPanel({
         <div className="flex-1" />
 
         <Button size="sm" className="btn-green gap-1.5 text-xs" onClick={startNewChat}>
-          <Plus className="h-4 w-4" /> New Chat
+          <Plus className="h-4 w-4" /> {t("newChat")}
         </Button>
       </div>
 
       {loadingThread ? (
         <div className="flex flex-1 items-center justify-center py-20 text-muted-foreground">
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Chat load ho rahi hai…
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("chatLoading")}
         </div>
       ) : (
         <ChatThread
@@ -286,6 +285,7 @@ function ChatThread({
   onWorkChanged: () => void;
   onTouched: (id: string) => void;
 }) {
+  const { lang, t } = useLanguage();
   const [input, setInput] = useState("");
   const [attached, setAttached] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
@@ -301,17 +301,17 @@ function ChatThread({
   async function pickImage(file: File | undefined) {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-      toast.error("Sirf image file bhejein");
+      toast.error(t("imageOnly"));
       return;
     }
     if (file.size > 30 * 1024 * 1024) {
-      toast.error("Image bohot bari hai (30MB se kam bhejein)");
+      toast.error(t("imageTooLarge"));
       return;
     }
     try {
       setAttached(await compressImage(file));
     } catch {
-      toast.error("Image load nahi ho saki, dobara try karein");
+      toast.error(t("imageLoadFailed"));
     }
   }
 
@@ -324,7 +324,7 @@ function ChatThread({
       const res = await fetch("/api/edit-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: before, prompt: instruction }),
+        body: JSON.stringify({ image: before, prompt: instruction, lang }),
       });
       if (!res.ok) throw new Error((await res.text()) || "Image edit fail hui");
       const json = (await res.json()) as { image?: string };
@@ -334,9 +334,9 @@ function ChatThread({
         { id: crypto.randomUUID(), before, after: json.image!, prompt: instruction },
       ]);
       setAttached(null);
-      toast.success("Image edit ho gayi");
+      toast.success(t("imageEdited"));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Image edit fail hui");
+      toast.error(err instanceof Error ? err.message : t("imageEditFailed"));
     } finally {
       setEditing(false);
     }
@@ -358,12 +358,13 @@ function ChatThread({
     () =>
       new DefaultChatTransport({
         api: "/api/chat",
+        body: { lang },
         headers: async () => {
           const { data } = await supabase.auth.getSession();
           return { Authorization: `Bearer ${data.session?.access_token ?? ""}` };
         },
       }),
-    [],
+    [lang],
   );
 
   const { messages, sendMessage, status, error } = useChat({
@@ -386,7 +387,7 @@ function ChatThread({
       onTouched(id);
       onWorkChanged();
     },
-    onError: (err) => toast.error(err.message || "AI se jawab nahi mila"),
+    onError: (err) => toast.error(err.message || t("aiNoReply")),
   });
 
   const busy = status === "submitted" || status === "streaming";
@@ -398,7 +399,7 @@ function ChatThread({
   async function submit(text: string) {
     const value = text.trim();
     if (attached) {
-      await runImageEdit(value || "Is image ko behtar, clean aur professional bana do.");
+      await runImageEdit(value || t("imageInstruction"));
       return;
     }
     if (!value || busy) return;
@@ -425,21 +426,24 @@ function ChatThread({
         {messages.length === 0 && (
           <div className="panel p-5">
             <div className="mb-3 flex items-center gap-2 text-sm font-medium">
-              <Sparkles className="h-4 w-4 text-primary" /> NO QUIT AI taiyar hai
+               <Sparkles className="h-4 w-4 text-primary" /> {t("chatReady")}
             </div>
             <p className="text-sm text-muted-foreground">
-              Kya banana hai? Command do — website, app ya domain names:
+               {t("chatIntro")}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              {SUGGESTIONS.map((suggestion) => (
+               {SUGGESTION_KEYS.map((key) => {
+                 const suggestion = t(key);
+                 return (
                 <button
-                  key={suggestion}
+                   key={key}
                   onClick={() => submit(suggestion)}
                   className="rounded-full border border-border bg-secondary px-3 py-1.5 text-xs text-secondary-foreground transition-colors hover:border-primary"
                 >
                   {suggestion}
                 </button>
-              ))}
+                 );
+               })}
             </div>
           </div>
         )}
@@ -465,7 +469,7 @@ function ChatThread({
                         className="inline-flex items-center gap-1 rounded-full border border-border bg-secondary px-2 py-0.5 text-[11px] text-muted-foreground"
                       >
                         <Wrench className="h-3 w-3 text-accent" />
-                        {TOOL_LABELS[part.type] ?? part.type.replace("tool-", "")}
+                         {TOOL_LABELS[part.type] ? t(TOOL_LABELS[part.type]) : part.type.replace("tool-", "")}
                       </span>
                     ))}
                   </div>
@@ -479,7 +483,7 @@ function ChatThread({
                     </div>
                   )
                 ) : (
-                  <span className="text-xs text-muted-foreground">Soch rahi hoon…</span>
+                   <span className="text-xs text-muted-foreground">{t("thinking")}</span>
                 )}
               </div>
             </div>
@@ -488,14 +492,14 @@ function ChatThread({
 
         {edits.map((edit) => (
           <div key={edit.id} className="panel space-y-3 p-3">
-            <p className="text-xs text-muted-foreground">Image edit: {edit.prompt}</p>
+             <p className="text-xs text-muted-foreground">{t("imageEdit", { prompt: edit.prompt })}</p>
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1">
-                <p className="text-[11px] text-muted-foreground">Pehle</p>
+                 <p className="text-[11px] text-muted-foreground">{t("before")}</p>
                 <img src={edit.before} alt="Original image" className="w-full rounded-lg border border-border" />
               </div>
               <div className="space-y-1">
-                <p className="text-[11px] text-muted-foreground">Baad me</p>
+                 <p className="text-[11px] text-muted-foreground">{t("after")}</p>
                 <img src={edit.after} alt="AI se edit ki hui image" className="w-full rounded-lg border border-border" />
               </div>
             </div>
@@ -504,7 +508,7 @@ function ChatThread({
               onClick={() => void downloadDataUrl(edit.after, `noquit-ai-image-${edit.id.slice(0, 8)}.png`)}
               className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary px-3 py-1.5 text-xs text-secondary-foreground transition-colors hover:border-primary"
             >
-              <Download className="h-3.5 w-3.5" /> Download
+               <Download className="h-3.5 w-3.5" /> {t("download")}
             </button>
           </div>
         ))}
@@ -512,13 +516,13 @@ function ChatThread({
         {(busy || editing) && (
           <div className="flex items-center gap-2 px-1 text-xs text-muted-foreground">
             <Brain className="h-4 w-4 text-primary node-pulse" />{" "}
-            {editing ? "Image edit ho rahi hai…" : "NO QUIT AI soch rahi hai…"}
+             {editing ? t("imageEditing") : t("aiThinking")}
           </div>
         )}
         {error && (
           <p className="px-1 text-xs text-destructive">
             {/credits|402|Payment Required|Not enough credits/i.test(error.message)
-              ? "AI credits khatam ho gaye hain. Lovable billing se credits add karo."
+               ? t("aiCreditsEnded")
               : error.message}
           </p>
         )}
@@ -534,16 +538,16 @@ function ChatThread({
       >
         {attached && (
           <div className="flex items-center gap-2 rounded-lg border border-border bg-secondary/60 p-2">
-            <img src={attached} alt="Attach ki hui image" className="h-14 w-14 rounded-md object-cover" />
+             <img src={attached} alt={t("attachImage")} className="h-14 w-14 rounded-md object-cover" />
             <p className="flex-1 text-xs text-muted-foreground">
-              Image attached — likho kya change karna hai, phir bhejo.
+               {t("imageAttached")}
             </p>
             <Button
               type="button"
               size="icon"
               variant="ghost"
               onClick={() => setAttached(null)}
-              aria-label="Image hatao"
+               aria-label={t("removeImage")}
             >
               <X className="h-4 w-4" />
             </Button>
@@ -565,7 +569,7 @@ function ChatThread({
             size="icon"
             variant="ghost"
             className="shrink-0"
-            aria-label="Image attach karo"
+             aria-label={t("attachImage")}
             onClick={() => fileRef.current?.click()}
           >
             <ImagePlus className="h-4 w-4" />
@@ -579,7 +583,7 @@ function ChatThread({
                 void submit(input);
               }
             }}
-            placeholder={attached ? "Image me kya change karna hai…" : "Naya sawal pucho..."}
+             placeholder={attached ? t("imageInstruction") : t("askNewQuestion")}
             rows={1}
             className="max-h-40 min-h-11 resize-none border-0 bg-transparent focus-visible:ring-0"
           />
