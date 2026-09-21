@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import { downloadHtmlAsPdf } from "@/lib/html-pdf";
 
 type Memory = {
   id: string;
