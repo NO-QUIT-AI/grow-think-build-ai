@@ -74,6 +74,7 @@ const RULES = [
 ] as const;
 
 function Earn({ userId }: { userId: string }) {
+  const t = useT();
   const [wallet, setWallet] = useState<NqaiWallet | null>(null);
   const [mining, setMining] = useState<MiningState | null>(null);
   const [txs, setTxs] = useState<NqaiTx[]>([]);
