@@ -31,7 +31,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     if (isLang(saved)) setLangState(saved);
   }, []);
 
-  const dir = LANGUAGES.find((l) => l.code === lang)?.dir === "rtl" ? "rtl" : "ltr";
+  const dir: "ltr" | "rtl" =
+    LANGUAGES.find((l) => l.code === lang)?.dir === "rtl" ? "rtl" : "ltr";
 
   useEffect(() => {
     if (typeof document === "undefined") return;
