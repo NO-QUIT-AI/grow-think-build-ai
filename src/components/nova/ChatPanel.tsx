@@ -8,9 +8,11 @@ import {
   ImagePlus,
   Loader2,
   Menu,
+  Mic,
   Plus,
   Sparkles,
   Trash2,
+  Volume2,
   Wrench,
   X,
 } from "lucide-react";
@@ -27,6 +29,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
+import { VoiceModal, getSpeechRecognition } from "@/components/nova/VoiceModal";
 import { useLanguage } from "@/i18n/LanguageContext";
 import type { TranslationKey } from "@/i18n/translations";
 
