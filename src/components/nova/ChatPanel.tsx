@@ -296,6 +296,37 @@ function ChatThread({
   const fileRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const convRef = useRef<string | null>(conversationId);
+  const [voiceOpen, setVoiceOpen] = useState(false);
+  const [speakingId, setSpeakingId] = useState<string | null>(null);
+
+  // AI jawab ko awaaz me sunao (browser ka speechSynthesis).
+  function speak(id: string, text: string) {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      toast.error("Voice not supported in this browser");
+      return;
+    }
+    if (speakingId === id) {
+      window.speechSynthesis.cancel();
+      setSpeakingId(null);
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = { en: "en-US", ur: "ur-PK", hi: "hi-IN", ar: "ar-SA" }[lang] ?? "en-US";
+    utterance.onend = () => setSpeakingId(null);
+    utterance.onerror = () => setSpeakingId(null);
+    setSpeakingId(id);
+    window.speechSynthesis.speak(utterance);
+  }
+
+  useEffect(
+    () => () => {
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     if (conversationId) convRef.current = conversationId;
