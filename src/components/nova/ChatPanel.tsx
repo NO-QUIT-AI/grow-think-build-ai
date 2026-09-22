@@ -517,6 +517,21 @@ function ChatThread({
                   ) : (
                     <div className="space-y-3 text-sm leading-relaxed [&_a]:text-primary [&_code]:rounded [&_code]:bg-secondary [&_code]:px-1 [&_h2]:text-base [&_h2]:font-semibold [&_h3]:font-semibold [&_li]:ml-4 [&_li]:list-disc [&_strong]:text-foreground">
                       <ReactMarkdown>{text}</ReactMarkdown>
+                      <button
+                        type="button"
+                        aria-label="Read aloud"
+                        onClick={() => speak(message.id, text)}
+                        className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                          speakingId === message.id
+                            ? "border-primary bg-primary/15 text-primary"
+                            : "border-border bg-secondary text-muted-foreground hover:border-primary"
+                        }`}
+                      >
+                        <Volume2
+                          className={`h-3.5 w-3.5 ${speakingId === message.id ? "node-pulse" : ""}`}
+                        />
+                        {speakingId === message.id ? "Speaking..." : "Listen"}
+                      </button>
                     </div>
                   )
                 ) : (
