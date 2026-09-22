@@ -22,13 +22,9 @@ export function readReferral(): string | null {
 }
 
 /** Har user ka apna unique invite code. */
-export async function fetchInviteCode(userId: string): Promise<string> {
-  const { data } = await supabase
-    .from("profiles")
-    .select("invite_code")
-    .eq("id", userId)
-    .maybeSingle();
-  return data?.invite_code ?? "";
+export async function fetchInviteCode(_userId?: string): Promise<string> {
+  const { data } = await supabase.rpc("nqai_my_invite_code");
+  return typeof data === "string" ? data : "";
 }
 
 /**

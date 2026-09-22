@@ -8,9 +8,11 @@ import {
   ImagePlus,
   Loader2,
   Menu,
+  Mic,
   Plus,
   Sparkles,
   Trash2,
+  Volume2,
   Wrench,
   X,
 } from "lucide-react";
@@ -27,6 +29,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
+import { VoiceModal, getSpeechRecognition } from "@/components/nova/VoiceModal";
 import { useLanguage } from "@/i18n/LanguageContext";
 import type { TranslationKey } from "@/i18n/translations";
 
@@ -293,6 +296,37 @@ function ChatThread({
   const fileRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const convRef = useRef<string | null>(conversationId);
+  const [voiceOpen, setVoiceOpen] = useState(false);
+  const [speakingId, setSpeakingId] = useState<string | null>(null);
+
+  // AI jawab ko awaaz me sunao (browser ka speechSynthesis).
+  function speak(id: string, text: string) {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      toast.error("Voice not supported in this browser");
+      return;
+    }
+    if (speakingId === id) {
+      window.speechSynthesis.cancel();
+      setSpeakingId(null);
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = { en: "en-US", ur: "ur-PK", hi: "hi-IN", ar: "ar-SA" }[lang] ?? "en-US";
+    utterance.onend = () => setSpeakingId(null);
+    utterance.onerror = () => setSpeakingId(null);
+    setSpeakingId(id);
+    window.speechSynthesis.speak(utterance);
+  }
+
+  useEffect(
+    () => () => {
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     if (conversationId) convRef.current = conversationId;
@@ -483,6 +517,21 @@ function ChatThread({
                   ) : (
                     <div className="space-y-3 text-sm leading-relaxed [&_a]:text-primary [&_code]:rounded [&_code]:bg-secondary [&_code]:px-1 [&_h2]:text-base [&_h2]:font-semibold [&_h3]:font-semibold [&_li]:ml-4 [&_li]:list-disc [&_strong]:text-foreground">
                       <ReactMarkdown>{text}</ReactMarkdown>
+                      <button
+                        type="button"
+                        aria-label="Read aloud"
+                        onClick={() => speak(message.id, text)}
+                        className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                          speakingId === message.id
+                            ? "border-primary bg-primary/15 text-primary"
+                            : "border-border bg-secondary text-muted-foreground hover:border-primary"
+                        }`}
+                      >
+                        <Volume2
+                          className={`h-3.5 w-3.5 ${speakingId === message.id ? "node-pulse" : ""}`}
+                        />
+                        {speakingId === message.id ? "Speaking..." : "Listen"}
+                      </button>
                     </div>
                   )
                 ) : (
@@ -591,6 +640,22 @@ function ChatThread({
             className="max-h-40 min-h-11 resize-none border-0 bg-transparent focus-visible:ring-0"
           />
           <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="shrink-0"
+            aria-label="Voice chat"
+            onClick={() => {
+              if (!getSpeechRecognition()) {
+                toast.error("Voice not supported in this browser");
+                return;
+              }
+              setVoiceOpen(true);
+            }}
+          >
+            <Mic className="h-4 w-4" />
+          </Button>
+          <Button
             type="submit"
             size="icon"
             disabled={busy || editing || (!attached && !input.trim())}
@@ -600,6 +665,15 @@ function ChatThread({
           </Button>
         </div>
       </form>
+
+      {voiceOpen && (
+        <VoiceModal
+          lang={lang}
+          onTranscript={setInput}
+          onSubmit={(value) => void submit(value)}
+          onClose={() => setVoiceOpen(false)}
+        />
+      )}
     </div>
   );
 }
