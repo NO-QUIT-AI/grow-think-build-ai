@@ -640,6 +640,22 @@ function ChatThread({
             className="max-h-40 min-h-11 resize-none border-0 bg-transparent focus-visible:ring-0"
           />
           <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="shrink-0"
+            aria-label="Voice chat"
+            onClick={() => {
+              if (!getSpeechRecognition()) {
+                toast.error("Voice not supported in this browser");
+                return;
+              }
+              setVoiceOpen(true);
+            }}
+          >
+            <Mic className="h-4 w-4" />
+          </Button>
+          <Button
             type="submit"
             size="icon"
             disabled={busy || editing || (!attached && !input.trim())}
@@ -649,6 +665,15 @@ function ChatThread({
           </Button>
         </div>
       </form>
+
+      {voiceOpen && (
+        <VoiceModal
+          lang={lang}
+          onTranscript={setInput}
+          onSubmit={(value) => void submit(value)}
+          onClose={() => setVoiceOpen(false)}
+        />
+      )}
     </div>
   );
 }
