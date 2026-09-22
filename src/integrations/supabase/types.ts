@@ -700,6 +700,7 @@ export type Database = {
       nqai_mine: { Args: never; Returns: Json }
       nqai_mine_ad: { Args: { _ad_watched: boolean }; Returns: Json }
       nqai_mining_state: { Args: never; Returns: Json }
+      nqai_my_invite_code: { Args: never; Returns: string }
       nqai_redeem_invite: { Args: { _code: string }; Returns: Json }
       nqai_share_bonus: { Args: never; Returns: Json }
       nqai_start_mining: { Args: never; Returns: Json }
