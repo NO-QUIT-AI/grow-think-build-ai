@@ -21,7 +21,14 @@ function validLang(value: unknown): Lang {
   return typeof value === "string" && LANGUAGES.some((item) => item.code === value) ? (value as Lang) : "en";
 }
 
-const SYSTEM_PROMPT = `You are NO QUIT AI, an AI assistant that creates websites, app blueprints, and domain names.
+const SYSTEM_PROMPT = `You are NO QUIT AI, a concise assistant that also creates websites, app blueprints, and domain names.
+
+SHORT REPLY RULE (sabse zaruri):
+- Jitna pucha jaye utna hi jawab do. No extra lecture, no long explanation unless user asks.
+- If user says "As-salamu Alaikum" or "Salam", just reply "Wa Alaikum As-salam" only. Don't add extra lines.
+- If user says "Hello", just reply "Hello" or "Hi, how can I help?".
+- Keep answers short, to the point, 1-2 lines max for simple greetings and simple questions.
+- Greeting ke waqt USER MEMORY dekho: agar memory maujood hai to greeting ke baad sirf ek chhota "Welcome back, <naam>!" (1 line, ho sake to pichle project ka zikr). Agar memory khali hai to ek line me batao ke ye pehli mulaqat hai.
 
 Rules:
 - Always reply in the explicitly selected app language supplied below. This overrides the language used in the user's message.
@@ -31,7 +38,8 @@ Rules:
 - Jab user app/website/product maange: create_app_blueprint tool chalao (complete structure: screens, features, data model, tech stack, roadmap). Har naya build automatically Memories me save hota hai.
 - Jab user website/landing page/web app "bana do" kahe: build_website tool chalao aur ek COMPLETE single-file HTML do (inline <style> aur <script>, koi external file nahi, sirf CDN fonts allowed). Modern, responsive, dark ya brand ke hisaab se theme, real content — lorem ipsum nahi. Ye Studio cabin me live preview hota hai aur Memories me save hota hai.
 - Website banane ke baad chat me sirf short summary do, poora HTML dobara chat me mat likho.
-- Sochne ka tarika: pehle short "Sochne ka plan" (2-4 bullets), phir kaam, phir clean markdown output.
+- Bade kaam (build/blueprint) me hi short plan do; simple sawal par seedha jawab.
+- User ka naam, preferences, aur har important baat save_knowledge se zarur save karo.
 - Jhooth mat bolo. Jo nahi jaante, keh do aur seekhne ke liye sawal poocho.`;
 
 
@@ -48,8 +56,8 @@ const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const CACHE_MAX = 300;
 const answerCache = new Map<string, { text: string; at: number }>();
 
-function cacheKey(question: string, lang: Lang) {
-  return `${lang}::${question.toLowerCase().replace(/\s+/g, " ").replace(/[?!.,؟]+$/g, "").trim()}`;
+function cacheKey(userId: string, question: string, lang: Lang) {
+  return `${userId}::${lang}::${question.toLowerCase().replace(/\s+/g, " ").replace(/[?!.,؟]+$/g, "").trim()}`;
 }
 
 function messageText(message: UIMessage | undefined): string {
@@ -178,13 +186,30 @@ export const Route = createFileRoute("/api/chat")({
             description: "Apni saved knowledge base me se relevant memories dhoondo.",
             inputSchema: z.object({ query: z.string() }),
             execute: async ({ query }) => {
-              const { data } = await supabase
-                .from("knowledge")
-                .select("topic, content, tags, confidence")
-                .eq("user_id", userId)
-                .or(`topic.ilike.%${query}%,content.ilike.%${query}%`)
-                .order("created_at", { ascending: false })
-                .limit(8);
+              const words = query
+                .toLowerCase()
+                .split(/[^\p{L}\p{N}]+/u)
+                .filter((w) => w.length > 2)
+                .slice(0, 6);
+              let data: unknown[] | null = null;
+              if (words.length) {
+                const filter = words.map((w) => `topic.ilike.%${w}%,content.ilike.%${w}%`).join(",");
+                ({ data } = await supabase
+                  .from("knowledge")
+                  .select("topic, content, tags, confidence")
+                  .eq("user_id", userId)
+                  .or(filter)
+                  .order("created_at", { ascending: false })
+                  .limit(8));
+              }
+              if (!data || data.length === 0) {
+                ({ data } = await supabase
+                  .from("knowledge")
+                  .select("topic, content, tags, confidence")
+                  .eq("user_id", userId)
+                  .order("created_at", { ascending: false })
+                  .limit(8));
+              }
               return { memories: data ?? [] };
             },
           }),
@@ -347,7 +372,7 @@ export const Route = createFileRoute("/api/chat")({
           !hasToolPart(incoming[0] as { parts?: unknown[] }) &&
           messageText(incoming[0]).length > 0 &&
           messageText(incoming[0]).length <= 500;
-        const key = cacheable ? cacheKey(messageText(incoming[0]), lang) : "";
+        const key = cacheable ? cacheKey(userId, messageText(incoming[0]), lang) : "";
         const cached = cacheable ? readCache(key) : null;
 
         if (cached) {
@@ -364,9 +389,23 @@ export const Route = createFileRoute("/api/chat")({
           return createUIMessageStreamResponse({ stream });
         }
 
+        const [{ data: prof }, { data: know }, { data: builds }] = await Promise.all([
+          supabase.from("profiles").select("display_name, username").eq("id", userId).maybeSingle(),
+          supabase.from("knowledge").select("topic, content").eq("user_id", userId).order("created_at", { ascending: false }).limit(12),
+          supabase.from("memories").select("project_type, summary").eq("user_id", userId).order("created_at", { ascending: false }).limit(6),
+        ]);
+        const userName = prof?.display_name || prof?.username || "";
+        const memoryLines = [
+          ...(know ?? []).map((k) => `- ${k.topic}: ${String(k.content).slice(0, 200)}`),
+          ...(builds ?? []).map((b) => `- Build (${b.project_type}): ${String(b.summary ?? "").slice(0, 120)}`),
+        ];
+        const memoryBlock = `USER MEMORY:\nName: ${userName || "unknown"}\n${
+          memoryLines.length ? memoryLines.join("\n") : "(empty — first time user)"
+        }`;
+
         const result = streamText({
           model,
-          system: `${SYSTEM_PROMPT}\n\n${languageInstruction}`,
+          system: `${SYSTEM_PROMPT}\n\n${memoryBlock}\n\n${languageInstruction}`,
           messages: await convertToModelMessages(trimMessages(incoming)),
           tools,
           stopWhen: stepCountIs(30),
