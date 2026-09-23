@@ -298,6 +298,8 @@ function ChatThread({
   const convRef = useRef<string | null>(conversationId);
   const [voiceOpen, setVoiceOpen] = useState(false);
   const [speakingId, setSpeakingId] = useState<string | null>(null);
+  const voiceResolveRef = useRef<((text: string) => void) | null>(null);
+  const voiceQuestionRef = useRef("");
 
   // AI jawab ko awaaz me sunao (browser ka speechSynthesis).
   function speak(id: string, text: string) {
@@ -401,11 +403,17 @@ function ChatThread({
     [lang],
   );
 
-  const { messages, sendMessage, status, error } = useChat({
+  const { messages, sendMessage, setMessages, status, error } = useChat({
     messages: initialMessages,
     transport,
     onFinish: async ({ message }) => {
       const text = messageText(message);
+      if (voiceResolveRef.current) {
+        const q = voiceQuestionRef.current;
+        if (q && text) writeVoiceCache(q, lang, text);
+        voiceResolveRef.current(text || t("aiNoReply"));
+        voiceResolveRef.current = null;
+      }
       const id = convRef.current;
       if (!text || !id) return;
       await supabase.from("messages").insert({
@@ -639,11 +647,9 @@ function ChatThread({
             rows={1}
             className="max-h-40 min-h-11 resize-none border-0 bg-transparent focus-visible:ring-0"
           />
-          <Button
+          <button
             type="button"
-            size="icon"
-            variant="ghost"
-            className="shrink-0"
+            className="galaxy-orb h-10 w-10 shrink-0 hover:scale-105"
             aria-label="Voice chat"
             onClick={() => {
               if (!getSpeechRecognition()) {
@@ -653,8 +659,9 @@ function ChatThread({
               setVoiceOpen(true);
             }}
           >
-            <Mic className="h-4 w-4" />
-          </Button>
+            <span className="galaxy-stars" />
+            <Mic className="relative z-10 mx-auto h-4 w-4 text-primary-foreground" />
+          </button>
           <Button
             type="submit"
             size="icon"
@@ -670,8 +677,12 @@ function ChatThread({
         <VoiceModal
           lang={lang}
           onTranscript={setInput}
-          onSubmit={(value) => void submit(value)}
-          onClose={() => setVoiceOpen(false)}
+          ask={askByVoice}
+          onClose={() => {
+            voiceResolveRef.current?.("");
+            voiceResolveRef.current = null;
+            setVoiceOpen(false);
+          }}
         />
       )}
     </div>
