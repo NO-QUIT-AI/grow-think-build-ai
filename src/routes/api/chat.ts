@@ -377,6 +377,12 @@ export const Route = createFileRoute("/api/chat")({
 
         return result.toUIMessageStreamResponse({
           originalMessages: incoming,
+          onFinish: ({ responseMessage }) => {
+            if (!cacheable) return;
+            if (hasToolPart(responseMessage as { parts?: unknown[] })) return;
+            const text = messageText(responseMessage as UIMessage);
+            if (text.length > 20) writeCache(key, text);
+          },
           onError: (error) => {
             const msg = error instanceof Error ? error.message : "";
             if (msg.includes("Payment Required") || msg.includes("Not enough credits") || msg.includes("402")) {
