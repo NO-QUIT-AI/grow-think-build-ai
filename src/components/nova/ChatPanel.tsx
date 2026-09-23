@@ -436,9 +436,11 @@ function ChatThread({
     transport,
     onFinish: async ({ message }) => {
       const text = messageText(message);
+      const cacheQ = voiceQuestionRef.current;
+      const usedTool = (message.parts ?? []).some((p) => String(p.type).startsWith("tool-"));
+      if (cacheQ && text && !usedTool && cacheQ.length <= 500) writeVoiceCache(cacheQ, lang, text);
+      voiceQuestionRef.current = "";
       if (voiceResolveRef.current) {
-        const q = voiceQuestionRef.current;
-        if (q && text) writeVoiceCache(q, lang, text);
         voiceResolveRef.current(text || t("aiNoReply"));
         voiceResolveRef.current = null;
       }
@@ -473,6 +475,11 @@ function ChatThread({
       return;
     }
     if (!value || busy) return;
+    if (readVoiceCache(value, lang)) {
+      void askByVoice(value);
+      return;
+    }
+    voiceQuestionRef.current = value;
 
     setInput("");
     let id = convRef.current;
