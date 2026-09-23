@@ -1,7 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import { convertToModelMessages, streamText, tool, stepCountIs, type UIMessage } from "ai";
+import {
+  convertToModelMessages,
+  createUIMessageStream,
+  createUIMessageStreamResponse,
+  streamText,
+  tool,
+  stepCountIs,
+  type UIMessage,
+} from "ai";
 import { z } from "zod";
 
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
@@ -30,6 +38,56 @@ Rules:
 const MAX_HTML = 300_000;
 const MAX_TEXT_PART = 6_000;
 const MAX_HISTORY = 14;
+
+/* ---------------------------------------------------------------
+ * Answer cache — same sawal dobara aaye to DeepSeek ko call na karo.
+ * Sirf pehle sawal (koi history nahi) aur plain text jawab cache hota hai,
+ * kyunki tool-based builds har baar naya result banate hain.
+ * ------------------------------------------------------------- */
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const CACHE_MAX = 300;
+const answerCache = new Map<string, { text: string; at: number }>();
+
+function cacheKey(question: string, lang: Lang) {
+  return `${lang}::${question.toLowerCase().replace(/\s+/g, " ").replace(/[?!.,؟]+$/g, "").trim()}`;
+}
+
+function messageText(message: UIMessage | undefined): string {
+  if (!message) return "";
+  return (message.parts ?? [])
+    .filter((part) => (part as { type?: string }).type === "text")
+    .map((part) => String((part as { text?: string }).text ?? ""))
+    .join("\n")
+    .trim();
+}
+
+function hasToolPart(message: { parts?: unknown[] } | undefined): boolean {
+  return (message?.parts ?? []).some((part) =>
+    String((part as { type?: string }).type ?? "").startsWith("tool-"),
+  );
+}
+
+function readCache(key: string): string | null {
+  const hit = answerCache.get(key);
+  if (!hit) return null;
+  if (Date.now() - hit.at > CACHE_TTL_MS) {
+    answerCache.delete(key);
+    return null;
+  }
+  // refresh recency (LRU)
+  answerCache.delete(key);
+  answerCache.set(key, hit);
+  return hit.text;
+}
+
+function writeCache(key: string, text: string) {
+  answerCache.set(key, { text, at: Date.now() });
+  while (answerCache.size > CACHE_MAX) {
+    const oldest = answerCache.keys().next().value;
+    if (oldest === undefined) break;
+    answerCache.delete(oldest);
+  }
+}
 
 /**
  * Bade builds (jaise mining coin app with contract address) ka HTML history me
@@ -282,6 +340,30 @@ export const Route = createFileRoute("/api/chat")({
         const lang = validLang(body.lang);
         const languageInstruction = `Selected app language: ${LANGUAGE_NAMES[lang]}. Write the complete response in this language. Keep code and technical identifiers unchanged.`;
 
+        // Pehla sawal + koi tool ki zarurat nahi ho to cache se hi jawab do.
+        const cacheable =
+          incoming.length === 1 &&
+          incoming[0]?.role === "user" &&
+          !hasToolPart(incoming[0] as { parts?: unknown[] }) &&
+          messageText(incoming[0]).length > 0 &&
+          messageText(incoming[0]).length <= 500;
+        const key = cacheable ? cacheKey(messageText(incoming[0]), lang) : "";
+        const cached = cacheable ? readCache(key) : null;
+
+        if (cached) {
+          const stream = createUIMessageStream({
+            execute: ({ writer }) => {
+              const id = "cached-text";
+              writer.write({ type: "start" });
+              writer.write({ type: "text-start", id });
+              writer.write({ type: "text-delta", id, delta: cached });
+              writer.write({ type: "text-end", id });
+              writer.write({ type: "finish" });
+            },
+          });
+          return createUIMessageStreamResponse({ stream });
+        }
+
         const result = streamText({
           model,
           system: `${SYSTEM_PROMPT}\n\n${languageInstruction}`,
@@ -295,6 +377,12 @@ export const Route = createFileRoute("/api/chat")({
 
         return result.toUIMessageStreamResponse({
           originalMessages: incoming,
+          onFinish: ({ responseMessage }) => {
+            if (!cacheable) return;
+            if (hasToolPart(responseMessage as { parts?: unknown[] })) return;
+            const text = messageText(responseMessage as UIMessage);
+            if (text.length > 20) writeCache(key, text);
+          },
           onError: (error) => {
             const msg = error instanceof Error ? error.message : "";
             if (msg.includes("Payment Required") || msg.includes("Not enough credits") || msg.includes("402")) {
