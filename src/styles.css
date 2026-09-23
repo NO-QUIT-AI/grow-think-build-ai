@@ -211,3 +211,29 @@
     transform: scaleY(1);
   }
 }
+
+/* Galaxy orb (voice button) */
+@utility galaxy-orb {
+  position: relative;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 35% 30%, #00ff88 0%, #00b863 22%, #003322 58%, #000000 100%);
+  box-shadow: 0 0 24px 4px rgb(0 255 136 / 0.45), 0 0 70px 10px rgb(0 255 136 / 0.2), inset 0 0 20px rgb(0 0 0 / 0.6);
+  transition: transform 0.2s ease;
+}
+@utility galaxy-stars {
+  position: absolute;
+  inset: -50%;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, #ffffff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 70% 20%, #cfffe8 50%, transparent 51%),
+    radial-gradient(1px 1px at 40% 70%, #ffffff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 85% 60%, #a8ffd6 50%, transparent 51%),
+    radial-gradient(1px 1px at 55% 45%, #ffffff 50%, transparent 51%),
+    radial-gradient(1px 1px at 10% 80%, #cfffe8 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 30% 55%, #ffffff 50%, transparent 51%);
+  animation: galaxy-spin 18s linear infinite, galaxy-twinkle 2.6s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes galaxy-spin { to { transform: rotate(360deg); } }
+@keyframes galaxy-twinkle { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
