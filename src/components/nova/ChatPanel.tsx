@@ -462,6 +462,39 @@ function ChatThread({
     void sendMessage({ text: value });
   }
 
+  // Voice agent: cache (device par save) me ho to AI call nahi, warna AI se poocho.
+  async function askByVoice(question: string): Promise<string> {
+    const cached = readVoiceCache(question, lang);
+    if (cached) {
+      setInput("");
+      const stamp = Date.now();
+      setMessages((prev) => [
+        ...prev,
+        { id: `vq-${stamp}`, role: "user", parts: [{ type: "text", text: question }] },
+        { id: `va-${stamp}`, role: "assistant", parts: [{ type: "text", text: cached }] },
+      ]);
+      let id = convRef.current;
+      if (!id) {
+        id = await ensureConversation(question);
+        if (id) convRef.current = id;
+      }
+      if (id) {
+        await supabase.from("messages").insert([
+          { conversation_id: id, user_id: userId, role: "user", content: question },
+          { conversation_id: id, user_id: userId, role: "assistant", content: cached },
+        ]);
+        onTouched(id);
+      }
+      return cached;
+    }
+    if (busy) return t("aiNoReply");
+    return new Promise<string>((resolve) => {
+      voiceResolveRef.current = resolve;
+      voiceQuestionRef.current = question;
+      void submit(question);
+    });
+  }
+
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex-1 space-y-4 overflow-y-auto px-1 pb-4">
