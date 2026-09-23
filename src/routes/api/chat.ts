@@ -39,6 +39,56 @@ const MAX_HTML = 300_000;
 const MAX_TEXT_PART = 6_000;
 const MAX_HISTORY = 14;
 
+/* ---------------------------------------------------------------
+ * Answer cache — same sawal dobara aaye to DeepSeek ko call na karo.
+ * Sirf pehle sawal (koi history nahi) aur plain text jawab cache hota hai,
+ * kyunki tool-based builds har baar naya result banate hain.
+ * ------------------------------------------------------------- */
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const CACHE_MAX = 300;
+const answerCache = new Map<string, { text: string; at: number }>();
+
+function cacheKey(question: string, lang: Lang) {
+  return `${lang}::${question.toLowerCase().replace(/\s+/g, " ").replace(/[?!.,؟]+$/g, "").trim()}`;
+}
+
+function messageText(message: UIMessage | undefined): string {
+  if (!message) return "";
+  return (message.parts ?? [])
+    .filter((part) => (part as { type?: string }).type === "text")
+    .map((part) => String((part as { text?: string }).text ?? ""))
+    .join("\n")
+    .trim();
+}
+
+function hasToolPart(message: { parts?: unknown[] } | undefined): boolean {
+  return (message?.parts ?? []).some((part) =>
+    String((part as { type?: string }).type ?? "").startsWith("tool-"),
+  );
+}
+
+function readCache(key: string): string | null {
+  const hit = answerCache.get(key);
+  if (!hit) return null;
+  if (Date.now() - hit.at > CACHE_TTL_MS) {
+    answerCache.delete(key);
+    return null;
+  }
+  // refresh recency (LRU)
+  answerCache.delete(key);
+  answerCache.set(key, hit);
+  return hit.text;
+}
+
+function writeCache(key: string, text: string) {
+  answerCache.set(key, { text, at: Date.now() });
+  while (answerCache.size > CACHE_MAX) {
+    const oldest = answerCache.keys().next().value;
+    if (oldest === undefined) break;
+    answerCache.delete(oldest);
+  }
+}
+
 /**
  * Bade builds (jaise mining coin app with contract address) ka HTML history me
  * reh jata tha aur agla request token limit cross kar ke fail ho jata tha.
