@@ -237,3 +237,19 @@
 }
 @keyframes galaxy-spin { to { transform: rotate(360deg); } }
 @keyframes galaxy-twinkle { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+
+/* Galaxy face */
+@keyframes galaxy-blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+@keyframes galaxy-talk { 0%, 100% { transform: scaleY(0.35); } 50% { transform: scaleY(1); } }
+@utility galaxy-eye {
+  width: 18%; height: 22%; border-radius: 9999px;
+  background: radial-gradient(circle at 40% 35%, #ffffff 0%, #b8ffe0 45%, #00ff88 100%);
+  box-shadow: 0 0 14px #00ff88;
+  animation: galaxy-blink 4s ease-in-out infinite;
+}
+@utility galaxy-mouth {
+  width: 34%; height: 12%; border-radius: 0 0 9999px 9999px;
+  background: #b8ffe0; box-shadow: 0 0 12px #00ff88;
+  transform-origin: top;
+}
+@utility galaxy-talking { animation: galaxy-talk 0.28s ease-in-out infinite; }
