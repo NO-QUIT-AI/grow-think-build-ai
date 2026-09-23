@@ -340,6 +340,30 @@ export const Route = createFileRoute("/api/chat")({
         const lang = validLang(body.lang);
         const languageInstruction = `Selected app language: ${LANGUAGE_NAMES[lang]}. Write the complete response in this language. Keep code and technical identifiers unchanged.`;
 
+        // Pehla sawal + koi tool ki zarurat nahi ho to cache se hi jawab do.
+        const cacheable =
+          incoming.length === 1 &&
+          incoming[0]?.role === "user" &&
+          !hasToolPart(incoming[0] as { parts?: unknown[] }) &&
+          messageText(incoming[0]).length > 0 &&
+          messageText(incoming[0]).length <= 500;
+        const key = cacheable ? cacheKey(messageText(incoming[0]), lang) : "";
+        const cached = cacheable ? readCache(key) : null;
+
+        if (cached) {
+          const stream = createUIMessageStream({
+            execute: ({ writer }) => {
+              const id = "cached-text";
+              writer.write({ type: "start" });
+              writer.write({ type: "text-start", id });
+              writer.write({ type: "text-delta", id, delta: cached });
+              writer.write({ type: "text-end", id });
+              writer.write({ type: "finish" });
+            },
+          });
+          return createUIMessageStreamResponse({ stream });
+        }
+
         const result = streamText({
           model,
           system: `${SYSTEM_PROMPT}\n\n${languageInstruction}`,
