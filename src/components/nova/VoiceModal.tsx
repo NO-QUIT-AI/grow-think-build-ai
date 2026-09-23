@@ -228,13 +228,18 @@ export function VoiceModal({
           className={`galaxy-orb h-44 w-44 sm:h-56 sm:w-56 ${active ? "voice-pulse" : ""}`}
         >
           <span className="galaxy-stars" />
-          <span className="relative z-10 flex h-full w-full items-center justify-center">
+          <span className="relative z-10 flex h-full w-full flex-col items-center justify-center gap-[10%]">
+            <span className="flex w-full justify-center gap-[18%]" style={{ height: "22%" }}>
+              <span className="galaxy-eye" style={{ width: "18%", height: "100%" }} />
+              <span className="galaxy-eye" style={{ width: "18%", height: "100%" }} />
+            </span>
             {phase === "thinking" ? (
-              <Loader2 className="h-14 w-14 animate-spin text-primary-foreground" />
-            ) : muted ? (
-              <MicOff className="h-14 w-14 text-muted-foreground" />
+              <Loader2 className="h-8 w-8 animate-spin text-primary-foreground" />
             ) : (
-              <Mic className="h-14 w-14 text-primary-foreground" />
+              <span
+                className={`galaxy-mouth ${phase === "speaking" || (speaking && !muted) ? "galaxy-talking" : ""}`}
+                style={muted ? { height: "3%", borderRadius: "9999px" } : undefined}
+              />
             )}
           </span>
         </button>
