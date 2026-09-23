@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Mic, MicOff, X } from "lucide-react";
+import { Loader2, Mic, MicOff, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -22,70 +22,123 @@ export function getSpeechRecognition(): (new () => SpeechRecognitionLike) | null
   return w.SpeechRecognition || w.webkitSpeechRecognition || null;
 }
 
-const LOCALES: Record<string, string> = {
-  en: "en-US",
-  ur: "ur-PK",
-  hi: "hi-IN",
-  ar: "ar-SA",
-};
+const LOCALES: Record<string, string> = { en: "en-US", ur: "hi-IN", hi: "hi-IN", ar: "ar-SA" };
+
+/** Markdown / code hata ke bolne layak saaf text. */
+export function speakableText(md: string) {
+  return md
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/`([^`]*)`/g, "$1")
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/[#*_>~|-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 1500);
+}
+
+export function speakText(text: string, lang: string, onEnd?: () => void) {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+    onEnd?.();
+    return;
+  }
+  const synth = window.speechSynthesis;
+  synth.cancel();
+  const u = new SpeechSynthesisUtterance(speakableText(text));
+  const locale = LOCALES[lang] ?? "hi-IN";
+  u.lang = locale;
+  u.rate = 0.95; // flutter_tts 0.5 ≈ normal speed on the web
+  const voice = synth.getVoices().find((v) => v.lang.replace("_", "-").startsWith(locale.slice(0, 2)));
+  if (voice) u.voice = voice;
+  u.onend = () => onEnd?.();
+  u.onerror = () => onEnd?.();
+  synth.speak(u);
+}
+
+type Phase = "listening" | "thinking" | "speaking";
 
 export function VoiceModal({
   lang,
   onTranscript,
-  onSubmit,
+  ask,
   onClose,
 }: {
   lang: string;
   onTranscript: (text: string) => void;
-  onSubmit: (text: string) => void;
+  ask: (text: string) => Promise<string>;
   onClose: () => void;
 }) {
   const [text, setText] = useState("");
+  const [reply, setReply] = useState("");
   const [muted, setMuted] = useState(false);
   const [speaking, setSpeaking] = useState(false);
+  const [phase, setPhase] = useState<Phase>("listening");
   const recRef = useRef<SpeechRecognitionLike | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const finalRef = useRef("");
-  const submittedRef = useRef(false);
+  const phaseRef = useRef<Phase>("listening");
   const mutedRef = useRef(false);
+  const aliveRef = useRef(true);
 
   useEffect(() => {
     mutedRef.current = muted;
   }, [muted]);
 
+  function setP(p: Phase) {
+    phaseRef.current = p;
+    setPhase(p);
+  }
+
+  function startListening() {
+    if (!aliveRef.current) return;
+    finalRef.current = "";
+    setText("");
+    setP("listening");
+    try {
+      recRef.current?.start();
+    } catch {
+      /* already started */
+    }
+  }
+
+  async function handleQuestion(value: string) {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    if (!value || phaseRef.current !== "listening") return;
+    setP("thinking");
+    try {
+      recRef.current?.stop();
+    } catch {
+      /* ignore */
+    }
+    try {
+      const answer = await ask(value);
+      if (!aliveRef.current) return;
+      setReply(answer);
+      setP("speaking");
+      speakText(answer, lang, () => {
+        if (aliveRef.current) startListening();
+      });
+    } catch {
+      if (aliveRef.current) startListening();
+    }
+  }
+
   useEffect(() => {
+    aliveRef.current = true;
     const Ctor = getSpeechRecognition();
     if (!Ctor) {
       toast.error("Voice not supported in this browser");
       onClose();
       return;
     }
-
     const rec = new Ctor();
     recRef.current = rec;
-    rec.lang = LOCALES[lang] ?? "en-US";
+    rec.lang = LOCALES[lang] ?? "hi-IN";
     rec.continuous = true;
     rec.interimResults = true;
 
-    const scheduleSend = () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => {
-        const value = finalRef.current.trim();
-        if (value && !submittedRef.current) {
-          submittedRef.current = true;
-          try {
-            rec.stop();
-          } catch {
-            /* ignore */
-          }
-          onSubmit(value);
-          onClose();
-        }
-      }, 2000);
-    };
-
     rec.onresult = (event: any) => {
-      if (mutedRef.current) return;
+      if (mutedRef.current || phaseRef.current !== "listening") return;
       let interim = "";
       let final = finalRef.current;
       for (let i = event.resultIndex; i < event.results.length; i += 1) {
@@ -98,25 +151,30 @@ export function VoiceModal({
       setText(combined);
       onTranscript(combined);
       setSpeaking(true);
-      scheduleSend();
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => void handleQuestion(finalRef.current.trim() || combined), 2000);
     };
-
     rec.onerror = (event: any) => {
       if (event?.error === "not-allowed") {
         toast.error("Microphone permission blocked");
         onClose();
       }
     };
-
-    rec.onend = () => setSpeaking(false);
-
-    try {
-      rec.start();
-    } catch {
-      /* already started */
-    }
+    rec.onend = () => {
+      setSpeaking(false);
+      // Mobile browsers band kar dete hain — listening phase me dobara chalu karo
+      if (aliveRef.current && phaseRef.current === "listening") {
+        try {
+          rec.start();
+        } catch {
+          /* ignore */
+        }
+      }
+    };
+    startListening();
 
     return () => {
+      aliveRef.current = false;
       if (timerRef.current) clearTimeout(timerRef.current);
       rec.onresult = null;
       rec.onend = null;
@@ -126,24 +184,33 @@ export function VoiceModal({
       } catch {
         /* ignore */
       }
+      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang]);
 
-  function stopAndSend() {
-    if (timerRef.current) clearTimeout(timerRef.current);
+  function stopOrSend() {
+    if (phaseRef.current === "speaking") {
+      window.speechSynthesis?.cancel();
+      startListening();
+      return;
+    }
     const value = (finalRef.current || text).trim();
-    try {
-      recRef.current?.stop();
-    } catch {
-      /* ignore */
-    }
-    if (value && !submittedRef.current) {
-      submittedRef.current = true;
-      onSubmit(value);
-    }
-    onClose();
+    if (value) void handleQuestion(value);
+    else onClose();
   }
+
+  const active = (phase === "listening" && speaking && !muted) || phase === "speaking";
+  const status =
+    phase === "thinking"
+      ? "Thinking..."
+      : phase === "speaking"
+        ? "Speaking... (tap to interrupt)"
+        : muted
+          ? "Muted"
+          : speaking
+            ? "Listening..."
+            : "Bolo, main sun raha hoon";
 
   return (
     <div className="fixed inset-0 z-[70] flex flex-col items-center justify-between bg-background/80 px-6 py-8 backdrop-blur-xl">
@@ -154,30 +221,30 @@ export function VoiceModal({
       </div>
 
       <div className="flex flex-col items-center gap-6">
-        <div className="relative flex h-44 w-44 items-center justify-center sm:h-56 sm:w-56">
-          <span
-            className={`absolute inset-0 rounded-full bg-primary/20 blur-2xl ${
-              speaking && !muted ? "voice-pulse" : ""
-            }`}
-          />
-          <div
-            className={`flex h-40 w-40 items-center justify-center rounded-full border border-primary/40 bg-primary/15 shadow-[0_0_60px_-10px] shadow-primary/60 sm:h-52 sm:w-52 ${
-              speaking && !muted ? "voice-pulse" : ""
-            }`}
-          >
-            {muted ? (
+        <button
+          type="button"
+          onClick={stopOrSend}
+          aria-label="Voice orb"
+          className={`galaxy-orb h-44 w-44 sm:h-56 sm:w-56 ${active ? "voice-pulse" : ""}`}
+        >
+          <span className="galaxy-stars" />
+          <span className="relative z-10 flex h-full w-full items-center justify-center">
+            {phase === "thinking" ? (
+              <Loader2 className="h-14 w-14 animate-spin text-primary-foreground" />
+            ) : muted ? (
               <MicOff className="h-14 w-14 text-muted-foreground" />
             ) : (
-              <Mic className="h-14 w-14 text-primary" />
+              <Mic className="h-14 w-14 text-primary-foreground" />
             )}
-          </div>
-        </div>
+          </span>
+        </button>
 
-        <p className="text-center text-sm text-muted-foreground">
-          {muted ? "Muted" : speaking ? "Listening..." : "Tap to stop"}
-        </p>
-        {text && (
+        <p className="text-center text-sm text-muted-foreground">{status}</p>
+        {text && phase !== "speaking" && (
           <p className="max-w-md text-center text-base font-medium text-foreground">{text}</p>
+        )}
+        {reply && phase === "speaking" && (
+          <p className="line-clamp-6 max-w-md text-center text-sm text-foreground/90">{speakableText(reply)}</p>
         )}
       </div>
 
@@ -188,27 +255,20 @@ export function VoiceModal({
               key={i}
               className="w-1.5 rounded-full bg-primary/70"
               style={{
-                height: speaking && !muted ? "100%" : "12%",
-                animation:
-                  speaking && !muted ? `voice-wave 1s ease-in-out ${i * 0.06}s infinite` : "none",
+                height: active ? "100%" : "12%",
+                animation: active ? `voice-wave 1s ease-in-out ${i * 0.06}s infinite` : "none",
               }}
             />
           ))}
         </div>
 
         <div className="flex items-center gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            size="lg"
-            className="rounded-full"
-            onClick={() => setMuted((m) => !m)}
-          >
+          <Button type="button" variant="outline" size="lg" className="rounded-full" onClick={() => setMuted((m) => !m)}>
             {muted ? <MicOff className="mr-2 h-4 w-4" /> : <Mic className="mr-2 h-4 w-4" />}
             {muted ? "Unmute" : "Mute"}
           </Button>
-          <Button type="button" size="lg" className="btn-green rounded-full px-8" onClick={stopAndSend}>
-            Stop
+          <Button type="button" size="lg" className="btn-green rounded-full px-8" onClick={onClose}>
+            End
           </Button>
         </div>
       </div>

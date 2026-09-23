@@ -33,6 +33,34 @@ import { VoiceModal, getSpeechRecognition } from "@/components/nova/VoiceModal";
 import { useLanguage } from "@/i18n/LanguageContext";
 import type { TranslationKey } from "@/i18n/translations";
 
+const VOICE_CACHE_KEY = "nqai_voice_cache";
+function voiceKey(q: string, lang: string) {
+  return `${lang}::${q.toLowerCase().trim()}`;
+}
+function loadVoiceCache(): Record<string, string> {
+  try {
+    return JSON.parse(localStorage.getItem(VOICE_CACHE_KEY) || "{}");
+  } catch {
+    return {};
+  }
+}
+function readVoiceCache(q: string, lang: string): string | null {
+  if (typeof window === "undefined") return null;
+  return loadVoiceCache()[voiceKey(q, lang)] ?? null;
+}
+function writeVoiceCache(q: string, lang: string, answer: string) {
+  if (typeof window === "undefined") return;
+  const cache = loadVoiceCache();
+  cache[voiceKey(q, lang)] = answer;
+  const keys = Object.keys(cache);
+  for (const k of keys.slice(0, Math.max(0, keys.length - 200))) delete cache[k];
+  try {
+    localStorage.setItem(VOICE_CACHE_KEY, JSON.stringify(cache));
+  } catch {
+    /* storage full */
+  }
+}
+
 const TOOL_LABELS: Record<string, TranslationKey> = {
   "tool-recall_knowledge": "toolRecall",
   "tool-save_knowledge": "toolSave",
@@ -298,6 +326,8 @@ function ChatThread({
   const convRef = useRef<string | null>(conversationId);
   const [voiceOpen, setVoiceOpen] = useState(false);
   const [speakingId, setSpeakingId] = useState<string | null>(null);
+  const voiceResolveRef = useRef<((text: string) => void) | null>(null);
+  const voiceQuestionRef = useRef("");
 
   // AI jawab ko awaaz me sunao (browser ka speechSynthesis).
   function speak(id: string, text: string) {
@@ -401,11 +431,17 @@ function ChatThread({
     [lang],
   );
 
-  const { messages, sendMessage, status, error } = useChat({
+  const { messages, sendMessage, setMessages, status, error } = useChat({
     messages: initialMessages,
     transport,
     onFinish: async ({ message }) => {
       const text = messageText(message);
+      if (voiceResolveRef.current) {
+        const q = voiceQuestionRef.current;
+        if (q && text) writeVoiceCache(q, lang, text);
+        voiceResolveRef.current(text || t("aiNoReply"));
+        voiceResolveRef.current = null;
+      }
       const id = convRef.current;
       if (!text || !id) return;
       await supabase.from("messages").insert({
@@ -452,6 +488,39 @@ function ChatThread({
       content: value,
     });
     void sendMessage({ text: value });
+  }
+
+  // Voice agent: cache (device par save) me ho to AI call nahi, warna AI se poocho.
+  async function askByVoice(question: string): Promise<string> {
+    const cached = readVoiceCache(question, lang);
+    if (cached) {
+      setInput("");
+      const stamp = Date.now();
+      setMessages((prev) => [
+        ...prev,
+        { id: `vq-${stamp}`, role: "user", parts: [{ type: "text", text: question }] },
+        { id: `va-${stamp}`, role: "assistant", parts: [{ type: "text", text: cached }] },
+      ]);
+      let id = convRef.current;
+      if (!id) {
+        id = await ensureConversation(question);
+        if (id) convRef.current = id;
+      }
+      if (id) {
+        await supabase.from("messages").insert([
+          { conversation_id: id, user_id: userId, role: "user", content: question },
+          { conversation_id: id, user_id: userId, role: "assistant", content: cached },
+        ]);
+        onTouched(id);
+      }
+      return cached;
+    }
+    if (busy) return t("aiNoReply");
+    return new Promise<string>((resolve) => {
+      voiceResolveRef.current = resolve;
+      voiceQuestionRef.current = question;
+      void submit(question);
+    });
   }
 
   return (
@@ -639,11 +708,9 @@ function ChatThread({
             rows={1}
             className="max-h-40 min-h-11 resize-none border-0 bg-transparent focus-visible:ring-0"
           />
-          <Button
+          <button
             type="button"
-            size="icon"
-            variant="ghost"
-            className="shrink-0"
+            className="galaxy-orb h-10 w-10 shrink-0 hover:scale-105"
             aria-label="Voice chat"
             onClick={() => {
               if (!getSpeechRecognition()) {
@@ -653,8 +720,9 @@ function ChatThread({
               setVoiceOpen(true);
             }}
           >
-            <Mic className="h-4 w-4" />
-          </Button>
+            <span className="galaxy-stars" />
+            <Mic className="relative z-10 mx-auto h-4 w-4 text-primary-foreground" />
+          </button>
           <Button
             type="submit"
             size="icon"
@@ -670,8 +738,12 @@ function ChatThread({
         <VoiceModal
           lang={lang}
           onTranscript={setInput}
-          onSubmit={(value) => void submit(value)}
-          onClose={() => setVoiceOpen(false)}
+          ask={askByVoice}
+          onClose={() => {
+            voiceResolveRef.current?.("");
+            voiceResolveRef.current = null;
+            setVoiceOpen(false);
+          }}
         />
       )}
     </div>
