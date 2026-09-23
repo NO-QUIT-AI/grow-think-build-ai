@@ -81,6 +81,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "monetag", content: "a96116c4c2cab550e181eedbdb25cd81" },
       { title: "NO QUIT AI" },
       {
         name: "description",
