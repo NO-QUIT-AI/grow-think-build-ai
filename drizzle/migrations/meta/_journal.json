@@ -64,6 +64,13 @@
       "when": 1789986104458,
       "tag": "0008_unique_invite_codes_referral_only_rewards",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790177262481,
+      "tag": "0009_tighten_member_read_policies",
+      "breakpoints": true
     }
   ]
 }
