@@ -33,6 +33,34 @@ import { VoiceModal, getSpeechRecognition } from "@/components/nova/VoiceModal";
 import { useLanguage } from "@/i18n/LanguageContext";
 import type { TranslationKey } from "@/i18n/translations";
 
+const VOICE_CACHE_KEY = "nqai_voice_cache";
+function voiceKey(q: string, lang: string) {
+  return `${lang}::${q.toLowerCase().trim()}`;
+}
+function loadVoiceCache(): Record<string, string> {
+  try {
+    return JSON.parse(localStorage.getItem(VOICE_CACHE_KEY) || "{}");
+  } catch {
+    return {};
+  }
+}
+function readVoiceCache(q: string, lang: string): string | null {
+  if (typeof window === "undefined") return null;
+  return loadVoiceCache()[voiceKey(q, lang)] ?? null;
+}
+function writeVoiceCache(q: string, lang: string, answer: string) {
+  if (typeof window === "undefined") return;
+  const cache = loadVoiceCache();
+  cache[voiceKey(q, lang)] = answer;
+  const keys = Object.keys(cache);
+  for (const k of keys.slice(0, Math.max(0, keys.length - 200))) delete cache[k];
+  try {
+    localStorage.setItem(VOICE_CACHE_KEY, JSON.stringify(cache));
+  } catch {
+    /* storage full */
+  }
+}
+
 const TOOL_LABELS: Record<string, TranslationKey> = {
   "tool-recall_knowledge": "toolRecall",
   "tool-save_knowledge": "toolSave",
