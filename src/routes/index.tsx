@@ -71,8 +71,8 @@ function Home() {
   }
 
   return (
-    <div className="mx-auto grid min-h-screen w-full max-w-[1100px] grid-cols-1 gap-6 px-4 pb-4 pt-5 lg:grid-cols-[minmax(0,768px)_300px] lg:items-start lg:justify-center">
-    <main className="flex min-h-screen min-w-0 w-full flex-col">
+    <div className="mx-auto flex min-h-screen w-full max-w-[1280px] flex-col gap-6 px-4 pb-4 pt-5 md:flex-row md:items-start">
+    <main className="flex w-full min-w-0 flex-col md:w-[75%]">
       <header className="mb-4 flex items-center gap-3">
         <img
           src={logoAsset.url}
