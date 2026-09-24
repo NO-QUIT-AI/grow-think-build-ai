@@ -119,12 +119,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         async: true,
         crossOrigin: "anonymous",
       },
-      {
-        src: "https://quge5.com/88/tag.min.js",
-        async: true,
-        "data-zone": "285465",
-        "data-cfasync": "false",
-      },
+      // Monetag scripts are NOT loaded globally anymore — they run only inside
+      // the sandboxed #monetag-ad-box in AdSidebar (never on login/auth pages).
     ],
   }),
   shellComponent: RootShell,
