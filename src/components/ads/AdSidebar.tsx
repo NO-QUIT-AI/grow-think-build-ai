@@ -14,8 +14,8 @@ export function AdSidebar() {
     script.id = MONETAG_SCRIPT_ID;
     script.src = "https://quge5.com/88/tag.min.js";
     script.async = true;
-    script.dataset.zone = MONETAG_ZONE_ID;
-    script.dataset.cfasync = "false";
+    script.dataset["zone"] = MONETAG_ZONE_ID;
+    script.dataset["cfasync"] = "false";
     container.appendChild(script);
 
     return () => {
