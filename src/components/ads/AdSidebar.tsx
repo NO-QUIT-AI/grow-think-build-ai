@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 
 const ZONES = ["11875406", "285465"];
 const FIVE_MIN = 5 * 60 * 1000;
-const LS_KEY = "nqai_ad_last_refresh";
 const BLOCKED = ["login", "signin", "signup", "register", "auth", "verify"];
 
 const tag = (zone: string) =>
@@ -14,19 +13,14 @@ export function AdSidebar() {
 
   useEffect(() => {
     const path = window.location.pathname.toLowerCase();
-    if (BLOCKED.some((b) => path.includes(b))) return; // never load on auth pages
-    setAllowed(true);
-    // Frequency cap: refresh the ad at most once every 5 minutes per user.
-    const tick = () => {
-      const last = Number(localStorage.getItem(LS_KEY) || 0);
-      if (Date.now() - last >= FIVE_MIN) {
-        localStorage.setItem(LS_KEY, String(Date.now()));
-        setRefreshKey((k) => k + 1);
-      }
+    if (BLOCKED.some((b) => path.includes(b))) return; // never on auth pages
+    // First ad appears only after 5 minutes, then refreshes every 5 minutes.
+    const first = window.setTimeout(() => setAllowed(true), FIVE_MIN);
+    const id = window.setInterval(() => setRefreshKey((k) => k + 1), FIVE_MIN);
+    return () => {
+      window.clearTimeout(first);
+      window.clearInterval(id);
     };
-    tick();
-    const id = window.setInterval(tick, 30_000);
-    return () => window.clearInterval(id);
   }, []);
 
   if (!allowed) return null;
@@ -44,9 +38,10 @@ export function AdSidebar() {
               key={`${zone}-${refreshKey}`}
               title={`Advertisement ${zone}`}
               srcDoc={tag(zone)}
-              // No allow-popups / allow-top-navigation: ads can't open popunders,
-              // go fullscreen over the app, or redirect the page.
-              sandbox="allow-scripts"
+              // allow-same-origin lets Monetag recognise the site so ads fill.
+              // Still NO allow-popups / allow-top-navigation: no popunders,
+              // no fullscreen overlays, no redirects.
+              sandbox="allow-scripts allow-same-origin"
               scrolling="no"
               className="block h-[250px] w-full border-0"
             />
