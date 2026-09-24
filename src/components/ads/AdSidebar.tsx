@@ -5,7 +5,7 @@ export function AdSidebar() {
   return (
     <aside
       aria-label="Advertisement"
-      className="w-full lg:sticky lg:top-5 lg:w-[300px] lg:self-start"
+      className="w-full shrink-0 self-center md:sticky md:top-5 md:w-[25%] md:self-start lg:w-[300px]"
     >
       <p className="mb-1.5 text-[11px] text-muted-foreground">Advertisement</p>
       <div className="mx-auto h-[250px] w-full max-w-[300px] overflow-hidden rounded-lg border border-border bg-card/40">
