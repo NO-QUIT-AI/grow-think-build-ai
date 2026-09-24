@@ -5,16 +5,22 @@ export function AdSidebar() {
   return (
     <aside
       aria-label="Advertisement"
-      className="w-full shrink-0 self-center md:sticky md:top-5 md:w-[25%] md:self-start lg:w-[300px]"
+      className="w-full min-w-0 shrink-0 self-center md:sticky md:top-5 md:w-[25%] md:self-start"
     >
-      <p className="mb-1.5 text-[11px] text-muted-foreground">Advertisement</p>
-      <div className="mx-auto h-[250px] w-full max-w-[300px] overflow-hidden rounded-lg border border-border bg-card/40">
-        <iframe
-          title="Monetag in-page advertisement"
-          srcDoc={MONETAG_IN_PAGE_TAG}
-          sandbox="allow-scripts"
-          className="h-full w-full border-0"
-        />
+      <div className="mx-auto w-full max-w-[300px] rounded-xl border border-border bg-card/40 p-2.5">
+        <p className="mb-1.5 text-[11px] text-muted-foreground">Advertisement</p>
+        <div
+          id="monetag-ad-container"
+          className="h-[250px] w-full overflow-hidden rounded-lg"
+        >
+          <iframe
+            title="Monetag in-page advertisement"
+            srcDoc={MONETAG_IN_PAGE_TAG}
+            sandbox="allow-scripts"
+            scrolling="no"
+            className="block h-full w-full border-0"
+          />
+        </div>
       </div>
     </aside>
   );
