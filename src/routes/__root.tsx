@@ -119,18 +119,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         async: true,
         crossOrigin: "anonymous",
       },
-      {
-        // Monetag Vignette Banner (zone 11875364)
-        children:
-          "(function(s){s.dataset.zone='11875364',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))",
-      },
-      {
-        // Monetag tag (zone 285465)
-        src: "https://quge5.com/88/tag.min.js",
-        async: true,
-        "data-zone": "285465",
-        "data-cfasync": "false",
-      },
     ],
   }),
   shellComponent: RootShell,

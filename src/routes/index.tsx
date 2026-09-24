@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { redeemReferral } from "@/lib/referral";
 import { LegalFooter } from "@/components/legal/LegalPage";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { AdSidebar } from "@/components/ads/AdSidebar";
 import { useT } from "@/i18n/LanguageContext";
 
 export const Route = createFileRoute("/")({
@@ -70,7 +71,8 @@ function Home() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 pb-4 pt-5">
+    <div className="mx-auto grid min-h-screen w-full max-w-[1100px] grid-cols-1 gap-6 px-4 pb-4 pt-5 lg:grid-cols-[minmax(0,768px)_300px] lg:items-start lg:justify-center">
+    <main className="flex min-h-screen min-w-0 w-full flex-col">
       <header className="mb-4 flex items-center gap-3">
         <img
           src={logoAsset.url}
@@ -154,5 +156,7 @@ function Home() {
       </Tabs>
       <LegalFooter />
     </main>
+      <AdSidebar />
+    </div>
   );
 }
