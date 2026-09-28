@@ -16,6 +16,7 @@ import { redeemReferral } from "@/lib/referral";
 import { LegalFooter } from "@/components/legal/LegalPage";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { AdSidebar } from "@/components/ads/AdSidebar";
+import { SmartLinkCta } from "@/components/ads/SmartLinkCta";
 import { useT } from "@/i18n/LanguageContext";
 
 export const Route = createFileRoute("/")({

@@ -237,6 +237,8 @@ function Earn({ userId }: { userId: string }) {
         <Button variant="outline" className="mt-2 w-full" onClick={() => void shareInvite()}>
           <Share2 className="mr-2 h-4 w-4" /> {t("shareInvite")}
         </Button>
+
+        <SmartLinkCta className="mt-2" />
       </section>
 
       <section className="mt-4 rounded-2xl border border-border bg-card p-4">
