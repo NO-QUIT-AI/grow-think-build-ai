@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { RewardAdHost } from "@/components/ads/RewardAd";
 import {
   Outlet,
   Link,

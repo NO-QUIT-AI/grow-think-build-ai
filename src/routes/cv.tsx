@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { showRewardAd } from "@/components/ads/RewardAd";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   Eye,

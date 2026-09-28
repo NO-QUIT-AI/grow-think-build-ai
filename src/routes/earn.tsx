@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { showRewardAd } from "@/components/ads/RewardAd";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Coins, Loader2, Pickaxe, Share2, Sparkles, Timer, Zap } from "lucide-react";
 import { toast } from "sonner";
