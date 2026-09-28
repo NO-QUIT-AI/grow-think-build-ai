@@ -4,6 +4,7 @@ import { Coins, Loader2, Pickaxe, Share2, Sparkles, Timer, Zap } from "lucide-re
 import { toast } from "sonner";
 
 import { AdSlot } from "@/components/ads/AdSlot";
+import { SmartLinkCta } from "@/components/ads/SmartLinkCta";
 import { CommunityShell } from "@/components/community/CommunityShell";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
