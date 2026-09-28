@@ -157,7 +157,10 @@ function Home() {
       </Tabs>
       <LegalFooter />
     </main>
-      <AdSidebar />
+      <div className="flex w-full flex-col gap-2">
+        <AdSidebar />
+        <SmartLinkCta className="mx-auto max-w-[300px]" />
+      </div>
     </div>
   );
 }
