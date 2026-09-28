@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { showRewardAd } from "@/components/ads/RewardAd";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Coins, Loader2, Pickaxe, Share2, Sparkles, Timer, Zap } from "lucide-react";
 import { toast } from "sonner";
@@ -133,6 +134,7 @@ function Earn({ userId }: { userId: string }) {
       const result = await claimMining();
       if (result.ok) {
         toast.success(`+${formatCoins(result.reward ?? 0)} ${COIN} claim ho gaye!`);
+        showRewardAd();
       } else if (result.reason === "cooldown") {
         toast.info(`Agla claim ${countdown(result.next_claim_at, skew.current)} baad.`);
       } else if (result.reason === "not_mining") {
