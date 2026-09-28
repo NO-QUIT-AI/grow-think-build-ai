@@ -4,6 +4,7 @@ import { Coins, Loader2, Pickaxe, Share2, Sparkles, Timer, Zap } from "lucide-re
 import { toast } from "sonner";
 
 import { AdSlot } from "@/components/ads/AdSlot";
+import { SmartLinkCta } from "@/components/ads/SmartLinkCta";
 import { CommunityShell } from "@/components/community/CommunityShell";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -236,6 +237,8 @@ function Earn({ userId }: { userId: string }) {
         <Button variant="outline" className="mt-2 w-full" onClick={() => void shareInvite()}>
           <Share2 className="mr-2 h-4 w-4" /> {t("shareInvite")}
         </Button>
+
+        <SmartLinkCta className="mt-2" />
       </section>
 
       <section className="mt-4 rounded-2xl border border-border bg-card p-4">
