@@ -159,6 +159,7 @@ function RootComponent() {
         <Outlet />
         <InstallAppBanner />
         <Toaster position="top-center" richColors />
+        <RewardAdHost />
       </LanguageProvider>
     </QueryClientProvider>
   );

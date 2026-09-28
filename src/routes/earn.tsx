@@ -133,6 +133,7 @@ function Earn({ userId }: { userId: string }) {
       const result = await claimMining();
       if (result.ok) {
         toast.success(`+${formatCoins(result.reward ?? 0)} ${COIN} claim ho gaye!`);
+        showRewardAd();
       } else if (result.reason === "cooldown") {
         toast.info(`Agla claim ${countdown(result.next_claim_at, skew.current)} baad.`);
       } else if (result.reason === "not_mining") {
