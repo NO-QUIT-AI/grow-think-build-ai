@@ -20,6 +20,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadHtmlAsPdf } from "@/lib/html-pdf";
+import { downloadHtmlAsPng } from "@/lib/html-png";
+import { ImageDown } from "lucide-react";
 
 type Memory = {
   id: string;
@@ -137,6 +139,21 @@ export function StudioPanel({
       toast.error("PDF nahi ban saka");
     } finally {
       setPdfBusy(false);
+    }
+  }
+
+  const [pngBusy, setPngBusy] = useState(false);
+  /** App ya logo build ko PNG image me download karta hai. */
+  async function downloadPng() {
+    if (!html) return;
+    setPngBusy(true);
+    try {
+      await downloadHtmlAsPng(html, `${fileBase()}.png`, device === "mobile" ? 420 : 1280);
+      toast.success("PNG download ho gaya");
+    } catch {
+      toast.error("PNG nahi ban saka");
+    } finally {
+      setPngBusy(false);
     }
   }
 
@@ -274,6 +291,14 @@ export function StudioPanel({
             onClick={() => void downloadZip()}
           >
             <FileArchive className="h-4 w-4" /> Download ZIP
+          </Button>
+          <Button
+            size="sm"
+            className="btn-green h-9 flex-1 gap-1.5 rounded-xl text-xs sm:flex-none"
+            disabled={pngBusy}
+            onClick={() => void downloadPng()}
+          >
+            <ImageDown className="h-4 w-4" /> {pngBusy ? "..." : "Download PNG"}
           </Button>
           <Button
             size="sm"
