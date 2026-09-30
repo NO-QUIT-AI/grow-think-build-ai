@@ -225,7 +225,7 @@ async function r2Fetch(method: string, query = "", body?: unknown) {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
-    body: body ? JSON.stringify(body) : undefined,
+    ...(body ? { body: JSON.stringify(body) } : {}),
   });
   if (!response.ok) throw new Error((await response.text()) || "R2 request failed");
   return response.json();
