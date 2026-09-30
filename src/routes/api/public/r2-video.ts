@@ -12,9 +12,10 @@ export const Route = createFileRoute("/api/public/r2-video")({
         const xml = await res.text();
         if (!res.ok) return Response.json({ error: `R2 list failed (${res.status})` }, { status: 502 });
         const files = [...xml.matchAll(/<Contents>([\s\S]*?)<\/Contents>/g)].map((m) => {
-          const key = /<Key>(.*?)<\/Key>/.exec(m[1])?.[1] ?? "";
-          const size = Number(/<Size>(.*?)<\/Size>/.exec(m[1])?.[1] ?? 0);
-          const uploaded = /<LastModified>(.*?)<\/LastModified>/.exec(m[1])?.[1] ?? "";
+          const c = m[1] ?? "";
+          const key = /<Key>(.*?)<\/Key>/.exec(c)?.[1] ?? "";
+          const size = Number(/<Size>(.*?)<\/Size>/.exec(c)?.[1] ?? 0);
+          const uploaded = /<LastModified>(.*?)<\/LastModified>/.exec(c)?.[1] ?? "";
           return { key, name: key.replace(/^videos\/\d+-/, ""), size, uploaded, url: `${publicUrl}/${key}` };
         });
         files.sort((a, b) => b.uploaded.localeCompare(a.uploaded));
