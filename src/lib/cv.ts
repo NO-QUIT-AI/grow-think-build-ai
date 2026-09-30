@@ -215,42 +215,46 @@ export function compressPhoto(file: File, maxSide = 600, quality = 0.85): Promis
   });
 }
 
-export async function listCvs(userId: string): Promise<CvRecord[]> {
-  const { data } = await supabase
-    .from("cv_documents")
-    .select("id, title, data, updated_at")
-    .eq("user_id", userId)
-    .order("updated_at", { ascending: false });
-  return (data ?? []).map((row) => ({
-    id: row.id as string,
-    title: (row.title as string) ?? "Mera CV",
-    data: normalizeCv(row.data),
-    updated_at: row.updated_at as string,
-  }));
+/** CV storage ab user ke apne Cloudflare R2 bucket (noquitai-files/database/cvs/) me hai. */
+async function r2Fetch(method: string, query = "", body?: unknown) {
+  const { data: session } = await supabase.auth.getSession();
+  const token = session.session?.access_token;
+  const response = await fetch(`/api/cv-store${query}`, {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!response.ok) throw new Error((await response.text()) || "R2 request failed");
+  return response.json();
 }
 
-export async function saveCv(userId: string, id: string | null, data: CvData) {
-  const title = data.name ? `${data.name} — CV` : "Mera CV";
-  if (id) {
-    const { error } = await supabase
-      .from("cv_documents")
-      .update({ title, data: data as never, updated_at: new Date().toISOString() })
-      .eq("id", id);
-    if (error) throw new Error(error.message);
-    return id;
+export async function listCvs(_userId: string): Promise<CvRecord[]> {
+  try {
+    const { cvs } = (await r2Fetch("GET")) as { cvs: CvRecord[] };
+    return cvs
+      .map((row) => ({
+        id: row.id,
+        title: row.title ?? "Mera CV",
+        data: normalizeCv(row.data),
+        updated_at: row.updated_at,
+      }))
+      .sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+  } catch {
+    return [];
   }
-  const { data: row, error } = await supabase
-    .from("cv_documents")
-    .insert({ user_id: userId, title, data: data as never })
-    .select("id")
-    .single();
-  if (error) throw new Error(error.message);
-  return row!.id as string;
+}
+
+export async function saveCv(_userId: string, id: string | null, data: CvData) {
+  const title = data.name ? `${data.name} — CV` : "Mera CV";
+  const res = (await r2Fetch("PUT", "", { id, title, data })) as { id: string };
+  return res.id;
 }
 
 export async function deleteCv(id: string) {
-  const { error } = await supabase.from("cv_documents").delete().eq("id", id);
-  if (error) throw new Error(error.message);
+  await r2Fetch("DELETE", `?id=${encodeURIComponent(id)}`);
 }
 
 /** AI se summary + experience bullets behtar karwata hai. */
