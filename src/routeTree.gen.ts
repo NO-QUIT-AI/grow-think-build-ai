@@ -18,6 +18,7 @@ import { Route as EarnRouteImport } from './routes/earn'
 import { Route as InviteRouteImport } from './routes/invite'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as MessagesRouteImport } from './routes/messages'
+import { Route as PlayerRouteImport } from './routes/player'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AdminAdsRouteImport } from './routes/admin.ads'
@@ -27,6 +28,7 @@ import { Route as ApiEditImageRouteImport } from './routes/api/edit-image'
 import { Route as ApiMindRouteImport } from './routes/api/mind'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as ApiMindThinkRouteImport } from './routes/api/mind/think'
+import { Route as ApiPublicR2VideoRouteImport } from './routes/api/public/r2-video'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -71,6 +73,11 @@ const LeaderboardRoute = LeaderboardRouteImport.update({
 const MessagesRoute = MessagesRouteImport.update({
   id: '/messages',
   path: '/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlayerRoute = PlayerRouteImport.update({
+  id: '/player',
+  path: '/player',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -118,6 +125,11 @@ const ApiMindThinkRoute = ApiMindThinkRouteImport.update({
   path: '/think',
   getParentRoute: () => ApiMindRoute,
 } as any)
+const ApiPublicR2VideoRoute = ApiPublicR2VideoRouteImport.update({
+  id: '/api/public/r2-video',
+  path: '/api/public/r2-video',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -129,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/invite': typeof InviteRoute
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRoute
+  '/player': typeof PlayerRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/admin/ads': typeof AdminAdsRoute
@@ -138,6 +151,7 @@ export interface FileRoutesByFullPath {
   '/api/mind': typeof ApiMindRouteWithChildren
   '/u/$username': typeof UUsernameRoute
   '/api/mind/think': typeof ApiMindThinkRoute
+  '/api/public/r2-video': typeof ApiPublicR2VideoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -149,6 +163,7 @@ export interface FileRoutesByTo {
   '/invite': typeof InviteRoute
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRoute
+  '/player': typeof PlayerRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/admin/ads': typeof AdminAdsRoute
@@ -158,6 +173,7 @@ export interface FileRoutesByTo {
   '/api/mind': typeof ApiMindRouteWithChildren
   '/u/$username': typeof UUsernameRoute
   '/api/mind/think': typeof ApiMindThinkRoute
+  '/api/public/r2-video': typeof ApiPublicR2VideoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -170,6 +186,7 @@ export interface FileRoutesById {
   '/invite': typeof InviteRoute
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRoute
+  '/player': typeof PlayerRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/admin/ads': typeof AdminAdsRoute
@@ -179,6 +196,7 @@ export interface FileRoutesById {
   '/api/mind': typeof ApiMindRouteWithChildren
   '/u/$username': typeof UUsernameRoute
   '/api/mind/think': typeof ApiMindThinkRoute
+  '/api/public/r2-video': typeof ApiPublicR2VideoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -192,6 +210,7 @@ export interface FileRouteTypes {
     | '/invite'
     | '/leaderboard'
     | '/messages'
+    | '/player'
     | '/privacy'
     | '/terms'
     | '/admin/ads'
@@ -201,6 +220,7 @@ export interface FileRouteTypes {
     | '/api/mind'
     | '/u/$username'
     | '/api/mind/think'
+    | '/api/public/r2-video'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -212,6 +232,7 @@ export interface FileRouteTypes {
     | '/invite'
     | '/leaderboard'
     | '/messages'
+    | '/player'
     | '/privacy'
     | '/terms'
     | '/admin/ads'
@@ -221,6 +242,7 @@ export interface FileRouteTypes {
     | '/api/mind'
     | '/u/$username'
     | '/api/mind/think'
+    | '/api/public/r2-video'
   id:
     | '__root__'
     | '/'
@@ -232,6 +254,7 @@ export interface FileRouteTypes {
     | '/invite'
     | '/leaderboard'
     | '/messages'
+    | '/player'
     | '/privacy'
     | '/terms'
     | '/admin/ads'
@@ -241,6 +264,7 @@ export interface FileRouteTypes {
     | '/api/mind'
     | '/u/$username'
     | '/api/mind/think'
+    | '/api/public/r2-video'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -253,6 +277,7 @@ export interface RootRouteChildren {
   InviteRoute: typeof InviteRoute
   LeaderboardRoute: typeof LeaderboardRoute
   MessagesRoute: typeof MessagesRoute
+  PlayerRoute: typeof PlayerRoute
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
   AdminAdsRoute: typeof AdminAdsRoute
@@ -261,6 +286,7 @@ export interface RootRouteChildren {
   ApiEditImageRoute: typeof ApiEditImageRoute
   ApiMindRoute: typeof ApiMindRouteWithChildren
   UUsernameRoute: typeof UUsernameRoute
+  ApiPublicR2VideoRoute: typeof ApiPublicR2VideoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -328,6 +354,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MessagesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/player': {
+      id: '/player'
+      path: '/player'
+      fullPath: '/player'
+      preLoaderRoute: typeof PlayerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
@@ -391,6 +424,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiMindThinkRouteImport
       parentRoute: typeof ApiMindRoute
     }
+    '/api/public/r2-video': {
+      id: '/api/public/r2-video'
+      path: '/api/public/r2-video'
+      fullPath: '/api/public/r2-video'
+      preLoaderRoute: typeof ApiPublicR2VideoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -415,6 +455,7 @@ const rootRouteChildren: RootRouteChildren = {
   InviteRoute: InviteRoute,
   LeaderboardRoute: LeaderboardRoute,
   MessagesRoute: MessagesRoute,
+  PlayerRoute: PlayerRoute,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
   AdminAdsRoute: AdminAdsRoute,
@@ -423,6 +464,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiEditImageRoute: ApiEditImageRoute,
   ApiMindRoute: ApiMindRouteWithChildren,
   UUsernameRoute: UUsernameRoute,
+  ApiPublicR2VideoRoute: ApiPublicR2VideoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
