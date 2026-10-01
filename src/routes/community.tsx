@@ -161,25 +161,22 @@ function Feed({ userId }: { userId: string }) {
       return;
     }
     setUploading(true);
-    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-    const path = `${userId}/${crypto.randomUUID()}.${ext}`;
-    const { error } = await supabase.storage
-      .from("community-images")
-      .upload(path, file, { contentType: file.type || "image/jpeg", upsert: false });
-    if (error) {
-      setUploading(false);
-      toast.error(`Image upload nahi hui: ${error.message}`);
-      return;
-    }
-    const { data } = await supabase.storage
-      .from("community-images")
-      .createSignedUrl(path, 60 * 60 * 24 * 3650);
+    const { data: sess } = await supabase.auth.getSession();
+    const res = await fetch("/api/r2-upload", {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${sess.session?.access_token ?? ""}`,
+        "content-type": file.type || "image/jpeg",
+      },
+      body: file,
+    }).catch(() => null);
     setUploading(false);
-    if (!data?.signedUrl) {
-      toast.error("Image link nahi bana");
+    if (!res?.ok) {
+      toast.error(`Image upload nahi hui${res ? ` (${res.status})` : ""}`);
       return;
     }
-    setImageUrl(data.signedUrl);
+    const { url } = (await res.json()) as { url: string };
+    setImageUrl(url);
     setShowExtra(true);
     toast.success("Screenshot lag gaya");
   }

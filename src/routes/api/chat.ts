@@ -355,6 +355,18 @@ export const Route = createFileRoute("/api/chat")({
               if (error || memoryError) {
                 return { saved: false, error: error?.message || memoryError?.message };
               }
+              // Build ki HTML file user ke Cloudflare R2 me bhi save hoti hai.
+              try {
+                const { r2 } = await import("@/lib/r2.server");
+                const { client, base } = r2();
+                await client.fetch(`${base}/builds/${userId}/${data!.id}.html`, {
+                  method: "PUT",
+                  body: html,
+                  headers: { "content-type": "text/html; charset=utf-8" },
+                });
+              } catch (e) {
+                console.error("[chat] R2 build save failed", e);
+              }
               return { saved: true, id: data!.id, name, preview: "Studio cabin me live chal rahi hai" };
             },
           }),

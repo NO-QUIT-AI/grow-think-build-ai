@@ -27,6 +27,7 @@ import { Route as ApiCvPolishRouteImport } from './routes/api/cv-polish'
 import { Route as ApiCvStoreRouteImport } from './routes/api/cv-store'
 import { Route as ApiEditImageRouteImport } from './routes/api/edit-image'
 import { Route as ApiMindRouteImport } from './routes/api/mind'
+import { Route as ApiR2UploadRouteImport } from './routes/api/r2-upload'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as ApiMindThinkRouteImport } from './routes/api/mind/think'
 import { Route as ApiPublicR2VideoRouteImport } from './routes/api/public/r2-video'
@@ -121,6 +122,11 @@ const ApiMindRoute = ApiMindRouteImport.update({
   path: '/api/mind',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiR2UploadRoute = ApiR2UploadRouteImport.update({
+  id: '/api/r2-upload',
+  path: '/api/r2-upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UUsernameRoute = UUsernameRouteImport.update({
   id: '/u/$username',
   path: '/u/$username',
@@ -156,6 +162,7 @@ export interface FileRoutesByFullPath {
   '/api/cv-store': typeof ApiCvStoreRoute
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/mind': typeof ApiMindRouteWithChildren
+  '/api/r2-upload': typeof ApiR2UploadRoute
   '/u/$username': typeof UUsernameRoute
   '/api/mind/think': typeof ApiMindThinkRoute
   '/api/public/r2-video': typeof ApiPublicR2VideoRoute
@@ -179,6 +186,7 @@ export interface FileRoutesByTo {
   '/api/cv-store': typeof ApiCvStoreRoute
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/mind': typeof ApiMindRouteWithChildren
+  '/api/r2-upload': typeof ApiR2UploadRoute
   '/u/$username': typeof UUsernameRoute
   '/api/mind/think': typeof ApiMindThinkRoute
   '/api/public/r2-video': typeof ApiPublicR2VideoRoute
@@ -203,6 +211,7 @@ export interface FileRoutesById {
   '/api/cv-store': typeof ApiCvStoreRoute
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/mind': typeof ApiMindRouteWithChildren
+  '/api/r2-upload': typeof ApiR2UploadRoute
   '/u/$username': typeof UUsernameRoute
   '/api/mind/think': typeof ApiMindThinkRoute
   '/api/public/r2-video': typeof ApiPublicR2VideoRoute
@@ -228,6 +237,7 @@ export interface FileRouteTypes {
     | '/api/cv-store'
     | '/api/edit-image'
     | '/api/mind'
+    | '/api/r2-upload'
     | '/u/$username'
     | '/api/mind/think'
     | '/api/public/r2-video'
@@ -251,6 +261,7 @@ export interface FileRouteTypes {
     | '/api/cv-store'
     | '/api/edit-image'
     | '/api/mind'
+    | '/api/r2-upload'
     | '/u/$username'
     | '/api/mind/think'
     | '/api/public/r2-video'
@@ -274,6 +285,7 @@ export interface FileRouteTypes {
     | '/api/cv-store'
     | '/api/edit-image'
     | '/api/mind'
+    | '/api/r2-upload'
     | '/u/$username'
     | '/api/mind/think'
     | '/api/public/r2-video'
@@ -298,6 +310,7 @@ export interface RootRouteChildren {
   ApiCvStoreRoute: typeof ApiCvStoreRoute
   ApiEditImageRoute: typeof ApiEditImageRoute
   ApiMindRoute: typeof ApiMindRouteWithChildren
+  ApiR2UploadRoute: typeof ApiR2UploadRoute
   UUsernameRoute: typeof UUsernameRoute
   ApiPublicR2VideoRoute: typeof ApiPublicR2VideoRoute
 }
@@ -430,6 +443,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiMindRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/r2-upload': {
+      id: '/api/r2-upload'
+      path: '/api/r2-upload'
+      fullPath: '/api/r2-upload'
+      preLoaderRoute: typeof ApiR2UploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/u/$username': {
       id: '/u/$username'
       path: '/u/$username'
@@ -484,6 +504,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCvStoreRoute: ApiCvStoreRoute,
   ApiEditImageRoute: ApiEditImageRoute,
   ApiMindRoute: ApiMindRouteWithChildren,
+  ApiR2UploadRoute: ApiR2UploadRoute,
   UUsernameRoute: UUsernameRoute,
   ApiPublicR2VideoRoute: ApiPublicR2VideoRoute,
 }
