@@ -63,11 +63,12 @@ export function AdSlot({
     return (
       <div
         className={cn(
-          "my-3 rounded-xl border border-dashed border-border/60 p-4 text-center text-[11px] text-muted-foreground",
+          "my-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-border/50 px-3 py-1.5 text-[10px] text-muted-foreground/60",
           className,
         )}
       >
-        Ad space (development preview)
+        <span className="h-1 w-1 rounded-full bg-muted-foreground/40" />
+        Ad space — abhi khali hai
       </div>
     );
   }
