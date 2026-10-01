@@ -228,7 +228,7 @@ export function CommunityShell({
               key={item.to}
               to={item.to}
               activeOptions={{ exact: true }}
-              className="flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] text-muted-foreground"
+              className="flex flex-col items-center gap-0.5 whitespace-nowrap px-1.5 py-1 text-[10px] text-muted-foreground"
               activeProps={{ className: "text-primary" }}
             >
               <item.icon className="h-4 w-4" />
