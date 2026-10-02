@@ -3,6 +3,7 @@ import { Loader2, Mic, MicOff, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import voiceAgent from "@/assets/voice-agent.jpg.asset.json";
 
 type SpeechRecognitionLike = {
   lang: string;
@@ -47,8 +48,13 @@ export function speakText(text: string, lang: string, onEnd?: () => void) {
   const u = new SpeechSynthesisUtterance(speakableText(text));
   const locale = LOCALES[lang] ?? "hi-IN";
   u.lang = locale;
-  u.rate = 0.95; // flutter_tts 0.5 ≈ normal speed on the web
-  const voice = synth.getVoices().find((v) => v.lang.replace("_", "-").startsWith(locale.slice(0, 2)));
+  u.rate = 1;
+  u.pitch = 1;
+  // Sab se natural (human jaisi) voice chuno: Neural/Natural/Google/Online voices pehle
+  const matches = synth.getVoices().filter((v) => v.lang.replace("_", "-").startsWith(locale.slice(0, 2)));
+  const score = (v: SpeechSynthesisVoice) =>
+    (/natural|neural|online/i.test(v.name) ? 4 : 0) + (/google/i.test(v.name) ? 3 : 0) + (/premium|enhanced/i.test(v.name) ? 2 : 0) + (v.localService ? 0 : 1);
+  const voice = matches.sort((a, b) => score(b) - score(a))[0];
   if (voice) u.voice = voice;
   u.onend = () => onEnd?.();
   u.onerror = () => onEnd?.();
@@ -224,24 +230,15 @@ export function VoiceModal({
         <button
           type="button"
           onClick={stopOrSend}
-          aria-label="Voice orb"
-          className={`galaxy-orb h-44 w-44 sm:h-56 sm:w-56 ${active ? "voice-pulse" : ""}`}
+          aria-label="Voice agent"
+          className={`relative h-64 w-44 overflow-hidden rounded-3xl border border-primary/40 shadow-[0_0_40px_hsl(var(--primary)/0.35)] transition-transform sm:h-80 sm:w-56 ${active ? "voice-pulse scale-[1.02]" : ""}`}
         >
-          <span className="galaxy-stars" />
-          <span className="relative z-10 flex h-full w-full flex-col items-center justify-center gap-[10%]">
-            <span className="flex w-full justify-center gap-[18%]" style={{ height: "22%" }}>
-              <span className="galaxy-eye" style={{ width: "18%", height: "100%" }} />
-              <span className="galaxy-eye" style={{ width: "18%", height: "100%" }} />
+          <img src={voiceAgent.url} alt="NO QUIT AI voice agent" className="h-full w-full object-cover object-top" />
+          {phase === "thinking" && (
+            <span className="absolute inset-0 flex items-center justify-center bg-background/40">
+              <Loader2 className="h-10 w-10 animate-spin text-primary" />
             </span>
-            {phase === "thinking" ? (
-              <Loader2 className="h-8 w-8 animate-spin text-primary-foreground" />
-            ) : (
-              <span
-                className={`galaxy-mouth ${phase === "speaking" || (speaking && !muted) ? "galaxy-talking" : ""}`}
-                style={muted ? { height: "3%", borderRadius: "9999px" } : undefined}
-              />
-            )}
-          </span>
+          )}
         </button>
 
         <p className="text-center text-sm text-muted-foreground">{status}</p>
