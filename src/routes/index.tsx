@@ -74,45 +74,64 @@ function Home() {
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-[1280px] flex-col gap-6 px-4 pb-4 pt-5 md:flex-row md:items-start">
     <main className="flex w-full min-w-0 flex-col md:w-[75%]">
-      <header className="mb-4 flex items-center gap-3">
-        <img
-          src={logoAsset.url}
-          alt="NO QUIT AI logo"
-          className="h-10 w-10 rounded-2xl border border-border object-cover"
-        />
-        <div className="flex-1">
-          <h1 className="text-lg font-semibold leading-tight">
-             NO QUIT AI <span className="text-gradient">{t("buildStudio")}</span>
-          </h1>
-           <p className="text-xs text-muted-foreground">{t("homeTagline")}</p>
+      <header className="mb-4 flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <img
+            src={logoAsset.url}
+            alt="NO QUIT AI logo"
+            className="h-10 w-10 shrink-0 rounded-2xl border border-border object-cover"
+          />
+          <div className="min-w-0">
+            <h1 className="truncate text-base font-semibold leading-tight md:text-lg">
+              NO QUIT AI <span className="text-gradient">{t("buildStudio")}</span>
+            </h1>
+            <p className="truncate text-xs text-muted-foreground">{t("homeTagline")}</p>
+          </div>
         </div>
-        <Button variant="ghost" size="icon" asChild aria-label={t("cv")}>
-          <Link to="/cv">
-            <FileText className="h-4 w-4" />
-          </Link>
-        </Button>
-        <Button variant="ghost" size="icon" asChild aria-label={t("community")}>
-          <Link to="/community">
-            <Users className="h-4 w-4" />
-          </Link>
-        </Button>
-
-        <Button variant="ghost" size="icon" asChild aria-label={t("earn")}>
-          <Link to="/earn">
-            <Coins className="h-4 w-4" />
-          </Link>
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setInviteOpen(true)}
-          aria-label={t("share")}
-        >
-          <UserPlus className="h-4 w-4" />
-        </Button>
-        <Button variant="ghost" size="icon" onClick={() => signOut()} aria-label={t("logout")}>
-          <LogOut className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center justify-end gap-0.5 md:gap-1">
+          <Button
+            variant="ghost"
+            asChild
+            className="h-auto flex-col gap-0.5 px-2 py-1.5 text-[10px] text-muted-foreground"
+          >
+            <Link to="/cv" aria-label={t("cv")}>
+              <FileText className="h-4 w-4" />
+              {t("cv")}
+            </Link>
+          </Button>
+          <Button
+            variant="ghost"
+            asChild
+            className="h-auto flex-col gap-0.5 px-2 py-1.5 text-[10px] text-muted-foreground"
+          >
+            <Link to="/community" aria-label={t("community")}>
+              <Users className="h-4 w-4" />
+              {t("community")}
+            </Link>
+          </Button>
+          <Button
+            variant="ghost"
+            asChild
+            className="h-auto flex-col gap-0.5 px-2 py-1.5 text-[10px] text-muted-foreground"
+          >
+            <Link to="/earn" aria-label={t("mining")}>
+              <Coins className="h-4 w-4" />
+              {t("mining")}
+            </Link>
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={() => setInviteOpen(true)}
+            aria-label={t("invite")}
+            className="h-auto flex-col gap-0.5 px-2 py-1.5 text-[10px] text-muted-foreground"
+          >
+            <UserPlus className="h-4 w-4" />
+            {t("invite")}
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => signOut()} aria-label={t("logout")}>
+            <LogOut className="h-4 w-4" />
+          </Button>
+        </div>
       </header>
 
       <div className="mb-3 flex items-center justify-end">
