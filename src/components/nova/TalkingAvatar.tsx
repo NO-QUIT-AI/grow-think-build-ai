@@ -1,7 +1,7 @@
 import { useEffect, useRef, type MutableRefObject } from "react";
 import { Loader2 } from "lucide-react";
 
-import voiceAgent from "@/assets/voice-agent.jpg.asset.json";
+import voiceAgent from "@/assets/voice-agent-nqai.jpg";
 
 type Phase = "listening" | "thinking" | "speaking";
 
@@ -123,7 +123,7 @@ export function TalkingAvatar({
     return () => cancelAnimationFrame(raf);
   }, [ampRef]);
 
-  const img = voiceAgent.url;
+  const img = voiceAgent;
   const layer = "pointer-events-none absolute inset-0 h-full w-full select-none object-cover";
 
   return (

@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { Loader2, Mic, MicOff, X } from "lucide-react";
+import { Mic, MicOff, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import voiceAgent from "@/assets/voice-agent.jpg.asset.json";
+import { TalkingAvatar } from "@/components/nova/TalkingAvatar";
 
 type SpeechRecognitionLike = {
   lang: string;
@@ -38,7 +38,7 @@ export function speakableText(md: string) {
     .slice(0, 1500);
 }
 
-export function speakText(text: string, lang: string, onEnd?: () => void) {
+export function speakText(text: string, lang: string, onEnd?: () => void, onWord?: () => void) {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) {
     onEnd?.();
     return;
@@ -56,6 +56,9 @@ export function speakText(text: string, lang: string, onEnd?: () => void) {
     (/natural|neural|online/i.test(v.name) ? 4 : 0) + (/google/i.test(v.name) ? 3 : 0) + (/premium|enhanced/i.test(v.name) ? 2 : 0) + (v.localService ? 0 : 1);
   const voice = matches.sort((a, b) => score(b) - score(a))[0];
   if (voice) u.voice = voice;
+  u.onboundary = (event) => {
+    if (event.name === "word" || event.charIndex >= 0) onWord?.();
+  };
   u.onend = () => onEnd?.();
   u.onerror = () => onEnd?.();
   synth.speak(u);
@@ -85,6 +88,7 @@ export function VoiceModal({
   const phaseRef = useRef<Phase>("listening");
   const mutedRef = useRef(false);
   const aliveRef = useRef(true);
+  const ampRef = useRef(0);
 
   useEffect(() => {
     mutedRef.current = muted;
@@ -121,9 +125,17 @@ export function VoiceModal({
       if (!aliveRef.current) return;
       setReply(answer);
       setP("speaking");
-      speakText(answer, lang, () => {
-        if (aliveRef.current) startListening();
-      });
+      speakText(
+        answer,
+        lang,
+        () => {
+          ampRef.current = 0;
+          if (aliveRef.current) startListening();
+        },
+        () => {
+          ampRef.current = 1;
+        },
+      );
     } catch {
       if (aliveRef.current) startListening();
     }
@@ -227,18 +239,8 @@ export function VoiceModal({
       </div>
 
       <div className="flex flex-col items-center gap-6">
-        <button
-          type="button"
-          onClick={stopOrSend}
-          aria-label="Voice agent"
-          className={`relative h-64 w-44 overflow-hidden rounded-3xl border border-primary/40 shadow-[0_0_40px_hsl(var(--primary)/0.35)] transition-transform sm:h-80 sm:w-56 ${active ? "voice-pulse scale-[1.02]" : ""}`}
-        >
-          <img src={voiceAgent.url} alt="NO QUIT AI voice agent" className="h-full w-full object-cover object-top" />
-          {phase === "thinking" && (
-            <span className="absolute inset-0 flex items-center justify-center bg-background/40">
-              <Loader2 className="h-10 w-10 animate-spin text-primary" />
-            </span>
-          )}
+        <button type="button" onClick={stopOrSend} aria-label="Voice agent" className="block bg-transparent">
+          <TalkingAvatar phase={phase} hearing={active} ampRef={ampRef} />
         </button>
 
         <p className="text-center text-sm text-muted-foreground">{status}</p>
