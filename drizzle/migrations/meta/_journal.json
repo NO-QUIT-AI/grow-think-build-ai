@@ -71,6 +71,13 @@
       "when": 1790177262481,
       "tag": "0009_tighten_member_read_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791159557405,
+      "tag": "0010_migration",
+      "breakpoints": true
     }
   ]
 }

@@ -562,6 +562,24 @@ export type Database = {
         }
         Relationships: []
       }
+      owners: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
       post_comments: {
         Row: {
           comment: string
@@ -683,6 +701,63 @@ export type Database = {
         }
         Relationships: []
       }
+      user_plans: {
+        Row: {
+          plan: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          plan?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          plan?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      viral_videos: {
+        Row: {
+          bonus_awarded: boolean
+          created_at: string
+          id: string
+          memory_id: string | null
+          r2_key: string
+          title: string
+          url: string
+          user_id: string
+          views: number
+          watermarked: boolean
+        }
+        Insert: {
+          bonus_awarded?: boolean
+          created_at?: string
+          id?: string
+          memory_id?: string | null
+          r2_key: string
+          title?: string
+          url: string
+          user_id: string
+          views?: number
+          watermarked?: boolean
+        }
+        Update: {
+          bonus_awarded?: boolean
+          created_at?: string
+          id?: string
+          memory_id?: string | null
+          r2_key?: string
+          title?: string
+          url?: string
+          user_id?: string
+          views?: number
+          watermarked?: boolean
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -691,6 +766,7 @@ export type Database = {
       ad_stats: { Args: never; Returns: Json }
       are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
       gen_invite_code: { Args: never; Returns: string }
+      is_owner: { Args: { _uid: string }; Returns: boolean }
       nqai_award: {
         Args: { _amount: number; _reason: string; _user: string }
         Returns: undefined
