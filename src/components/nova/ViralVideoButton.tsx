@@ -31,7 +31,10 @@ export function ViralVideoButton({ html, title, memoryId }: Props) {
 
   async function generate() {
     if (!html || busy) return;
-    if (typeof MediaRecorder === "undefined") return toast.error("Ye browser video record nahi kar sakta");
+    if (typeof MediaRecorder === "undefined") {
+      toast.error("Ye browser video record nahi kar sakta");
+      return;
+    }
     setBusy(true);
     try {
       const { data: s } = await supabase.auth.getSession();
