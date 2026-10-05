@@ -1,5 +1,5 @@
-/** Standalone HTML (app/logo build) ko PNG image bana kar seedha download karta hai. */
-export async function downloadHtmlAsPng(html: string, fileName: string, width = 1280): Promise<void> {
+/** Standalone HTML (app/logo build) ko canvas me render karta hai. */
+export async function renderHtmlToCanvas(html: string, width = 1280, scale = 2): Promise<HTMLCanvasElement> {
   const { default: html2canvas } = await import("html2canvas-pro");
 
   const frame = document.createElement("iframe");
@@ -35,27 +35,31 @@ export async function downloadHtmlAsPng(html: string, fileName: string, width = 
     const height = Math.min(Math.max(target.scrollHeight, 400), 12000);
     const bg = frame.contentWindow?.getComputedStyle(target).backgroundColor;
 
-    const canvas = await html2canvas(target, {
-      backgroundColor: bg && bg !== "rgba(0, 0, 0, 0)" ? bg : null,
-      scale: 2,
+    return await html2canvas(target, {
+      backgroundColor: bg && bg !== "rgba(0, 0, 0, 0)" ? bg : "#ffffff",
+      scale,
       useCORS: true,
       windowWidth: width,
       windowHeight: height,
       width,
       height,
     });
-
-    const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/png"));
-    if (!blob) throw new Error("PNG failed");
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = fileName.endsWith(".png") ? fileName : `${fileName}.png`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.setTimeout(() => URL.revokeObjectURL(url), 30_000);
   } finally {
     frame.remove();
   }
+}
+
+/** Standalone HTML ko PNG image bana kar seedha download karta hai. */
+export async function downloadHtmlAsPng(html: string, fileName: string, width = 1280): Promise<void> {
+  const canvas = await renderHtmlToCanvas(html, width, 2);
+  const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/png"));
+  if (!blob) throw new Error("PNG failed");
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName.endsWith(".png") ? fileName : `${fileName}.png`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 30_000);
 }

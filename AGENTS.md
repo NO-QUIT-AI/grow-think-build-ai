@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Owner table (owners, is_owner) controls owner-only data; plans in user_plans, viral videos in viral_videos — server routes set plan-sensitive fields, not the client.
+- Viral build videos are rendered in the browser (canvas + MediaRecorder) because the Worker runtime has no ffmpeg; uploaded to R2 videos/viral/.

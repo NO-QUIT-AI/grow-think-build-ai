@@ -22,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { downloadHtmlAsPdf } from "@/lib/html-pdf";
 import { downloadHtmlAsPng } from "@/lib/html-png";
 import { ImageDown } from "lucide-react";
+import { ViralVideoButton } from "@/components/nova/ViralVideoButton";
 
 type Memory = {
   id: string;
@@ -300,6 +301,7 @@ export function StudioPanel({
           >
             <ImageDown className="h-4 w-4" /> {pngBusy ? "..." : "Download PNG"}
           </Button>
+          <ViralVideoButton html={html} title={(active?.summary || active?.prompt || "my app").slice(0, 60)} memoryId={active?.id} />
           <Button
             size="sm"
             variant="outline"

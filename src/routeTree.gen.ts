@@ -28,6 +28,8 @@ import { Route as ApiCvStoreRouteImport } from './routes/api/cv-store'
 import { Route as ApiEditImageRouteImport } from './routes/api/edit-image'
 import { Route as ApiMindRouteImport } from './routes/api/mind'
 import { Route as ApiR2UploadRouteImport } from './routes/api/r2-upload'
+import { Route as ApiTtsRouteImport } from './routes/api/tts'
+import { Route as ApiViralVideoRouteImport } from './routes/api/viral-video'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as ApiMindThinkRouteImport } from './routes/api/mind/think'
 import { Route as ApiPublicR2VideoRouteImport } from './routes/api/public/r2-video'
@@ -127,6 +129,16 @@ const ApiR2UploadRoute = ApiR2UploadRouteImport.update({
   path: '/api/r2-upload',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTtsRoute = ApiTtsRouteImport.update({
+  id: '/api/tts',
+  path: '/api/tts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiViralVideoRoute = ApiViralVideoRouteImport.update({
+  id: '/api/viral-video',
+  path: '/api/viral-video',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UUsernameRoute = UUsernameRouteImport.update({
   id: '/u/$username',
   path: '/u/$username',
@@ -163,6 +175,8 @@ export interface FileRoutesByFullPath {
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/mind': typeof ApiMindRouteWithChildren
   '/api/r2-upload': typeof ApiR2UploadRoute
+  '/api/tts': typeof ApiTtsRoute
+  '/api/viral-video': typeof ApiViralVideoRoute
   '/u/$username': typeof UUsernameRoute
   '/api/mind/think': typeof ApiMindThinkRoute
   '/api/public/r2-video': typeof ApiPublicR2VideoRoute
@@ -187,6 +201,8 @@ export interface FileRoutesByTo {
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/mind': typeof ApiMindRouteWithChildren
   '/api/r2-upload': typeof ApiR2UploadRoute
+  '/api/tts': typeof ApiTtsRoute
+  '/api/viral-video': typeof ApiViralVideoRoute
   '/u/$username': typeof UUsernameRoute
   '/api/mind/think': typeof ApiMindThinkRoute
   '/api/public/r2-video': typeof ApiPublicR2VideoRoute
@@ -212,6 +228,8 @@ export interface FileRoutesById {
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/mind': typeof ApiMindRouteWithChildren
   '/api/r2-upload': typeof ApiR2UploadRoute
+  '/api/tts': typeof ApiTtsRoute
+  '/api/viral-video': typeof ApiViralVideoRoute
   '/u/$username': typeof UUsernameRoute
   '/api/mind/think': typeof ApiMindThinkRoute
   '/api/public/r2-video': typeof ApiPublicR2VideoRoute
@@ -238,6 +256,8 @@ export interface FileRouteTypes {
     | '/api/edit-image'
     | '/api/mind'
     | '/api/r2-upload'
+    | '/api/tts'
+    | '/api/viral-video'
     | '/u/$username'
     | '/api/mind/think'
     | '/api/public/r2-video'
@@ -262,6 +282,8 @@ export interface FileRouteTypes {
     | '/api/edit-image'
     | '/api/mind'
     | '/api/r2-upload'
+    | '/api/tts'
+    | '/api/viral-video'
     | '/u/$username'
     | '/api/mind/think'
     | '/api/public/r2-video'
@@ -286,6 +308,8 @@ export interface FileRouteTypes {
     | '/api/edit-image'
     | '/api/mind'
     | '/api/r2-upload'
+    | '/api/tts'
+    | '/api/viral-video'
     | '/u/$username'
     | '/api/mind/think'
     | '/api/public/r2-video'
@@ -311,6 +335,8 @@ export interface RootRouteChildren {
   ApiEditImageRoute: typeof ApiEditImageRoute
   ApiMindRoute: typeof ApiMindRouteWithChildren
   ApiR2UploadRoute: typeof ApiR2UploadRoute
+  ApiTtsRoute: typeof ApiTtsRoute
+  ApiViralVideoRoute: typeof ApiViralVideoRoute
   UUsernameRoute: typeof UUsernameRoute
   ApiPublicR2VideoRoute: typeof ApiPublicR2VideoRoute
 }
@@ -450,6 +476,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiR2UploadRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/tts': {
+      id: '/api/tts'
+      path: '/api/tts'
+      fullPath: '/api/tts'
+      preLoaderRoute: typeof ApiTtsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/viral-video': {
+      id: '/api/viral-video'
+      path: '/api/viral-video'
+      fullPath: '/api/viral-video'
+      preLoaderRoute: typeof ApiViralVideoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/u/$username': {
       id: '/u/$username'
       path: '/u/$username'
@@ -505,6 +545,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiEditImageRoute: ApiEditImageRoute,
   ApiMindRoute: ApiMindRouteWithChildren,
   ApiR2UploadRoute: ApiR2UploadRoute,
+  ApiTtsRoute: ApiTtsRoute,
+  ApiViralVideoRoute: ApiViralVideoRoute,
   UUsernameRoute: UUsernameRoute,
   ApiPublicR2VideoRoute: ApiPublicR2VideoRoute,
 }
