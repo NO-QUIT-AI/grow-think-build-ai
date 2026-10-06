@@ -31,7 +31,7 @@ async function call(method: "GET" | "POST", body?: unknown) {
   const res = await fetch("/api/owner", {
     method,
     headers: { "content-type": "application/json", authorization: `Bearer ${s.session?.access_token ?? ""}` },
-    body: body ? JSON.stringify(body) : undefined,
+    body: body ? JSON.stringify(body) : null,
   });
   if (!res.ok) throw new Error((await res.text()) || String(res.status));
   return res.json();
