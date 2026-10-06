@@ -167,19 +167,25 @@ export const Route = createFileRoute("/api/chat")({
 
         const apiKey = process.env["LOVABLE_API_KEY"];
         const deepseekKey = process.env["DEEPSEEK_API_KEY"];
-        if (!apiKey && !deepseekKey) return new Response("AI is not configured", { status: 500 });
+        const groqKey = process.env["GROQ_API_KEY"];
+        if (!apiKey && !deepseekKey && !groqKey) return new Response("AI is not configured", { status: 500 });
 
-        // Personal DeepSeek key maujood ho to wahi primary model hai —
-        // Lovable credits khatam hone par bhi chat kabhi band nahi hoti.
+        // Text mode: DeepSeek pehle; uska credit khatam ho to Groq sara kaam sambhale.
         const deepseek = deepseekKey
-          ? createOpenAICompatible({
-              name: "deepseek",
-              baseURL: "https://api.deepseek.com",
-              apiKey: deepseekKey,
-            })
+          ? createOpenAICompatible({ name: "deepseek", baseURL: "https://api.deepseek.com", apiKey: deepseekKey })
+          : null;
+        const groq = groqKey
+          ? createOpenAICompatible({ name: "groq", baseURL: "https://api.groq.com/openai/v1", apiKey: groqKey })
           : null;
         const gateway = apiKey ? createLovableAiGatewayProvider(apiKey) : null;
-        const model = deepseek ? deepseek.chatModel("deepseek-chat") : gateway!("google/gemini-3.7-flash");
+        const useDeepseek = deepseek && Date.now() > deepseekDownUntil;
+        const model = useDeepseek
+          ? deepseek.chatModel("deepseek-chat")
+          : groq
+            ? groq.chatModel("llama-3.3-70b-versatile")
+            : deepseek
+              ? deepseek.chatModel("deepseek-chat")
+              : gateway!("google/gemini-3.7-flash");
 
         const tools = {
           recall_knowledge: tool({
