@@ -522,12 +522,40 @@ function ChatThread({
       }
       return cached;
     }
-    if (busy) return t("aiNoReply");
-    return new Promise<string>((resolve) => {
-      voiceResolveRef.current = resolve;
-      voiceQuestionRef.current = question;
-      void submit(question);
-    });
+    // Voice mode: Groq (fallback DeepSeek) — chhota, insaan jaisa jawab.
+    setInput("");
+    const history = messages.slice(-6).map((m) => ({
+      role: m.role === "user" ? ("user" as const) : ("assistant" as const),
+      content: m.parts.map((p) => (p.type === "text" ? p.text : "")).join(" ").slice(0, 800),
+    })).filter((m) => m.content.trim());
+    const { data: s } = await supabase.auth.getSession();
+    const res = await fetch("/api/voice-chat", {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${s.session?.access_token ?? ""}` },
+      body: JSON.stringify({ messages: [...history, { role: "user", content: question }] }),
+    }).catch(() => null);
+    const answer = res?.ok ? String(((await res.json()) as { text?: string }).text ?? "") : "";
+    if (!answer) return t("aiNoReply");
+    writeVoiceCache(question, lang, answer);
+    const stamp = Date.now();
+    setMessages((prev) => [
+      ...prev,
+      { id: `vq-${stamp}`, role: "user", parts: [{ type: "text", text: question }] },
+      { id: `va-${stamp}`, role: "assistant", parts: [{ type: "text", text: answer }] },
+    ]);
+    let cid = convRef.current;
+    if (!cid) {
+      cid = await ensureConversation(question);
+      if (cid) convRef.current = cid;
+    }
+    if (cid) {
+      await supabase.from("messages").insert([
+        { conversation_id: cid, user_id: userId, role: "user", content: question },
+        { conversation_id: cid, user_id: userId, role: "assistant", content: answer },
+      ]);
+      onTouched(cid);
+    }
+    return answer;
   }
 
   return (
