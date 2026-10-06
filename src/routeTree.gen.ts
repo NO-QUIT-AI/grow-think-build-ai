@@ -30,6 +30,7 @@ import { Route as ApiMindRouteImport } from './routes/api/mind'
 import { Route as ApiR2UploadRouteImport } from './routes/api/r2-upload'
 import { Route as ApiTtsRouteImport } from './routes/api/tts'
 import { Route as ApiViralVideoRouteImport } from './routes/api/viral-video'
+import { Route as ApiVoiceChatRouteImport } from './routes/api/voice-chat'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as ApiMindThinkRouteImport } from './routes/api/mind/think'
 import { Route as ApiPublicR2VideoRouteImport } from './routes/api/public/r2-video'
@@ -139,6 +140,11 @@ const ApiViralVideoRoute = ApiViralVideoRouteImport.update({
   path: '/api/viral-video',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiVoiceChatRoute = ApiVoiceChatRouteImport.update({
+  id: '/api/voice-chat',
+  path: '/api/voice-chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UUsernameRoute = UUsernameRouteImport.update({
   id: '/u/$username',
   path: '/u/$username',
@@ -177,6 +183,7 @@ export interface FileRoutesByFullPath {
   '/api/r2-upload': typeof ApiR2UploadRoute
   '/api/tts': typeof ApiTtsRoute
   '/api/viral-video': typeof ApiViralVideoRoute
+  '/api/voice-chat': typeof ApiVoiceChatRoute
   '/u/$username': typeof UUsernameRoute
   '/api/mind/think': typeof ApiMindThinkRoute
   '/api/public/r2-video': typeof ApiPublicR2VideoRoute
@@ -203,6 +210,7 @@ export interface FileRoutesByTo {
   '/api/r2-upload': typeof ApiR2UploadRoute
   '/api/tts': typeof ApiTtsRoute
   '/api/viral-video': typeof ApiViralVideoRoute
+  '/api/voice-chat': typeof ApiVoiceChatRoute
   '/u/$username': typeof UUsernameRoute
   '/api/mind/think': typeof ApiMindThinkRoute
   '/api/public/r2-video': typeof ApiPublicR2VideoRoute
@@ -230,6 +238,7 @@ export interface FileRoutesById {
   '/api/r2-upload': typeof ApiR2UploadRoute
   '/api/tts': typeof ApiTtsRoute
   '/api/viral-video': typeof ApiViralVideoRoute
+  '/api/voice-chat': typeof ApiVoiceChatRoute
   '/u/$username': typeof UUsernameRoute
   '/api/mind/think': typeof ApiMindThinkRoute
   '/api/public/r2-video': typeof ApiPublicR2VideoRoute
@@ -258,6 +267,7 @@ export interface FileRouteTypes {
     | '/api/r2-upload'
     | '/api/tts'
     | '/api/viral-video'
+    | '/api/voice-chat'
     | '/u/$username'
     | '/api/mind/think'
     | '/api/public/r2-video'
@@ -284,6 +294,7 @@ export interface FileRouteTypes {
     | '/api/r2-upload'
     | '/api/tts'
     | '/api/viral-video'
+    | '/api/voice-chat'
     | '/u/$username'
     | '/api/mind/think'
     | '/api/public/r2-video'
@@ -310,6 +321,7 @@ export interface FileRouteTypes {
     | '/api/r2-upload'
     | '/api/tts'
     | '/api/viral-video'
+    | '/api/voice-chat'
     | '/u/$username'
     | '/api/mind/think'
     | '/api/public/r2-video'
@@ -337,6 +349,7 @@ export interface RootRouteChildren {
   ApiR2UploadRoute: typeof ApiR2UploadRoute
   ApiTtsRoute: typeof ApiTtsRoute
   ApiViralVideoRoute: typeof ApiViralVideoRoute
+  ApiVoiceChatRoute: typeof ApiVoiceChatRoute
   UUsernameRoute: typeof UUsernameRoute
   ApiPublicR2VideoRoute: typeof ApiPublicR2VideoRoute
 }
@@ -490,6 +503,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiViralVideoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/voice-chat': {
+      id: '/api/voice-chat'
+      path: '/api/voice-chat'
+      fullPath: '/api/voice-chat'
+      preLoaderRoute: typeof ApiVoiceChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/u/$username': {
       id: '/u/$username'
       path: '/u/$username'
@@ -547,6 +567,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiR2UploadRoute: ApiR2UploadRoute,
   ApiTtsRoute: ApiTtsRoute,
   ApiViralVideoRoute: ApiViralVideoRoute,
+  ApiVoiceChatRoute: ApiVoiceChatRoute,
   UUsernameRoute: UUsernameRoute,
   ApiPublicR2VideoRoute: ApiPublicR2VideoRoute,
 }

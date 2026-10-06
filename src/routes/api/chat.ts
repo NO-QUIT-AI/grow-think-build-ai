@@ -54,6 +54,7 @@ const MAX_HISTORY = 14;
  * ------------------------------------------------------------- */
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const CACHE_MAX = 300;
+let deepseekDownUntil = 0;
 const answerCache = new Map<string, { text: string; at: number }>();
 
 function cacheKey(userId: string, question: string, lang: Lang) {
@@ -429,6 +430,7 @@ export const Route = createFileRoute("/api/chat")({
           stopWhen: stepCountIs(30),
           onError: ({ error }) => {
             console.error("[chat] stream error", error);
+            if (useDeepseek) deepseekDownUntil = Date.now() + 10 * 60 * 1000;
           },
         });
 
