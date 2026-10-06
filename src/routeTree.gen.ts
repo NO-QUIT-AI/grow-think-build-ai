@@ -22,11 +22,13 @@ import { Route as PlayerRouteImport } from './routes/player'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AdminAdsRouteImport } from './routes/admin.ads'
+import { Route as AdminOwnerRouteImport } from './routes/admin.owner'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiCvPolishRouteImport } from './routes/api/cv-polish'
 import { Route as ApiCvStoreRouteImport } from './routes/api/cv-store'
 import { Route as ApiEditImageRouteImport } from './routes/api/edit-image'
 import { Route as ApiMindRouteImport } from './routes/api/mind'
+import { Route as ApiOwnerRouteImport } from './routes/api/owner'
 import { Route as ApiR2UploadRouteImport } from './routes/api/r2-upload'
 import { Route as ApiTtsRouteImport } from './routes/api/tts'
 import { Route as ApiViralVideoRouteImport } from './routes/api/viral-video'
@@ -100,6 +102,11 @@ const AdminAdsRoute = AdminAdsRouteImport.update({
   path: '/admin/ads',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminOwnerRoute = AdminOwnerRouteImport.update({
+  id: '/admin/owner',
+  path: '/admin/owner',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
@@ -123,6 +130,11 @@ const ApiEditImageRoute = ApiEditImageRouteImport.update({
 const ApiMindRoute = ApiMindRouteImport.update({
   id: '/api/mind',
   path: '/api/mind',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOwnerRoute = ApiOwnerRouteImport.update({
+  id: '/api/owner',
+  path: '/api/owner',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiR2UploadRoute = ApiR2UploadRouteImport.update({
@@ -175,11 +187,13 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/admin/ads': typeof AdminAdsRoute
+  '/admin/owner': typeof AdminOwnerRoute
   '/api/chat': typeof ApiChatRoute
   '/api/cv-polish': typeof ApiCvPolishRoute
   '/api/cv-store': typeof ApiCvStoreRoute
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/mind': typeof ApiMindRouteWithChildren
+  '/api/owner': typeof ApiOwnerRoute
   '/api/r2-upload': typeof ApiR2UploadRoute
   '/api/tts': typeof ApiTtsRoute
   '/api/viral-video': typeof ApiViralVideoRoute
@@ -202,11 +216,13 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/admin/ads': typeof AdminAdsRoute
+  '/admin/owner': typeof AdminOwnerRoute
   '/api/chat': typeof ApiChatRoute
   '/api/cv-polish': typeof ApiCvPolishRoute
   '/api/cv-store': typeof ApiCvStoreRoute
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/mind': typeof ApiMindRouteWithChildren
+  '/api/owner': typeof ApiOwnerRoute
   '/api/r2-upload': typeof ApiR2UploadRoute
   '/api/tts': typeof ApiTtsRoute
   '/api/viral-video': typeof ApiViralVideoRoute
@@ -230,11 +246,13 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/admin/ads': typeof AdminAdsRoute
+  '/admin/owner': typeof AdminOwnerRoute
   '/api/chat': typeof ApiChatRoute
   '/api/cv-polish': typeof ApiCvPolishRoute
   '/api/cv-store': typeof ApiCvStoreRoute
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/mind': typeof ApiMindRouteWithChildren
+  '/api/owner': typeof ApiOwnerRoute
   '/api/r2-upload': typeof ApiR2UploadRoute
   '/api/tts': typeof ApiTtsRoute
   '/api/viral-video': typeof ApiViralVideoRoute
@@ -259,11 +277,13 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/terms'
     | '/admin/ads'
+    | '/admin/owner'
     | '/api/chat'
     | '/api/cv-polish'
     | '/api/cv-store'
     | '/api/edit-image'
     | '/api/mind'
+    | '/api/owner'
     | '/api/r2-upload'
     | '/api/tts'
     | '/api/viral-video'
@@ -286,11 +306,13 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/terms'
     | '/admin/ads'
+    | '/admin/owner'
     | '/api/chat'
     | '/api/cv-polish'
     | '/api/cv-store'
     | '/api/edit-image'
     | '/api/mind'
+    | '/api/owner'
     | '/api/r2-upload'
     | '/api/tts'
     | '/api/viral-video'
@@ -313,11 +335,13 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/terms'
     | '/admin/ads'
+    | '/admin/owner'
     | '/api/chat'
     | '/api/cv-polish'
     | '/api/cv-store'
     | '/api/edit-image'
     | '/api/mind'
+    | '/api/owner'
     | '/api/r2-upload'
     | '/api/tts'
     | '/api/viral-video'
@@ -341,11 +365,13 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
   AdminAdsRoute: typeof AdminAdsRoute
+  AdminOwnerRoute: typeof AdminOwnerRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiCvPolishRoute: typeof ApiCvPolishRoute
   ApiCvStoreRoute: typeof ApiCvStoreRoute
   ApiEditImageRoute: typeof ApiEditImageRoute
   ApiMindRoute: typeof ApiMindRouteWithChildren
+  ApiOwnerRoute: typeof ApiOwnerRoute
   ApiR2UploadRoute: typeof ApiR2UploadRoute
   ApiTtsRoute: typeof ApiTtsRoute
   ApiViralVideoRoute: typeof ApiViralVideoRoute
@@ -447,6 +473,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/owner': {
+      id: '/admin/owner'
+      path: '/admin/owner'
+      fullPath: '/admin/owner'
+      preLoaderRoute: typeof AdminOwnerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -480,6 +513,13 @@ declare module '@tanstack/react-router' {
       path: '/api/mind'
       fullPath: '/api/mind'
       preLoaderRoute: typeof ApiMindRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/owner': {
+      id: '/api/owner'
+      path: '/api/owner'
+      fullPath: '/api/owner'
+      preLoaderRoute: typeof ApiOwnerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/r2-upload': {
@@ -559,11 +599,13 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
   AdminAdsRoute: AdminAdsRoute,
+  AdminOwnerRoute: AdminOwnerRoute,
   ApiChatRoute: ApiChatRoute,
   ApiCvPolishRoute: ApiCvPolishRoute,
   ApiCvStoreRoute: ApiCvStoreRoute,
   ApiEditImageRoute: ApiEditImageRoute,
   ApiMindRoute: ApiMindRouteWithChildren,
+  ApiOwnerRoute: ApiOwnerRoute,
   ApiR2UploadRoute: ApiR2UploadRoute,
   ApiTtsRoute: ApiTtsRoute,
   ApiViralVideoRoute: ApiViralVideoRoute,
