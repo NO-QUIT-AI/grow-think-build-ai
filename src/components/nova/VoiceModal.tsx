@@ -3,7 +3,83 @@ import { Mic, MicOff, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { TalkingAvatar } from "@/components/nova/TalkingAvatar";
+import { supabase } from "@/integrations/supabase/client";
+import proAvatar from "@/assets/nqai-pro-avatar.jpg.asset.json";
+
+let currentAudio: HTMLAudioElement | null = null;
+
+/** ElevenLabs lifelike awaaz; fail ho to browser voice. */
+export async function speakHuman(text: string, lang: string, onEnd: () => void, ampRef: { current: number }) {
+  const clean = speakableText(text);
+  try {
+    const { data: s } = await supabase.auth.getSession();
+    const res = await fetch("/api/tts", {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${s.session?.access_token ?? ""}` },
+      body: JSON.stringify({ text: clean }),
+    });
+    if (!res.ok) throw new Error("tts");
+    const url = URL.createObjectURL(await res.blob());
+    const audio = new Audio(url);
+    currentAudio = audio;
+    let raf = 0;
+    try {
+      const ctx = new AudioContext();
+      const an = ctx.createAnalyser();
+      an.fftSize = 256;
+      ctx.createMediaElementSource(audio).connect(an);
+      an.connect(ctx.destination);
+      const buf = new Uint8Array(an.frequencyBinCount);
+      const tick = () => {
+        an.getByteFrequencyData(buf);
+        ampRef.current = Math.min(1, buf.reduce((a, b) => a + b, 0) / buf.length / 90);
+        raf = requestAnimationFrame(tick);
+      };
+      tick();
+    } catch {
+      ampRef.current = 0.6;
+    }
+    const done = () => {
+      cancelAnimationFrame(raf);
+      ampRef.current = 0;
+      URL.revokeObjectURL(url);
+      if (currentAudio === audio) currentAudio = null;
+      onEnd();
+    };
+    audio.onended = done;
+    audio.onerror = done;
+    await audio.play();
+  } catch {
+    speakText(clean, lang, () => { ampRef.current = 0; onEnd(); }, () => { ampRef.current = 1; });
+  }
+}
+
+export function stopHuman() {
+  currentAudio?.pause();
+  currentAudio = null;
+  if (typeof window !== "undefined") window.speechSynthesis?.cancel();
+}
+
+function ProAvatar({ phase, ampRef }: { phase: string; ampRef: { current: number } }) {
+  const ref = useRef<HTMLImageElement | null>(null);
+  useEffect(() => {
+    let raf = 0;
+    const loop = (t: number) => {
+      const a = ampRef.current;
+      const breathe = Math.sin(t / 900) * 0.01;
+      if (ref.current) ref.current.style.transform = `scale(${1.02 + breathe + a * 0.03}) rotate(${Math.sin(t / 700) * a * 1.5}deg)`;
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [ampRef]);
+  return (
+    <div className={`relative aspect-[3/4] w-52 overflow-hidden rounded-3xl border border-primary/40 transition-shadow duration-[400ms] sm:w-60 ${phase === "speaking" ? "shadow-[0_0_50px_hsl(var(--primary)/0.6)]" : "shadow-[0_0_25px_hsl(var(--primary)/0.25)]"}`}>
+      <img ref={ref} src={proAvatar.url} alt="NO QUIT AI voice agent" className="h-full w-full object-cover will-change-transform" draggable={false} />
+      {phase === "thinking" && <div className="absolute inset-x-0 bottom-3 text-center text-xs text-foreground">...</div>}
+    </div>
+  );
+}
 
 type SpeechRecognitionLike = {
   lang: string;
@@ -48,8 +124,8 @@ export function speakText(text: string, lang: string, onEnd?: () => void, onWord
   const u = new SpeechSynthesisUtterance(speakableText(text));
   const locale = LOCALES[lang] ?? "hi-IN";
   u.lang = locale;
-  u.rate = 1;
-  u.pitch = 1;
+  u.rate = 1.05;
+  u.pitch = 0.95;
   // Sab se natural (human jaisi) voice chuno: Neural/Natural/Google/Online voices pehle
   const matches = synth.getVoices().filter((v) => v.lang.replace("_", "-").startsWith(locale.slice(0, 2)));
   const score = (v: SpeechSynthesisVoice) =>
@@ -125,17 +201,9 @@ export function VoiceModal({
       if (!aliveRef.current) return;
       setReply(answer);
       setP("speaking");
-      speakText(
-        answer,
-        lang,
-        () => {
-          ampRef.current = 0;
-          if (aliveRef.current) startListening();
-        },
-        () => {
-          ampRef.current = 1;
-        },
-      );
+      void speakHuman(answer, lang, () => {
+        if (aliveRef.current) startListening();
+      }, ampRef);
     } catch {
       if (aliveRef.current) startListening();
     }
@@ -189,7 +257,13 @@ export function VoiceModal({
         }
       }
     };
-    startListening();
+    // Voice khulte hi user se khud baat shuru kare
+    const greet = "Arre bhai, kya haal hai? Bolo, aaj kya scene hai?";
+    setReply(greet);
+    setP("speaking");
+    void speakHuman(greet, lang, () => {
+      if (aliveRef.current) startListening();
+    }, ampRef);
 
     return () => {
       aliveRef.current = false;
@@ -202,14 +276,14 @@ export function VoiceModal({
       } catch {
         /* ignore */
       }
-      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+      stopHuman();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang]);
 
   function stopOrSend() {
     if (phaseRef.current === "speaking") {
-      window.speechSynthesis?.cancel();
+      stopHuman();
       startListening();
       return;
     }
@@ -240,7 +314,7 @@ export function VoiceModal({
 
       <div className="flex flex-col items-center gap-6">
         <button type="button" onClick={stopOrSend} aria-label="Voice agent" className="block bg-transparent">
-          <TalkingAvatar phase={phase} hearing={active} ampRef={ampRef} />
+          <ProAvatar phase={phase} ampRef={ampRef} />
         </button>
 
         <p className="text-center text-sm text-muted-foreground">{status}</p>
