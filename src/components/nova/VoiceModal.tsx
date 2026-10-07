@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import proAvatar from "@/assets/nqai-pro-avatar.jpg.asset.json";
+import proAvatar from "@/assets/nqai-galaxy-avatar.jpg.asset.json";
 
 let currentAudio: HTMLAudioElement | null = null;
 
