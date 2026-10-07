@@ -27,6 +27,7 @@ import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiCvPolishRouteImport } from './routes/api/cv-polish'
 import { Route as ApiCvStoreRouteImport } from './routes/api/cv-store'
 import { Route as ApiEditImageRouteImport } from './routes/api/edit-image'
+import { Route as ApiGenerateVideoRouteImport } from './routes/api/generate-video'
 import { Route as ApiMindRouteImport } from './routes/api/mind'
 import { Route as ApiOwnerRouteImport } from './routes/api/owner'
 import { Route as ApiR2UploadRouteImport } from './routes/api/r2-upload'
@@ -127,6 +128,11 @@ const ApiEditImageRoute = ApiEditImageRouteImport.update({
   path: '/api/edit-image',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiGenerateVideoRoute = ApiGenerateVideoRouteImport.update({
+  id: '/api/generate-video',
+  path: '/api/generate-video',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiMindRoute = ApiMindRouteImport.update({
   id: '/api/mind',
   path: '/api/mind',
@@ -192,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/api/cv-polish': typeof ApiCvPolishRoute
   '/api/cv-store': typeof ApiCvStoreRoute
   '/api/edit-image': typeof ApiEditImageRoute
+  '/api/generate-video': typeof ApiGenerateVideoRoute
   '/api/mind': typeof ApiMindRouteWithChildren
   '/api/owner': typeof ApiOwnerRoute
   '/api/r2-upload': typeof ApiR2UploadRoute
@@ -221,6 +228,7 @@ export interface FileRoutesByTo {
   '/api/cv-polish': typeof ApiCvPolishRoute
   '/api/cv-store': typeof ApiCvStoreRoute
   '/api/edit-image': typeof ApiEditImageRoute
+  '/api/generate-video': typeof ApiGenerateVideoRoute
   '/api/mind': typeof ApiMindRouteWithChildren
   '/api/owner': typeof ApiOwnerRoute
   '/api/r2-upload': typeof ApiR2UploadRoute
@@ -251,6 +259,7 @@ export interface FileRoutesById {
   '/api/cv-polish': typeof ApiCvPolishRoute
   '/api/cv-store': typeof ApiCvStoreRoute
   '/api/edit-image': typeof ApiEditImageRoute
+  '/api/generate-video': typeof ApiGenerateVideoRoute
   '/api/mind': typeof ApiMindRouteWithChildren
   '/api/owner': typeof ApiOwnerRoute
   '/api/r2-upload': typeof ApiR2UploadRoute
@@ -282,6 +291,7 @@ export interface FileRouteTypes {
     | '/api/cv-polish'
     | '/api/cv-store'
     | '/api/edit-image'
+    | '/api/generate-video'
     | '/api/mind'
     | '/api/owner'
     | '/api/r2-upload'
@@ -311,6 +321,7 @@ export interface FileRouteTypes {
     | '/api/cv-polish'
     | '/api/cv-store'
     | '/api/edit-image'
+    | '/api/generate-video'
     | '/api/mind'
     | '/api/owner'
     | '/api/r2-upload'
@@ -340,6 +351,7 @@ export interface FileRouteTypes {
     | '/api/cv-polish'
     | '/api/cv-store'
     | '/api/edit-image'
+    | '/api/generate-video'
     | '/api/mind'
     | '/api/owner'
     | '/api/r2-upload'
@@ -370,6 +382,7 @@ export interface RootRouteChildren {
   ApiCvPolishRoute: typeof ApiCvPolishRoute
   ApiCvStoreRoute: typeof ApiCvStoreRoute
   ApiEditImageRoute: typeof ApiEditImageRoute
+  ApiGenerateVideoRoute: typeof ApiGenerateVideoRoute
   ApiMindRoute: typeof ApiMindRouteWithChildren
   ApiOwnerRoute: typeof ApiOwnerRoute
   ApiR2UploadRoute: typeof ApiR2UploadRoute
@@ -508,6 +521,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiEditImageRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/generate-video': {
+      id: '/api/generate-video'
+      path: '/api/generate-video'
+      fullPath: '/api/generate-video'
+      preLoaderRoute: typeof ApiGenerateVideoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/mind': {
       id: '/api/mind'
       path: '/api/mind'
@@ -604,6 +624,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCvPolishRoute: ApiCvPolishRoute,
   ApiCvStoreRoute: ApiCvStoreRoute,
   ApiEditImageRoute: ApiEditImageRoute,
+  ApiGenerateVideoRoute: ApiGenerateVideoRoute,
   ApiMindRoute: ApiMindRouteWithChildren,
   ApiOwnerRoute: ApiOwnerRoute,
   ApiR2UploadRoute: ApiR2UploadRoute,
