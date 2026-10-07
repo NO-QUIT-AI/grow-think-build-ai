@@ -31,7 +31,7 @@ export function ProVideoButtons({ title }: { title: string }) {
   async function run(kind: Kind) {
     const { data: s } = await supabase.auth.getSession();
     const token = s.session?.access_token;
-    if (!token) return toast.error("Pehle login karo");
+    if (!token) { toast.error("Pehle login karo"); return; }
     setBusy(kind);
     setVideo(null);
     try {
