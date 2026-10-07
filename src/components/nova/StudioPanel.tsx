@@ -23,6 +23,7 @@ import { downloadHtmlAsPdf } from "@/lib/html-pdf";
 import { downloadHtmlAsPng } from "@/lib/html-png";
 import { ImageDown } from "lucide-react";
 import { ViralVideoButton } from "@/components/nova/ViralVideoButton";
+import { ProVideoButtons } from "@/components/nova/ProVideoButtons";
 
 type Memory = {
   id: string;
@@ -318,6 +319,7 @@ export function StudioPanel({
           >
             <ExternalLink className="h-4 w-4" /> Preview
           </Button>
+          <ProVideoButtons title={(active?.summary || active?.prompt || "my app").slice(0, 80)} />
         </div>
       )}
 
