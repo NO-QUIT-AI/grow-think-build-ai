@@ -27,10 +27,12 @@ import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiCvPolishRouteImport } from './routes/api/cv-polish'
 import { Route as ApiCvStoreRouteImport } from './routes/api/cv-store'
 import { Route as ApiEditImageRouteImport } from './routes/api/edit-image'
+import { Route as ApiFalVideoRouteImport } from './routes/api/fal-video'
 import { Route as ApiGenerateVideoRouteImport } from './routes/api/generate-video'
 import { Route as ApiMindRouteImport } from './routes/api/mind'
 import { Route as ApiOwnerRouteImport } from './routes/api/owner'
 import { Route as ApiR2UploadRouteImport } from './routes/api/r2-upload'
+import { Route as ApiRunwayVideoRouteImport } from './routes/api/runway-video'
 import { Route as ApiTtsRouteImport } from './routes/api/tts'
 import { Route as ApiViralVideoRouteImport } from './routes/api/viral-video'
 import { Route as ApiVoiceChatRouteImport } from './routes/api/voice-chat'
@@ -128,6 +130,11 @@ const ApiEditImageRoute = ApiEditImageRouteImport.update({
   path: '/api/edit-image',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiFalVideoRoute = ApiFalVideoRouteImport.update({
+  id: '/api/fal-video',
+  path: '/api/fal-video',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiGenerateVideoRoute = ApiGenerateVideoRouteImport.update({
   id: '/api/generate-video',
   path: '/api/generate-video',
@@ -146,6 +153,11 @@ const ApiOwnerRoute = ApiOwnerRouteImport.update({
 const ApiR2UploadRoute = ApiR2UploadRouteImport.update({
   id: '/api/r2-upload',
   path: '/api/r2-upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiRunwayVideoRoute = ApiRunwayVideoRouteImport.update({
+  id: '/api/runway-video',
+  path: '/api/runway-video',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTtsRoute = ApiTtsRouteImport.update({
@@ -198,10 +210,12 @@ export interface FileRoutesByFullPath {
   '/api/cv-polish': typeof ApiCvPolishRoute
   '/api/cv-store': typeof ApiCvStoreRoute
   '/api/edit-image': typeof ApiEditImageRoute
+  '/api/fal-video': typeof ApiFalVideoRoute
   '/api/generate-video': typeof ApiGenerateVideoRoute
   '/api/mind': typeof ApiMindRouteWithChildren
   '/api/owner': typeof ApiOwnerRoute
   '/api/r2-upload': typeof ApiR2UploadRoute
+  '/api/runway-video': typeof ApiRunwayVideoRoute
   '/api/tts': typeof ApiTtsRoute
   '/api/viral-video': typeof ApiViralVideoRoute
   '/api/voice-chat': typeof ApiVoiceChatRoute
@@ -228,10 +242,12 @@ export interface FileRoutesByTo {
   '/api/cv-polish': typeof ApiCvPolishRoute
   '/api/cv-store': typeof ApiCvStoreRoute
   '/api/edit-image': typeof ApiEditImageRoute
+  '/api/fal-video': typeof ApiFalVideoRoute
   '/api/generate-video': typeof ApiGenerateVideoRoute
   '/api/mind': typeof ApiMindRouteWithChildren
   '/api/owner': typeof ApiOwnerRoute
   '/api/r2-upload': typeof ApiR2UploadRoute
+  '/api/runway-video': typeof ApiRunwayVideoRoute
   '/api/tts': typeof ApiTtsRoute
   '/api/viral-video': typeof ApiViralVideoRoute
   '/api/voice-chat': typeof ApiVoiceChatRoute
@@ -259,10 +275,12 @@ export interface FileRoutesById {
   '/api/cv-polish': typeof ApiCvPolishRoute
   '/api/cv-store': typeof ApiCvStoreRoute
   '/api/edit-image': typeof ApiEditImageRoute
+  '/api/fal-video': typeof ApiFalVideoRoute
   '/api/generate-video': typeof ApiGenerateVideoRoute
   '/api/mind': typeof ApiMindRouteWithChildren
   '/api/owner': typeof ApiOwnerRoute
   '/api/r2-upload': typeof ApiR2UploadRoute
+  '/api/runway-video': typeof ApiRunwayVideoRoute
   '/api/tts': typeof ApiTtsRoute
   '/api/viral-video': typeof ApiViralVideoRoute
   '/api/voice-chat': typeof ApiVoiceChatRoute
@@ -291,10 +309,12 @@ export interface FileRouteTypes {
     | '/api/cv-polish'
     | '/api/cv-store'
     | '/api/edit-image'
+    | '/api/fal-video'
     | '/api/generate-video'
     | '/api/mind'
     | '/api/owner'
     | '/api/r2-upload'
+    | '/api/runway-video'
     | '/api/tts'
     | '/api/viral-video'
     | '/api/voice-chat'
@@ -321,10 +341,12 @@ export interface FileRouteTypes {
     | '/api/cv-polish'
     | '/api/cv-store'
     | '/api/edit-image'
+    | '/api/fal-video'
     | '/api/generate-video'
     | '/api/mind'
     | '/api/owner'
     | '/api/r2-upload'
+    | '/api/runway-video'
     | '/api/tts'
     | '/api/viral-video'
     | '/api/voice-chat'
@@ -351,10 +373,12 @@ export interface FileRouteTypes {
     | '/api/cv-polish'
     | '/api/cv-store'
     | '/api/edit-image'
+    | '/api/fal-video'
     | '/api/generate-video'
     | '/api/mind'
     | '/api/owner'
     | '/api/r2-upload'
+    | '/api/runway-video'
     | '/api/tts'
     | '/api/viral-video'
     | '/api/voice-chat'
@@ -382,10 +406,12 @@ export interface RootRouteChildren {
   ApiCvPolishRoute: typeof ApiCvPolishRoute
   ApiCvStoreRoute: typeof ApiCvStoreRoute
   ApiEditImageRoute: typeof ApiEditImageRoute
+  ApiFalVideoRoute: typeof ApiFalVideoRoute
   ApiGenerateVideoRoute: typeof ApiGenerateVideoRoute
   ApiMindRoute: typeof ApiMindRouteWithChildren
   ApiOwnerRoute: typeof ApiOwnerRoute
   ApiR2UploadRoute: typeof ApiR2UploadRoute
+  ApiRunwayVideoRoute: typeof ApiRunwayVideoRoute
   ApiTtsRoute: typeof ApiTtsRoute
   ApiViralVideoRoute: typeof ApiViralVideoRoute
   ApiVoiceChatRoute: typeof ApiVoiceChatRoute
@@ -521,6 +547,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiEditImageRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/fal-video': {
+      id: '/api/fal-video'
+      path: '/api/fal-video'
+      fullPath: '/api/fal-video'
+      preLoaderRoute: typeof ApiFalVideoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/generate-video': {
       id: '/api/generate-video'
       path: '/api/generate-video'
@@ -547,6 +580,13 @@ declare module '@tanstack/react-router' {
       path: '/api/r2-upload'
       fullPath: '/api/r2-upload'
       preLoaderRoute: typeof ApiR2UploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/runway-video': {
+      id: '/api/runway-video'
+      path: '/api/runway-video'
+      fullPath: '/api/runway-video'
+      preLoaderRoute: typeof ApiRunwayVideoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/tts': {
@@ -624,10 +664,12 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCvPolishRoute: ApiCvPolishRoute,
   ApiCvStoreRoute: ApiCvStoreRoute,
   ApiEditImageRoute: ApiEditImageRoute,
+  ApiFalVideoRoute: ApiFalVideoRoute,
   ApiGenerateVideoRoute: ApiGenerateVideoRoute,
   ApiMindRoute: ApiMindRouteWithChildren,
   ApiOwnerRoute: ApiOwnerRoute,
   ApiR2UploadRoute: ApiR2UploadRoute,
+  ApiRunwayVideoRoute: ApiRunwayVideoRoute,
   ApiTtsRoute: ApiTtsRoute,
   ApiViralVideoRoute: ApiViralVideoRoute,
   ApiVoiceChatRoute: ApiVoiceChatRoute,
