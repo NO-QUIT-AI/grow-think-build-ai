@@ -161,6 +161,7 @@ export function VoiceModal({
   const recRef = useRef<SpeechRecognitionLike | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const finalRef = useRef("");
+  const lastSentRef = useRef({ text: "", at: 0 });
   const phaseRef = useRef<Phase>("listening");
   const mutedRef = useRef(false);
   const aliveRef = useRef(true);
@@ -192,14 +193,18 @@ export function VoiceModal({
     if (!value || phaseRef.current !== "listening") return;
     setP("thinking");
     try {
-      recRef.current?.stop();
+      recRef.current?.abort();
     } catch {
       /* ignore */
     }
+    finalRef.current = "";
     try {
       const answer = await ask(value);
       if (!aliveRef.current) return;
       setReply(answer);
+      // Speaking shuru — purana transcript buffer saaf
+      finalRef.current = "";
+      setText("");
       setP("speaking");
       void speakHuman(answer, lang, () => {
         if (aliveRef.current) startListening();
@@ -225,20 +230,35 @@ export function VoiceModal({
 
     rec.onresult = (event: any) => {
       if (mutedRef.current || phaseRef.current !== "listening") return;
+      // Sirf FINAL results state me jaate hain; interim sirf dikhane ke liye.
       let interim = "";
       let final = finalRef.current;
       for (let i = event.resultIndex; i < event.results.length; i += 1) {
-        const chunk = event.results[i][0].transcript as string;
-        if (event.results[i].isFinal) final += chunk;
-        else interim += chunk;
+        const chunk = String(event.results[i][0].transcript ?? "").trim();
+        if (!chunk) continue;
+        if (event.results[i].isFinal) final = mergeFinal(final, chunk);
+        else interim = chunk;
       }
+      final = cleanTranscript(final);
       finalRef.current = final;
-      const combined = (final + interim).trim();
-      setText(combined);
-      onTranscript(combined);
+      const shown = cleanTranscript(mergeFinal(final, interim));
+      setText(shown);
+      onTranscript(shown);
       setSpeaking(true);
       if (timerRef.current) clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => void handleQuestion(finalRef.current.trim() || combined), 2000);
+      // VAD: 800ms khamoshi ke baad hi final
+      timerRef.current = setTimeout(() => {
+        const value = finalRef.current.trim() || shown;
+        const now = Date.now();
+        const key = value.toLowerCase();
+        if (key === lastSentRef.current.text && now - lastSentRef.current.at < 2000) {
+          finalRef.current = "";
+          setText("");
+          return;
+        }
+        lastSentRef.current = { text: key, at: now };
+        void handleQuestion(value);
+      }, 800);
     };
     rec.onerror = (event: any) => {
       if (event?.error === "not-allowed") {
