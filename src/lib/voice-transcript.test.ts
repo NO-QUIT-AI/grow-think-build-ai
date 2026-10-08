@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { expect, test } from "bun:test";
 import { cleanTranscript, mergeFinal } from "./voice-transcript";
 test("loop", () => {

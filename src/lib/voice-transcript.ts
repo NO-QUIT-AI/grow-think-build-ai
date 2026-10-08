@@ -27,7 +27,7 @@ export function cleanTranscript(text: string): string {
         i += size; // skip the duplicate copy
         continue;
       }
-      out.push(words[i]);
+      out.push(words[i] ?? "");
       i += 1;
     }
     words = out;
