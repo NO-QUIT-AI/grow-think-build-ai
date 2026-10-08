@@ -20,6 +20,7 @@ import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as PlayerRouteImport } from './routes/player'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ScoutRouteImport } from './routes/scout'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AdminAdsRouteImport } from './routes/admin.ads'
 import { Route as AdminOwnerRouteImport } from './routes/admin.owner'
@@ -33,6 +34,7 @@ import { Route as ApiMindRouteImport } from './routes/api/mind'
 import { Route as ApiOwnerRouteImport } from './routes/api/owner'
 import { Route as ApiR2UploadRouteImport } from './routes/api/r2-upload'
 import { Route as ApiRunwayVideoRouteImport } from './routes/api/runway-video'
+import { Route as ApiScoutRouteImport } from './routes/api/scout'
 import { Route as ApiTtsRouteImport } from './routes/api/tts'
 import { Route as ApiViralVideoRouteImport } from './routes/api/viral-video'
 import { Route as ApiVoiceChatRouteImport } from './routes/api/voice-chat'
@@ -93,6 +95,11 @@ const PlayerRoute = PlayerRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScoutRoute = ScoutRouteImport.update({
+  id: '/scout',
+  path: '/scout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -160,6 +167,11 @@ const ApiRunwayVideoRoute = ApiRunwayVideoRouteImport.update({
   path: '/api/runway-video',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiScoutRoute = ApiScoutRouteImport.update({
+  id: '/api/scout',
+  path: '/api/scout',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiTtsRoute = ApiTtsRouteImport.update({
   id: '/api/tts',
   path: '/api/tts',
@@ -203,6 +215,7 @@ export interface FileRoutesByFullPath {
   '/messages': typeof MessagesRoute
   '/player': typeof PlayerRoute
   '/privacy': typeof PrivacyRoute
+  '/scout': typeof ScoutRoute
   '/terms': typeof TermsRoute
   '/admin/ads': typeof AdminAdsRoute
   '/admin/owner': typeof AdminOwnerRoute
@@ -216,6 +229,7 @@ export interface FileRoutesByFullPath {
   '/api/owner': typeof ApiOwnerRoute
   '/api/r2-upload': typeof ApiR2UploadRoute
   '/api/runway-video': typeof ApiRunwayVideoRoute
+  '/api/scout': typeof ApiScoutRoute
   '/api/tts': typeof ApiTtsRoute
   '/api/viral-video': typeof ApiViralVideoRoute
   '/api/voice-chat': typeof ApiVoiceChatRoute
@@ -235,6 +249,7 @@ export interface FileRoutesByTo {
   '/messages': typeof MessagesRoute
   '/player': typeof PlayerRoute
   '/privacy': typeof PrivacyRoute
+  '/scout': typeof ScoutRoute
   '/terms': typeof TermsRoute
   '/admin/ads': typeof AdminAdsRoute
   '/admin/owner': typeof AdminOwnerRoute
@@ -248,6 +263,7 @@ export interface FileRoutesByTo {
   '/api/owner': typeof ApiOwnerRoute
   '/api/r2-upload': typeof ApiR2UploadRoute
   '/api/runway-video': typeof ApiRunwayVideoRoute
+  '/api/scout': typeof ApiScoutRoute
   '/api/tts': typeof ApiTtsRoute
   '/api/viral-video': typeof ApiViralVideoRoute
   '/api/voice-chat': typeof ApiVoiceChatRoute
@@ -268,6 +284,7 @@ export interface FileRoutesById {
   '/messages': typeof MessagesRoute
   '/player': typeof PlayerRoute
   '/privacy': typeof PrivacyRoute
+  '/scout': typeof ScoutRoute
   '/terms': typeof TermsRoute
   '/admin/ads': typeof AdminAdsRoute
   '/admin/owner': typeof AdminOwnerRoute
@@ -281,6 +298,7 @@ export interface FileRoutesById {
   '/api/owner': typeof ApiOwnerRoute
   '/api/r2-upload': typeof ApiR2UploadRoute
   '/api/runway-video': typeof ApiRunwayVideoRoute
+  '/api/scout': typeof ApiScoutRoute
   '/api/tts': typeof ApiTtsRoute
   '/api/viral-video': typeof ApiViralVideoRoute
   '/api/voice-chat': typeof ApiVoiceChatRoute
@@ -302,6 +320,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/player'
     | '/privacy'
+    | '/scout'
     | '/terms'
     | '/admin/ads'
     | '/admin/owner'
@@ -315,6 +334,7 @@ export interface FileRouteTypes {
     | '/api/owner'
     | '/api/r2-upload'
     | '/api/runway-video'
+    | '/api/scout'
     | '/api/tts'
     | '/api/viral-video'
     | '/api/voice-chat'
@@ -334,6 +354,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/player'
     | '/privacy'
+    | '/scout'
     | '/terms'
     | '/admin/ads'
     | '/admin/owner'
@@ -347,6 +368,7 @@ export interface FileRouteTypes {
     | '/api/owner'
     | '/api/r2-upload'
     | '/api/runway-video'
+    | '/api/scout'
     | '/api/tts'
     | '/api/viral-video'
     | '/api/voice-chat'
@@ -366,6 +388,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/player'
     | '/privacy'
+    | '/scout'
     | '/terms'
     | '/admin/ads'
     | '/admin/owner'
@@ -379,6 +402,7 @@ export interface FileRouteTypes {
     | '/api/owner'
     | '/api/r2-upload'
     | '/api/runway-video'
+    | '/api/scout'
     | '/api/tts'
     | '/api/viral-video'
     | '/api/voice-chat'
@@ -399,6 +423,7 @@ export interface RootRouteChildren {
   MessagesRoute: typeof MessagesRoute
   PlayerRoute: typeof PlayerRoute
   PrivacyRoute: typeof PrivacyRoute
+  ScoutRoute: typeof ScoutRoute
   TermsRoute: typeof TermsRoute
   AdminAdsRoute: typeof AdminAdsRoute
   AdminOwnerRoute: typeof AdminOwnerRoute
@@ -412,6 +437,7 @@ export interface RootRouteChildren {
   ApiOwnerRoute: typeof ApiOwnerRoute
   ApiR2UploadRoute: typeof ApiR2UploadRoute
   ApiRunwayVideoRoute: typeof ApiRunwayVideoRoute
+  ApiScoutRoute: typeof ApiScoutRoute
   ApiTtsRoute: typeof ApiTtsRoute
   ApiViralVideoRoute: typeof ApiViralVideoRoute
   ApiVoiceChatRoute: typeof ApiVoiceChatRoute
@@ -496,6 +522,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/scout': {
+      id: '/scout'
+      path: '/scout'
+      fullPath: '/scout'
+      preLoaderRoute: typeof ScoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -589,6 +622,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiRunwayVideoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/scout': {
+      id: '/api/scout'
+      path: '/api/scout'
+      fullPath: '/api/scout'
+      preLoaderRoute: typeof ApiScoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/tts': {
       id: '/api/tts'
       path: '/api/tts'
@@ -657,6 +697,7 @@ const rootRouteChildren: RootRouteChildren = {
   MessagesRoute: MessagesRoute,
   PlayerRoute: PlayerRoute,
   PrivacyRoute: PrivacyRoute,
+  ScoutRoute: ScoutRoute,
   TermsRoute: TermsRoute,
   AdminAdsRoute: AdminAdsRoute,
   AdminOwnerRoute: AdminOwnerRoute,
@@ -670,6 +711,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiOwnerRoute: ApiOwnerRoute,
   ApiR2UploadRoute: ApiR2UploadRoute,
   ApiRunwayVideoRoute: ApiRunwayVideoRoute,
+  ApiScoutRoute: ApiScoutRoute,
   ApiTtsRoute: ApiTtsRoute,
   ApiViralVideoRoute: ApiViralVideoRoute,
   ApiVoiceChatRoute: ApiVoiceChatRoute,
