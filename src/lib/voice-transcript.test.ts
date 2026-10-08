@@ -1,4 +1,4 @@
-import { expect, test } from "vitest";
+import { expect, test } from "bun:test";
 import { cleanTranscript, mergeFinal } from "./voice-transcript";
 test("loop", () => {
   const s = "Achcha Mujhe yah batao ki baki hai theek";
