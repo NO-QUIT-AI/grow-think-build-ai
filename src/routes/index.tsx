@@ -58,6 +58,12 @@ function Home() {
     if (user) void redeemReferral();
   }, [user]);
 
+  useEffect(() => {
+    const h = (e: Event) => setActiveTab(String((e as CustomEvent).detail));
+    window.addEventListener("nqai-open-tab", h);
+    return () => window.removeEventListener("nqai-open-tab", h);
+  }, []);
+
   if (loading || !user) {
     return (
       <main className="flex min-h-screen items-center justify-center">

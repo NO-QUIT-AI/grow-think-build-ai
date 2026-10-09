@@ -1,3 +1,4 @@
+import { ToolsMenu, CHAT_ACTION_EVT } from "@/components/nova/ToolsMenu";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -8,6 +9,7 @@ import {
   ImagePlus,
   Loader2,
   Menu,
+
   Mic,
   Plus,
   Sparkles,
@@ -231,14 +233,15 @@ export function ChatPanel({
         <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
           <SheetTrigger asChild>
             <Button variant="outline" size="sm" className="gap-1.5 text-xs" aria-label={t("history")}>
-              <Menu className="h-4 w-4" /> {t("history")}
+              <Menu className="h-4 w-4" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-[85vw] max-w-sm p-0">
-            <SheetHeader className="border-b border-border px-4 py-3">
-              <SheetTitle className="text-sm">{t("oldChats")}</SheetTitle>
+          <SheetContent side="left" className="w-[85vw] max-w-sm border-r border-border/50 bg-background/70 p-0 backdrop-blur-xl duration-300">
+            <SheetHeader className="sr-only">
+              <SheetTitle>All Tools</SheetTitle>
             </SheetHeader>
-            <div className="max-h-[calc(100vh-4rem)] overflow-y-auto p-2">
+            <ToolsMenu onNewChat={startNewChat} onClose={() => setHistoryOpen(false)} history={
+            <div className="max-h-[50vh] overflow-y-auto p-1">
               {threads.length === 0 && (
                 <p className="px-2 py-4 text-xs text-muted-foreground">{t("noSavedChats")}</p>
               )}
@@ -268,6 +271,7 @@ export function ChatPanel({
                 </div>
               ))}
             </div>
+            } />
           </SheetContent>
         </Sheet>
 
@@ -325,6 +329,15 @@ function ChatThread({
   const bottomRef = useRef<HTMLDivElement>(null);
   const convRef = useRef<string | null>(conversationId);
   const [voiceOpen, setVoiceOpen] = useState(false);
+  useEffect(() => {
+    const h = (e: Event) => {
+      const d = (e as CustomEvent<{ prefill?: string; voice?: boolean }>).detail;
+      if (d?.prefill) setInput(d.prefill);
+      if (d?.voice) setVoiceOpen(true);
+    };
+    window.addEventListener(CHAT_ACTION_EVT, h);
+    return () => window.removeEventListener(CHAT_ACTION_EVT, h);
+  }, []);
   const [speakingId, setSpeakingId] = useState<string | null>(null);
   const voiceResolveRef = useRef<((text: string) => void) | null>(null);
   const voiceQuestionRef = useRef("");
