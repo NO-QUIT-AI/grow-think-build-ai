@@ -1,3 +1,4 @@
+import { ToolsMenu, CHAT_ACTION_EVT } from "@/components/nova/ToolsMenu";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -232,7 +233,7 @@ export function ChatPanel({
         <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
           <SheetTrigger asChild>
             <Button variant="outline" size="sm" className="gap-1.5 text-xs" aria-label={t("history")}>
-              <Menu className="h-4 w-4" /> {t("history")}
+              <Menu className="h-4 w-4" />
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-[85vw] max-w-sm border-r border-border/50 bg-background/70 p-0 backdrop-blur-xl duration-300">
