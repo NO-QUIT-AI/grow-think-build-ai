@@ -59,7 +59,7 @@ export function ToolsMenu({ onNewChat, onClose, history }: { onNewChat: () => vo
     if (torch) { torch.stop(); setTorch(null); return; }
     try {
       const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-      const track = s.getVideoTracks()[0];
+      const track = s.getVideoTracks()[0]; if (!track) throw new Error("no cam");
       await track.applyConstraints({ advanced: [{ torch: true } as MediaTrackConstraintSet] });
       setTorch(track);
       toast.success("Flashlight ON — dobara tap = OFF");
