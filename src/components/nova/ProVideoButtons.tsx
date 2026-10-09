@@ -44,7 +44,12 @@ export function ProVideoButtons({ title }: { title: string }) {
           prompt: kind === "runway" ? `${PROMPT.runway}. Build: ${title}` : PROMPT.fal,
         }),
       });
-      const j = (await res.json().catch(() => ({}))) as { id?: string; error?: string };
+      const j = (await res.json().catch(() => ({}))) as { id?: string; error?: string; status?: string; video_url?: string };
+      if (res.ok && j.status === "COMPLETED" && j.video_url) {
+        setVideo(j.video_url);
+        toast.success("Video ready!");
+        return;
+      }
       if (!res.ok || !j.id) throw new Error(j.error || "Video start nahi hui");
       toast.success("Video ban rahi hai… 1-3 minute");
       for (let i = 0; i < 90; i++) {
