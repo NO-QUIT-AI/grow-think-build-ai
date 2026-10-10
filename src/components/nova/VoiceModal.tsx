@@ -1,3 +1,4 @@
+import { useConversation } from "@elevenlabs/react";
 import { cleanTranscript, mergeFinal } from "@/lib/voice-transcript";
 import { useEffect, useRef, useState } from "react";
 import { Mic, MicOff, X } from "lucide-react";
@@ -143,7 +144,7 @@ export function speakText(text: string, lang: string, onEnd?: () => void, onWord
 
 type Phase = "listening" | "thinking" | "speaking";
 
-export function VoiceModal({
+function LegacyVoiceModal({
   lang,
   onTranscript,
   ask,
@@ -370,6 +371,121 @@ export function VoiceModal({
             End
           </Button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+type VoiceProps = {
+  lang: string;
+  onTranscript: (text: string) => void;
+  ask: (text: string) => Promise<string>;
+  onClose: () => void;
+};
+
+/** Pehle ElevenLabs live agent; fail / minute khatam → purani voice. */
+export function VoiceModal(props: VoiceProps) {
+  const [mode, setMode] = useState<"live" | "legacy">("live");
+  if (mode === "legacy") return <LegacyVoiceModal {...props} />;
+  return <LiveVoiceModal {...props} onFallback={() => setMode("legacy")} />;
+}
+
+function LiveVoiceModal({ onClose, onFallback }: VoiceProps & { onFallback: () => void }) {
+  const [reply, setReply] = useState("");
+  const [heard, setHeard] = useState("");
+  const [muted, setMuted] = useState(false);
+  const [connected, setConnected] = useState(false);
+  const ampRef = useRef(0);
+  const fellBack = useRef(false);
+  const closing = useRef(false);
+
+  const fallback = () => {
+    if (fellBack.current || closing.current) return;
+    fellBack.current = true;
+    onFallback();
+  };
+
+  const conversation = useConversation({
+    micMuted: muted,
+    onConnect: () => setConnected(true),
+    onDisconnect: () => {
+      if (!closing.current) fallback();
+    },
+    onError: () => fallback(),
+    onMessage: (m: any) => {
+      if (m?.source === "user") setHeard(String(m.message ?? ""));
+      else if (m?.message) setReply(String(m.message));
+    },
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+        const { data: s } = await supabase.auth.getSession();
+        const res = await fetch("/api/voice-agent-token", {
+          method: "POST",
+          headers: { authorization: `Bearer ${s.session?.access_token ?? ""}` },
+        });
+        if (!res.ok) throw new Error("token");
+        const { token } = (await res.json()) as { token: string };
+        if (cancelled) return;
+        await conversation.startSession({ conversationToken: token, connectionType: "webrtc" });
+      } catch {
+        if (!cancelled) fallback();
+      }
+    })();
+    return () => {
+      cancelled = true;
+      closing.current = true;
+      void conversation.endSession();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const speaking = conversation.isSpeaking;
+  useEffect(() => {
+    let raf = 0;
+    const tick = () => {
+      try {
+        ampRef.current = speaking ? Math.min(1, conversation.getOutputVolume() * 2) : 0;
+      } catch {
+        ampRef.current = speaking ? 0.6 : 0;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    tick();
+    return () => cancelAnimationFrame(raf);
+  }, [speaking, conversation]);
+
+  const phase = !connected ? "thinking" : speaking ? "speaking" : "listening";
+  const status = !connected ? "Connecting..." : speaking ? "Speaking... (bol kar tok sakte ho)" : muted ? "Muted" : "Bolo, main sun raha hoon";
+
+  return (
+    <div className="fixed inset-0 z-[70] flex flex-col items-center justify-between bg-background/80 px-6 py-8 backdrop-blur-xl">
+      <div className="flex w-full items-center justify-end">
+        <Button variant="ghost" size="icon" aria-label="Close voice chat" onClick={onClose}>
+          <X className="h-5 w-5" />
+        </Button>
+      </div>
+      <div className="flex flex-col items-center gap-6">
+        <ProAvatar phase={phase} ampRef={ampRef} />
+        <p className="text-center text-sm text-muted-foreground">{status}</p>
+        {speaking && reply ? (
+          <p className="line-clamp-6 max-w-md text-center text-sm text-foreground/90">{reply}</p>
+        ) : heard ? (
+          <p className="max-w-md text-center text-base font-medium text-foreground">{heard}</p>
+        ) : null}
+      </div>
+      <div className="flex items-center gap-3">
+        <Button type="button" variant="outline" size="lg" className="rounded-full" onClick={() => setMuted((m) => !m)}>
+          {muted ? <MicOff className="mr-2 h-4 w-4" /> : <Mic className="mr-2 h-4 w-4" />}
+          {muted ? "Unmute" : "Mute"}
+        </Button>
+        <Button type="button" size="lg" className="btn-green rounded-full px-8" onClick={onClose}>
+          End
+        </Button>
       </div>
     </div>
   );

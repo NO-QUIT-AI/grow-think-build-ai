@@ -37,6 +37,7 @@ import { Route as ApiRunwayVideoRouteImport } from './routes/api/runway-video'
 import { Route as ApiScoutRouteImport } from './routes/api/scout'
 import { Route as ApiTtsRouteImport } from './routes/api/tts'
 import { Route as ApiViralVideoRouteImport } from './routes/api/viral-video'
+import { Route as ApiVoiceAgentTokenRouteImport } from './routes/api/voice-agent-token'
 import { Route as ApiVoiceChatRouteImport } from './routes/api/voice-chat'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as ApiMindThinkRouteImport } from './routes/api/mind/think'
@@ -182,6 +183,11 @@ const ApiViralVideoRoute = ApiViralVideoRouteImport.update({
   path: '/api/viral-video',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiVoiceAgentTokenRoute = ApiVoiceAgentTokenRouteImport.update({
+  id: '/api/voice-agent-token',
+  path: '/api/voice-agent-token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiVoiceChatRoute = ApiVoiceChatRouteImport.update({
   id: '/api/voice-chat',
   path: '/api/voice-chat',
@@ -232,6 +238,7 @@ export interface FileRoutesByFullPath {
   '/api/scout': typeof ApiScoutRoute
   '/api/tts': typeof ApiTtsRoute
   '/api/viral-video': typeof ApiViralVideoRoute
+  '/api/voice-agent-token': typeof ApiVoiceAgentTokenRoute
   '/api/voice-chat': typeof ApiVoiceChatRoute
   '/u/$username': typeof UUsernameRoute
   '/api/mind/think': typeof ApiMindThinkRoute
@@ -266,6 +273,7 @@ export interface FileRoutesByTo {
   '/api/scout': typeof ApiScoutRoute
   '/api/tts': typeof ApiTtsRoute
   '/api/viral-video': typeof ApiViralVideoRoute
+  '/api/voice-agent-token': typeof ApiVoiceAgentTokenRoute
   '/api/voice-chat': typeof ApiVoiceChatRoute
   '/u/$username': typeof UUsernameRoute
   '/api/mind/think': typeof ApiMindThinkRoute
@@ -301,6 +309,7 @@ export interface FileRoutesById {
   '/api/scout': typeof ApiScoutRoute
   '/api/tts': typeof ApiTtsRoute
   '/api/viral-video': typeof ApiViralVideoRoute
+  '/api/voice-agent-token': typeof ApiVoiceAgentTokenRoute
   '/api/voice-chat': typeof ApiVoiceChatRoute
   '/u/$username': typeof UUsernameRoute
   '/api/mind/think': typeof ApiMindThinkRoute
@@ -337,6 +346,7 @@ export interface FileRouteTypes {
     | '/api/scout'
     | '/api/tts'
     | '/api/viral-video'
+    | '/api/voice-agent-token'
     | '/api/voice-chat'
     | '/u/$username'
     | '/api/mind/think'
@@ -371,6 +381,7 @@ export interface FileRouteTypes {
     | '/api/scout'
     | '/api/tts'
     | '/api/viral-video'
+    | '/api/voice-agent-token'
     | '/api/voice-chat'
     | '/u/$username'
     | '/api/mind/think'
@@ -405,6 +416,7 @@ export interface FileRouteTypes {
     | '/api/scout'
     | '/api/tts'
     | '/api/viral-video'
+    | '/api/voice-agent-token'
     | '/api/voice-chat'
     | '/u/$username'
     | '/api/mind/think'
@@ -440,6 +452,7 @@ export interface RootRouteChildren {
   ApiScoutRoute: typeof ApiScoutRoute
   ApiTtsRoute: typeof ApiTtsRoute
   ApiViralVideoRoute: typeof ApiViralVideoRoute
+  ApiVoiceAgentTokenRoute: typeof ApiVoiceAgentTokenRoute
   ApiVoiceChatRoute: typeof ApiVoiceChatRoute
   UUsernameRoute: typeof UUsernameRoute
   ApiPublicR2VideoRoute: typeof ApiPublicR2VideoRoute
@@ -643,6 +656,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiViralVideoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/voice-agent-token': {
+      id: '/api/voice-agent-token'
+      path: '/api/voice-agent-token'
+      fullPath: '/api/voice-agent-token'
+      preLoaderRoute: typeof ApiVoiceAgentTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/voice-chat': {
       id: '/api/voice-chat'
       path: '/api/voice-chat'
@@ -714,6 +734,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiScoutRoute: ApiScoutRoute,
   ApiTtsRoute: ApiTtsRoute,
   ApiViralVideoRoute: ApiViralVideoRoute,
+  ApiVoiceAgentTokenRoute: ApiVoiceAgentTokenRoute,
   ApiVoiceChatRoute: ApiVoiceChatRoute,
   UUsernameRoute: UUsernameRoute,
   ApiPublicR2VideoRoute: ApiPublicR2VideoRoute,
