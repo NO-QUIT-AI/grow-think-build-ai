@@ -17,6 +17,7 @@
   "dependencies": {
     "@ai-sdk/openai-compatible": "^3.0.39",
     "@ai-sdk/react": "^4.0.86",
+    "@elevenlabs/react": "^1.17.0",
     "@hookform/resolvers": "^5.2.2",
     "@lovable.dev/cloud-auth-js": "^1.0.0",
     "@radix-ui/react-accordion": "^1.2.12",
