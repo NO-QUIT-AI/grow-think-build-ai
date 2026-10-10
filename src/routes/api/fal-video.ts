@@ -5,7 +5,7 @@ import { requirePro } from "@/lib/pro-user.server";
 /** Photo → galaxy video via fal Wan 2.2 at 480p (cheap). Pro only, FAL_KEY server-side. */
 const MODEL = "fal-ai/wan/v2.2-a14b/image-to-video";
 const APP = "fal-ai/wan";
-const HF_URL = "https://api-inference.huggingface.co/models/Wan-AI/Wan2.1-T2V-14B";
+const HF_URL = "https://router.huggingface.co/hf-inference/models/Wan-AI/Wan2.1-T2V-14B";
 
 const Body = z.object({
   image_url: z.string().url().startsWith("https://").max(2000),
@@ -28,29 +28,28 @@ export const Route = createFileRoute("/api/fal-video")({
         if (!parsed.success) return Response.json({ error: "Invalid input" }, { status: 400 });
         const hfKey = process.env["HUGGINGFACE_API_KEY"];
         if (hfKey) {
-          // Free HuggingFace path (text-to-video). 503 = model loading → wait 20s, retry 3x.
+          // Free HuggingFace router. 503/404 → wait 20s, retry 3x, then fall back to fal.ai.
           let res: Response | null = null;
           for (let attempt = 0; attempt <= 3; attempt++) {
             res = await fetch(HF_URL, {
               method: "POST",
-              headers: { Authorization: `Bearer ${hfKey}`, "content-type": "application/json" },
+              headers: { Authorization: `Bearer ${hfKey}`, "Content-Type": "application/json" },
               body: JSON.stringify({ inputs: parsed.data.prompt }),
             });
-            if (res.status !== 503 || attempt === 3) break;
+            if ((res.status !== 503 && res.status !== 404) || attempt === 3) break;
             await new Promise((r) => setTimeout(r, 20_000));
           }
-          if (!res || !res.ok) {
-            const t = res ? await res.text() : "";
-            console.error(`HF video failed [${res?.status}]: ${t}`);
-            return Response.json({ error: `HuggingFace error (${res?.status})`, detail: t.slice(0, 300) }, { status: 502 });
+          if (res && res.ok) {
+            const bytes = await res.arrayBuffer();
+            const { r2 } = await import("@/lib/r2.server");
+            const { client, base, publicUrl } = r2();
+            const key = `videos/galaxy/${pro.id}/${Date.now()}-${crypto.randomUUID()}.mp4`;
+            const up = await client.fetch(`${base}/${key}`, { method: "PUT", body: bytes, headers: { "content-type": "video/mp4" } });
+            if (up.ok) return Response.json({ status: "COMPLETED", video_url: `${publicUrl}/${key}`, provider: "huggingface" });
+            console.error(`R2 upload failed [${up.status}] — falling back to fal`);
+          } else {
+            console.error(`HF video failed [${res?.status}]: ${res ? (await res.text()).slice(0, 300) : ""} — falling back to fal`);
           }
-          const bytes = await res.arrayBuffer();
-          const { r2 } = await import("@/lib/r2.server");
-          const { client, base, publicUrl } = r2();
-          const key = `videos/galaxy/${pro.id}/${Date.now()}-${crypto.randomUUID()}.mp4`;
-          const up = await client.fetch(`${base}/${key}`, { method: "PUT", body: bytes, headers: { "content-type": "video/mp4" } });
-          if (!up.ok) return Response.json({ error: `R2 upload failed (${up.status})` }, { status: 502 });
-          return Response.json({ status: "COMPLETED", video_url: `${publicUrl}/${key}`, provider: "huggingface" });
         }
         const res = await fetch(`https://queue.fal.run/${MODEL}`, {
           method: "POST",
