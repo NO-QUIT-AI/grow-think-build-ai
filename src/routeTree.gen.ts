@@ -21,6 +21,7 @@ import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as PlayerRouteImport } from './routes/player'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ScoutRouteImport } from './routes/scout'
+import { Route as SpaceRouteImport } from './routes/space'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AdminAdsRouteImport } from './routes/admin.ads'
 import { Route as AdminOwnerRouteImport } from './routes/admin.owner'
@@ -31,6 +32,7 @@ import { Route as ApiEditImageRouteImport } from './routes/api/edit-image'
 import { Route as ApiFalVideoRouteImport } from './routes/api/fal-video'
 import { Route as ApiGenerateVideoRouteImport } from './routes/api/generate-video'
 import { Route as ApiMindRouteImport } from './routes/api/mind'
+import { Route as ApiNasaApodRouteImport } from './routes/api/nasa-apod'
 import { Route as ApiOwnerRouteImport } from './routes/api/owner'
 import { Route as ApiR2UploadRouteImport } from './routes/api/r2-upload'
 import { Route as ApiRunwayVideoRouteImport } from './routes/api/runway-video'
@@ -103,6 +105,11 @@ const ScoutRoute = ScoutRouteImport.update({
   path: '/scout',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SpaceRoute = SpaceRouteImport.update({
+  id: '/space',
+  path: '/space',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
@@ -151,6 +158,11 @@ const ApiGenerateVideoRoute = ApiGenerateVideoRouteImport.update({
 const ApiMindRoute = ApiMindRouteImport.update({
   id: '/api/mind',
   path: '/api/mind',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiNasaApodRoute = ApiNasaApodRouteImport.update({
+  id: '/api/nasa-apod',
+  path: '/api/nasa-apod',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiOwnerRoute = ApiOwnerRouteImport.update({
@@ -222,6 +234,7 @@ export interface FileRoutesByFullPath {
   '/player': typeof PlayerRoute
   '/privacy': typeof PrivacyRoute
   '/scout': typeof ScoutRoute
+  '/space': typeof SpaceRoute
   '/terms': typeof TermsRoute
   '/admin/ads': typeof AdminAdsRoute
   '/admin/owner': typeof AdminOwnerRoute
@@ -232,6 +245,7 @@ export interface FileRoutesByFullPath {
   '/api/fal-video': typeof ApiFalVideoRoute
   '/api/generate-video': typeof ApiGenerateVideoRoute
   '/api/mind': typeof ApiMindRouteWithChildren
+  '/api/nasa-apod': typeof ApiNasaApodRoute
   '/api/owner': typeof ApiOwnerRoute
   '/api/r2-upload': typeof ApiR2UploadRoute
   '/api/runway-video': typeof ApiRunwayVideoRoute
@@ -257,6 +271,7 @@ export interface FileRoutesByTo {
   '/player': typeof PlayerRoute
   '/privacy': typeof PrivacyRoute
   '/scout': typeof ScoutRoute
+  '/space': typeof SpaceRoute
   '/terms': typeof TermsRoute
   '/admin/ads': typeof AdminAdsRoute
   '/admin/owner': typeof AdminOwnerRoute
@@ -267,6 +282,7 @@ export interface FileRoutesByTo {
   '/api/fal-video': typeof ApiFalVideoRoute
   '/api/generate-video': typeof ApiGenerateVideoRoute
   '/api/mind': typeof ApiMindRouteWithChildren
+  '/api/nasa-apod': typeof ApiNasaApodRoute
   '/api/owner': typeof ApiOwnerRoute
   '/api/r2-upload': typeof ApiR2UploadRoute
   '/api/runway-video': typeof ApiRunwayVideoRoute
@@ -293,6 +309,7 @@ export interface FileRoutesById {
   '/player': typeof PlayerRoute
   '/privacy': typeof PrivacyRoute
   '/scout': typeof ScoutRoute
+  '/space': typeof SpaceRoute
   '/terms': typeof TermsRoute
   '/admin/ads': typeof AdminAdsRoute
   '/admin/owner': typeof AdminOwnerRoute
@@ -303,6 +320,7 @@ export interface FileRoutesById {
   '/api/fal-video': typeof ApiFalVideoRoute
   '/api/generate-video': typeof ApiGenerateVideoRoute
   '/api/mind': typeof ApiMindRouteWithChildren
+  '/api/nasa-apod': typeof ApiNasaApodRoute
   '/api/owner': typeof ApiOwnerRoute
   '/api/r2-upload': typeof ApiR2UploadRoute
   '/api/runway-video': typeof ApiRunwayVideoRoute
@@ -330,6 +348,7 @@ export interface FileRouteTypes {
     | '/player'
     | '/privacy'
     | '/scout'
+    | '/space'
     | '/terms'
     | '/admin/ads'
     | '/admin/owner'
@@ -340,6 +359,7 @@ export interface FileRouteTypes {
     | '/api/fal-video'
     | '/api/generate-video'
     | '/api/mind'
+    | '/api/nasa-apod'
     | '/api/owner'
     | '/api/r2-upload'
     | '/api/runway-video'
@@ -365,6 +385,7 @@ export interface FileRouteTypes {
     | '/player'
     | '/privacy'
     | '/scout'
+    | '/space'
     | '/terms'
     | '/admin/ads'
     | '/admin/owner'
@@ -375,6 +396,7 @@ export interface FileRouteTypes {
     | '/api/fal-video'
     | '/api/generate-video'
     | '/api/mind'
+    | '/api/nasa-apod'
     | '/api/owner'
     | '/api/r2-upload'
     | '/api/runway-video'
@@ -400,6 +422,7 @@ export interface FileRouteTypes {
     | '/player'
     | '/privacy'
     | '/scout'
+    | '/space'
     | '/terms'
     | '/admin/ads'
     | '/admin/owner'
@@ -410,6 +433,7 @@ export interface FileRouteTypes {
     | '/api/fal-video'
     | '/api/generate-video'
     | '/api/mind'
+    | '/api/nasa-apod'
     | '/api/owner'
     | '/api/r2-upload'
     | '/api/runway-video'
@@ -436,6 +460,7 @@ export interface RootRouteChildren {
   PlayerRoute: typeof PlayerRoute
   PrivacyRoute: typeof PrivacyRoute
   ScoutRoute: typeof ScoutRoute
+  SpaceRoute: typeof SpaceRoute
   TermsRoute: typeof TermsRoute
   AdminAdsRoute: typeof AdminAdsRoute
   AdminOwnerRoute: typeof AdminOwnerRoute
@@ -446,6 +471,7 @@ export interface RootRouteChildren {
   ApiFalVideoRoute: typeof ApiFalVideoRoute
   ApiGenerateVideoRoute: typeof ApiGenerateVideoRoute
   ApiMindRoute: typeof ApiMindRouteWithChildren
+  ApiNasaApodRoute: typeof ApiNasaApodRoute
   ApiOwnerRoute: typeof ApiOwnerRoute
   ApiR2UploadRoute: typeof ApiR2UploadRoute
   ApiRunwayVideoRoute: typeof ApiRunwayVideoRoute
@@ -544,6 +570,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ScoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/space': {
+      id: '/space'
+      path: '/space'
+      fullPath: '/space'
+      preLoaderRoute: typeof SpaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/terms': {
       id: '/terms'
       path: '/terms'
@@ -612,6 +645,13 @@ declare module '@tanstack/react-router' {
       path: '/api/mind'
       fullPath: '/api/mind'
       preLoaderRoute: typeof ApiMindRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/nasa-apod': {
+      id: '/api/nasa-apod'
+      path: '/api/nasa-apod'
+      fullPath: '/api/nasa-apod'
+      preLoaderRoute: typeof ApiNasaApodRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/owner': {
@@ -718,6 +758,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlayerRoute: PlayerRoute,
   PrivacyRoute: PrivacyRoute,
   ScoutRoute: ScoutRoute,
+  SpaceRoute: SpaceRoute,
   TermsRoute: TermsRoute,
   AdminAdsRoute: AdminAdsRoute,
   AdminOwnerRoute: AdminOwnerRoute,
@@ -728,6 +769,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiFalVideoRoute: ApiFalVideoRoute,
   ApiGenerateVideoRoute: ApiGenerateVideoRoute,
   ApiMindRoute: ApiMindRouteWithChildren,
+  ApiNasaApodRoute: ApiNasaApodRoute,
   ApiOwnerRoute: ApiOwnerRoute,
   ApiR2UploadRoute: ApiR2UploadRoute,
   ApiRunwayVideoRoute: ApiRunwayVideoRoute,
