@@ -1,4 +1,4 @@
-import { useConversation } from "@elevenlabs/react";
+import { ConversationProvider, useConversation } from "@elevenlabs/react";
 import { cleanTranscript, mergeFinal } from "@/lib/voice-transcript";
 import { useEffect, useRef, useState } from "react";
 import { Mic, MicOff, X } from "lucide-react";
@@ -387,7 +387,11 @@ type VoiceProps = {
 export function VoiceModal(props: VoiceProps) {
   const [mode, setMode] = useState<"live" | "legacy">("live");
   if (mode === "legacy") return <LegacyVoiceModal {...props} />;
-  return <LiveVoiceModal {...props} onFallback={() => setMode("legacy")} />;
+  return (
+    <ConversationProvider>
+      <LiveVoiceModal {...props} onFallback={() => setMode("legacy")} />
+    </ConversationProvider>
+  );
 }
 
 function LiveVoiceModal({ onClose, onFallback }: VoiceProps & { onFallback: () => void }) {
