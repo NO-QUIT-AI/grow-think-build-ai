@@ -29,6 +29,7 @@ const TOOLS: Tool[] = [
   { id: "t2i", name: "Text to Image", icon: ImageIcon, section: "AI TOOLS" },
   { id: "pdf", name: "PDF Reader", icon: FileSearch, section: "AI TOOLS" },
   { id: "voice", name: "Voice Tools", icon: Mic, section: "AI TOOLS" },
+  { id: "space", name: "Space Photo (NASA)", icon: ImageIcon, section: "AI TOOLS" },
 ];
 
 /** Ask home page to switch its middle tab. */
@@ -74,6 +75,7 @@ export function ToolsMenu({ onNewChat, onClose, history }: { onNewChat: () => vo
       case "history": setShowHistory((v) => !v); return;
       case "builds": case "websites": case "domains": tab("builds"); return;
       case "cvs": onClose(); void navigate({ to: "/cv" }); return;
+      case "space": onClose(); void navigate({ to: "/space" }); return;
       case "whatsapp": case "call": setModal(id); return;
       case "music": open("https://music.youtube.com"); return;
       case "flash": void toggleTorch(); return;
