@@ -11,6 +11,7 @@ export const Route = createFileRoute("/api/vault")({
         if (!user) return new Response("Unauthorized", { status: 401 });
         const sb = createClient(process.env["SUPABASE_URL"]!, process.env["SUPABASE_PUBLISHABLE_KEY"]!, {
           auth: { persistSession: false },
+          global: { headers: { Authorization: request.headers.get("authorization") ?? "" } },
         });
         const { data: owner } = await sb.rpc("is_owner", { _uid: user.id });
         if (!owner) return new Response("Owner only", { status: 403 });

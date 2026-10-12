@@ -38,6 +38,7 @@ import { Route as ApiR2UploadRouteImport } from './routes/api/r2-upload'
 import { Route as ApiRunwayVideoRouteImport } from './routes/api/runway-video'
 import { Route as ApiScoutRouteImport } from './routes/api/scout'
 import { Route as ApiTtsRouteImport } from './routes/api/tts'
+import { Route as ApiVaultRouteImport } from './routes/api/vault'
 import { Route as ApiViralVideoRouteImport } from './routes/api/viral-video'
 import { Route as ApiVoiceAgentTokenRouteImport } from './routes/api/voice-agent-token'
 import { Route as ApiVoiceChatRouteImport } from './routes/api/voice-chat'
@@ -190,6 +191,11 @@ const ApiTtsRoute = ApiTtsRouteImport.update({
   path: '/api/tts',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiVaultRoute = ApiVaultRouteImport.update({
+  id: '/api/vault',
+  path: '/api/vault',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiViralVideoRoute = ApiViralVideoRouteImport.update({
   id: '/api/viral-video',
   path: '/api/viral-video',
@@ -251,6 +257,7 @@ export interface FileRoutesByFullPath {
   '/api/runway-video': typeof ApiRunwayVideoRoute
   '/api/scout': typeof ApiScoutRoute
   '/api/tts': typeof ApiTtsRoute
+  '/api/vault': typeof ApiVaultRoute
   '/api/viral-video': typeof ApiViralVideoRoute
   '/api/voice-agent-token': typeof ApiVoiceAgentTokenRoute
   '/api/voice-chat': typeof ApiVoiceChatRoute
@@ -288,6 +295,7 @@ export interface FileRoutesByTo {
   '/api/runway-video': typeof ApiRunwayVideoRoute
   '/api/scout': typeof ApiScoutRoute
   '/api/tts': typeof ApiTtsRoute
+  '/api/vault': typeof ApiVaultRoute
   '/api/viral-video': typeof ApiViralVideoRoute
   '/api/voice-agent-token': typeof ApiVoiceAgentTokenRoute
   '/api/voice-chat': typeof ApiVoiceChatRoute
@@ -326,6 +334,7 @@ export interface FileRoutesById {
   '/api/runway-video': typeof ApiRunwayVideoRoute
   '/api/scout': typeof ApiScoutRoute
   '/api/tts': typeof ApiTtsRoute
+  '/api/vault': typeof ApiVaultRoute
   '/api/viral-video': typeof ApiViralVideoRoute
   '/api/voice-agent-token': typeof ApiVoiceAgentTokenRoute
   '/api/voice-chat': typeof ApiVoiceChatRoute
@@ -365,6 +374,7 @@ export interface FileRouteTypes {
     | '/api/runway-video'
     | '/api/scout'
     | '/api/tts'
+    | '/api/vault'
     | '/api/viral-video'
     | '/api/voice-agent-token'
     | '/api/voice-chat'
@@ -402,6 +412,7 @@ export interface FileRouteTypes {
     | '/api/runway-video'
     | '/api/scout'
     | '/api/tts'
+    | '/api/vault'
     | '/api/viral-video'
     | '/api/voice-agent-token'
     | '/api/voice-chat'
@@ -439,6 +450,7 @@ export interface FileRouteTypes {
     | '/api/runway-video'
     | '/api/scout'
     | '/api/tts'
+    | '/api/vault'
     | '/api/viral-video'
     | '/api/voice-agent-token'
     | '/api/voice-chat'
@@ -477,6 +489,7 @@ export interface RootRouteChildren {
   ApiRunwayVideoRoute: typeof ApiRunwayVideoRoute
   ApiScoutRoute: typeof ApiScoutRoute
   ApiTtsRoute: typeof ApiTtsRoute
+  ApiVaultRoute: typeof ApiVaultRoute
   ApiViralVideoRoute: typeof ApiViralVideoRoute
   ApiVoiceAgentTokenRoute: typeof ApiVoiceAgentTokenRoute
   ApiVoiceChatRoute: typeof ApiVoiceChatRoute
@@ -689,6 +702,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTtsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/vault': {
+      id: '/api/vault'
+      path: '/api/vault'
+      fullPath: '/api/vault'
+      preLoaderRoute: typeof ApiVaultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/viral-video': {
       id: '/api/viral-video'
       path: '/api/viral-video'
@@ -775,6 +795,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiRunwayVideoRoute: ApiRunwayVideoRoute,
   ApiScoutRoute: ApiScoutRoute,
   ApiTtsRoute: ApiTtsRoute,
+  ApiVaultRoute: ApiVaultRoute,
   ApiViralVideoRoute: ApiViralVideoRoute,
   ApiVoiceAgentTokenRoute: ApiVoiceAgentTokenRoute,
   ApiVoiceChatRoute: ApiVoiceChatRoute,
