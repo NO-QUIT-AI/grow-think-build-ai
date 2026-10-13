@@ -379,6 +379,21 @@ export const Route = createFileRoute("/api/chat")({
           }),
         };
 
+        // Genesis powers sirf owner ke liye.
+        const { data: isOwner } = await supabase.rpc("is_owner", { _uid: userId });
+        let ownerPrompt = "";
+        let allTools: Record<string, unknown> = tools;
+        if (isOwner) {
+          const { genesisTools, GENESIS_PROMPT } = await import("@/lib/genesis-tools.server");
+          const { genesisExtraTools, GENESIS_EXTRA_PROMPT } = await import("@/lib/genesis-extra.server");
+          const g = genesisTools();
+          const deploy = (project: string) =>
+            (g.vercel_deploy.execute as (i: { project: string }, o: unknown) => Promise<unknown>)({ project }, {});
+          allTools = { ...tools, ...g, ...genesisExtraTools({ lovableKey: apiKey, deploy }) };
+          ownerPrompt = `\n\n${GENESIS_PROMPT}\n\n${GENESIS_EXTRA_PROMPT}`;
+        }
+
+
 
         const incoming = body.messages as UIMessage[];
         const lang = validLang(body.lang);
