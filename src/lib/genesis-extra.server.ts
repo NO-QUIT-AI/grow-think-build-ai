@@ -34,7 +34,7 @@ export const GENESIS_EXTRA_PROMPT = `GENESIS ADD-ONS:
 - generate_image (image), voiceover (ElevenLabs awaaz), generate_video (fal.ai clip, phir video_status), export_doc (CV/invoice/report printable PDF link).
 - quick_deploy = ek line me project Vercel par push.`;
 
-export function genesisExtraTools(opts: { lovableKey?: string; deploy: (project: string) => Promise<unknown> }) {
+export function genesisExtraTools(opts: { lovableKey: string | undefined; deploy: (project: string) => Promise<unknown> }) {
   return {
     db_query: tool({
       description: "Database table se rows padho (read-only). filters: column=value.",
