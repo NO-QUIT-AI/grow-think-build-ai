@@ -439,9 +439,9 @@ export const Route = createFileRoute("/api/chat")({
 
         const result = streamText({
           model,
-          system: `${SYSTEM_PROMPT}\n\n${memoryBlock}\n\n${languageInstruction}`,
+          system: `${SYSTEM_PROMPT}${ownerPrompt}\n\n${memoryBlock}\n\n${languageInstruction}`,
           messages: await convertToModelMessages(trimMessages(incoming)),
-          tools,
+          tools: allTools as typeof tools,
           stopWhen: stepCountIs(30),
           onError: ({ error }) => {
             console.error("[chat] stream error", error);
