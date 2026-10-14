@@ -28,7 +28,13 @@ export function LegalFooter({ className }: { className?: string }) {
   return (
     <nav className={`mt-10 flex flex-wrap gap-4 border-t border-border pt-4 text-[11px] text-muted-foreground ${className ?? ""}`}>
       <Link to="/about" className="hover:text-primary">
-        About & Contact
+        About
+      </Link>
+      <Link to="/contact" className="hover:text-primary">
+        Contact
+      </Link>
+      <Link to="/blog" className="hover:text-primary">
+        Blog
       </Link>
       <Link to="/privacy" className="hover:text-primary">
         Privacy Policy

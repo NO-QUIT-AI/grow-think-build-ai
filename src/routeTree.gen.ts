@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CommunityRouteImport } from './routes/community'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CvRouteImport } from './routes/cv'
 import { Route as EarnRouteImport } from './routes/earn'
 import { Route as InviteRouteImport } from './routes/invite'
@@ -43,6 +44,8 @@ import { Route as ApiVaultRouteImport } from './routes/api/vault'
 import { Route as ApiViralVideoRouteImport } from './routes/api/viral-video'
 import { Route as ApiVoiceAgentTokenRouteImport } from './routes/api/voice-agent-token'
 import { Route as ApiVoiceChatRouteImport } from './routes/api/voice-chat'
+import { Route as BlogIndexRouteImport } from './routes/blog.index'
+import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as ApiMindThinkRouteImport } from './routes/api/mind/think'
 import { Route as ApiPublicR2VideoRouteImport } from './routes/api/public/r2-video'
@@ -65,6 +68,11 @@ const AuthRoute = AuthRouteImport.update({
 const CommunityRoute = CommunityRouteImport.update({
   id: '/community',
   path: '/community',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CvRoute = CvRouteImport.update({
@@ -217,6 +225,16 @@ const ApiVoiceChatRoute = ApiVoiceChatRouteImport.update({
   path: '/api/voice-chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/blog/$slug',
+  path: '/blog/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UUsernameRoute = UUsernameRouteImport.update({
   id: '/u/$username',
   path: '/u/$username',
@@ -238,6 +256,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/community': typeof CommunityRoute
+  '/contact': typeof ContactRoute
   '/cv': typeof CvRoute
   '/earn': typeof EarnRoute
   '/invite': typeof InviteRoute
@@ -268,7 +287,9 @@ export interface FileRoutesByFullPath {
   '/api/viral-video': typeof ApiViralVideoRoute
   '/api/voice-agent-token': typeof ApiVoiceAgentTokenRoute
   '/api/voice-chat': typeof ApiVoiceChatRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/u/$username': typeof UUsernameRoute
+  '/blog/': typeof BlogIndexRoute
   '/api/mind/think': typeof ApiMindThinkRoute
   '/api/public/r2-video': typeof ApiPublicR2VideoRoute
 }
@@ -277,6 +298,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/community': typeof CommunityRoute
+  '/contact': typeof ContactRoute
   '/cv': typeof CvRoute
   '/earn': typeof EarnRoute
   '/invite': typeof InviteRoute
@@ -307,7 +329,9 @@ export interface FileRoutesByTo {
   '/api/viral-video': typeof ApiViralVideoRoute
   '/api/voice-agent-token': typeof ApiVoiceAgentTokenRoute
   '/api/voice-chat': typeof ApiVoiceChatRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/u/$username': typeof UUsernameRoute
+  '/blog': typeof BlogIndexRoute
   '/api/mind/think': typeof ApiMindThinkRoute
   '/api/public/r2-video': typeof ApiPublicR2VideoRoute
 }
@@ -317,6 +341,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/community': typeof CommunityRoute
+  '/contact': typeof ContactRoute
   '/cv': typeof CvRoute
   '/earn': typeof EarnRoute
   '/invite': typeof InviteRoute
@@ -347,7 +372,9 @@ export interface FileRoutesById {
   '/api/viral-video': typeof ApiViralVideoRoute
   '/api/voice-agent-token': typeof ApiVoiceAgentTokenRoute
   '/api/voice-chat': typeof ApiVoiceChatRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/u/$username': typeof UUsernameRoute
+  '/blog/': typeof BlogIndexRoute
   '/api/mind/think': typeof ApiMindThinkRoute
   '/api/public/r2-video': typeof ApiPublicR2VideoRoute
 }
@@ -358,6 +385,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/community'
+    | '/contact'
     | '/cv'
     | '/earn'
     | '/invite'
@@ -388,7 +416,9 @@ export interface FileRouteTypes {
     | '/api/viral-video'
     | '/api/voice-agent-token'
     | '/api/voice-chat'
+    | '/blog/$slug'
     | '/u/$username'
+    | '/blog/'
     | '/api/mind/think'
     | '/api/public/r2-video'
   fileRoutesByTo: FileRoutesByTo
@@ -397,6 +427,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/community'
+    | '/contact'
     | '/cv'
     | '/earn'
     | '/invite'
@@ -427,7 +458,9 @@ export interface FileRouteTypes {
     | '/api/viral-video'
     | '/api/voice-agent-token'
     | '/api/voice-chat'
+    | '/blog/$slug'
     | '/u/$username'
+    | '/blog'
     | '/api/mind/think'
     | '/api/public/r2-video'
   id:
@@ -436,6 +469,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/community'
+    | '/contact'
     | '/cv'
     | '/earn'
     | '/invite'
@@ -466,7 +500,9 @@ export interface FileRouteTypes {
     | '/api/viral-video'
     | '/api/voice-agent-token'
     | '/api/voice-chat'
+    | '/blog/$slug'
     | '/u/$username'
+    | '/blog/'
     | '/api/mind/think'
     | '/api/public/r2-video'
   fileRoutesById: FileRoutesById
@@ -476,6 +512,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRoute
   CommunityRoute: typeof CommunityRoute
+  ContactRoute: typeof ContactRoute
   CvRoute: typeof CvRoute
   EarnRoute: typeof EarnRoute
   InviteRoute: typeof InviteRoute
@@ -506,7 +543,9 @@ export interface RootRouteChildren {
   ApiViralVideoRoute: typeof ApiViralVideoRoute
   ApiVoiceAgentTokenRoute: typeof ApiVoiceAgentTokenRoute
   ApiVoiceChatRoute: typeof ApiVoiceChatRoute
+  BlogSlugRoute: typeof BlogSlugRoute
   UUsernameRoute: typeof UUsernameRoute
+  BlogIndexRoute: typeof BlogIndexRoute
   ApiPublicR2VideoRoute: typeof ApiPublicR2VideoRoute
 }
 
@@ -538,6 +577,13 @@ declare module '@tanstack/react-router' {
       path: '/community'
       fullPath: '/community'
       preLoaderRoute: typeof CommunityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cv': {
@@ -750,6 +796,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiVoiceChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/blog/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/u/$username': {
       id: '/u/$username'
       path: '/u/$username'
@@ -790,6 +850,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AuthRoute: AuthRoute,
   CommunityRoute: CommunityRoute,
+  ContactRoute: ContactRoute,
   CvRoute: CvRoute,
   EarnRoute: EarnRoute,
   InviteRoute: InviteRoute,
@@ -820,7 +881,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiViralVideoRoute: ApiViralVideoRoute,
   ApiVoiceAgentTokenRoute: ApiVoiceAgentTokenRoute,
   ApiVoiceChatRoute: ApiVoiceChatRoute,
+  BlogSlugRoute: BlogSlugRoute,
   UUsernameRoute: UUsernameRoute,
+  BlogIndexRoute: BlogIndexRoute,
   ApiPublicR2VideoRoute: ApiPublicR2VideoRoute,
 }
 export const routeTree = rootRouteImport

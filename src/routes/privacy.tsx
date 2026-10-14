@@ -101,6 +101,23 @@ function Privacy() {
         above.
       </p>
 
+      <h2>How we protect your information</h2>
+      <p>
+        Data is sent over encrypted HTTPS connections. Access to stored files such as CVs and
+        uploaded images is restricted to your account through private storage and time-limited
+        links. Direct messages can only be exchanged between users who have accepted each other as
+        friends. We never sell your personal information, and we never ask for your password by
+        email or chat.
+      </p>
+
+      <h2>Sharing of information</h2>
+      <p>
+        We share data only with the service providers needed to run NO QUIT AI (hosting, storage,
+        AI processing and advertising, as listed above), when required by law, or to protect the
+        safety of users and the service. Content you post publicly in the community feed or on your
+        profile can be seen by other users.
+      </p>
+
       <h2>Data retention and deletion</h2>
       <p>
         We keep your content while your account is active. You can delete individual posts, chats
