@@ -54,7 +54,7 @@ export async function edgeTts(text: string, voice = EDGE_VOICE): Promise<ArrayBu
   const path = `speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?${qs}`;
   const headers = {
     Upgrade: "websocket",
-    Origin: "chrome-extension://jdiccldimpdaibmpdkjnbmckianbfold",
+    Origin: "https://www.bing.com",
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0",
   };
 
@@ -102,6 +102,20 @@ export async function edgeTts(text: string, voice = EDGE_VOICE): Promise<ArrayBu
   return out.buffer;
 }
 
+/** Tiny silent MP3 frame — last resort so the player never breaks. */
+const SILENT_MP3 = Uint8Array.from(atob("//uQxAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAACAAACcQCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA//////////////////////////////////////////////////////////////////8AAAA5TEFNRTMuOTlyAc0AAAAAAAAAABSAJAJAQgAAgAAAAnGMHkkIAAAAAAAAAAAAAAAAAAAA"), (c) => c.charCodeAt(0)).buffer;
+
+async function edgeUniversal(text: string): Promise<ArrayBuffer> {
+  const { EdgeTTS } = await import("edge-tts-universal/webworker");
+  const r = await Promise.race([
+    new EdgeTTS(text, EDGE_VOICE).synthesize(),
+    new Promise<never>((_, bad) => setTimeout(() => bad(new Error("edge-tts-universal timeout")), 20000)),
+  ]);
+  const buf = await r.audio.arrayBuffer();
+  if (!buf.byteLength) throw new Error("edge-tts-universal returned no audio");
+  return buf;
+}
+
 export async function getVoiceAudio(text: string, voiceId = DEFAULT_VOICE): Promise<ArrayBuffer> {
   try {
     const audio = await elevenLabs(text, voiceId);
@@ -109,6 +123,20 @@ export async function getVoiceAudio(text: string, voiceId = DEFAULT_VOICE): Prom
     return audio;
   } catch (e) {
     console.log("Using Edge TTS Fallback", (e as Error).message);
-    return edgeTts(text);
+  }
+  try {
+    const a = await edgeUniversal(text);
+    console.log("Edge TTS audio received", a.byteLength);
+    return a;
+  } catch (e) {
+    console.error("Edge TTS (package) failed", (e as Error).message);
+  }
+  try {
+    const a = await edgeTts(text);
+    console.log("Edge TTS (direct) audio received", a.byteLength);
+    return a;
+  } catch (e) {
+    console.error("ALL TTS FAILED — returning silent MP3", (e as Error).message);
+    return SILENT_MP3;
   }
 }
