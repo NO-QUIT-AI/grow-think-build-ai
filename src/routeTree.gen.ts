@@ -22,6 +22,7 @@ import { Route as PlayerRouteImport } from './routes/player'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ScoutRouteImport } from './routes/scout'
 import { Route as SpaceRouteImport } from './routes/space'
+import { Route as StudioRouteImport } from './routes/studio'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AdminAdsRouteImport } from './routes/admin.ads'
 import { Route as AdminOwnerRouteImport } from './routes/admin.owner'
@@ -109,6 +110,11 @@ const ScoutRoute = ScoutRouteImport.update({
 const SpaceRoute = SpaceRouteImport.update({
   id: '/space',
   path: '/space',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudioRoute = StudioRouteImport.update({
+  id: '/studio',
+  path: '/studio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -241,6 +247,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/scout': typeof ScoutRoute
   '/space': typeof SpaceRoute
+  '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
   '/admin/ads': typeof AdminAdsRoute
   '/admin/owner': typeof AdminOwnerRoute
@@ -279,6 +286,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/scout': typeof ScoutRoute
   '/space': typeof SpaceRoute
+  '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
   '/admin/ads': typeof AdminAdsRoute
   '/admin/owner': typeof AdminOwnerRoute
@@ -318,6 +326,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/scout': typeof ScoutRoute
   '/space': typeof SpaceRoute
+  '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
   '/admin/ads': typeof AdminAdsRoute
   '/admin/owner': typeof AdminOwnerRoute
@@ -358,6 +367,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/scout'
     | '/space'
+    | '/studio'
     | '/terms'
     | '/admin/ads'
     | '/admin/owner'
@@ -396,6 +406,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/scout'
     | '/space'
+    | '/studio'
     | '/terms'
     | '/admin/ads'
     | '/admin/owner'
@@ -434,6 +445,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/scout'
     | '/space'
+    | '/studio'
     | '/terms'
     | '/admin/ads'
     | '/admin/owner'
@@ -473,6 +485,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ScoutRoute: typeof ScoutRoute
   SpaceRoute: typeof SpaceRoute
+  StudioRoute: typeof StudioRoute
   TermsRoute: typeof TermsRoute
   AdminAdsRoute: typeof AdminAdsRoute
   AdminOwnerRoute: typeof AdminOwnerRoute
@@ -588,6 +601,13 @@ declare module '@tanstack/react-router' {
       path: '/space'
       fullPath: '/space'
       preLoaderRoute: typeof SpaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/studio': {
+      id: '/studio'
+      path: '/studio'
+      fullPath: '/studio'
+      preLoaderRoute: typeof StudioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -779,6 +799,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ScoutRoute: ScoutRoute,
   SpaceRoute: SpaceRoute,
+  StudioRoute: StudioRoute,
   TermsRoute: TermsRoute,
   AdminAdsRoute: AdminAdsRoute,
   AdminOwnerRoute: AdminOwnerRoute,
