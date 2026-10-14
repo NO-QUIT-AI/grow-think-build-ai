@@ -63,6 +63,14 @@ function Privacy() {
       <h2>Advertising - Google AdMob</h2>
       <p>We use Google AdMob to show advertisements in our app/website.</p>
       <p>
+        Our website also uses Google AdSense. Google AdSense uses cookies to show personalized
+        ads based on your visits to this and other websites. You can turn off personalized ads at{' '}
+        <a className="underline" href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer">
+          Google Ads Settings
+        </a>
+        .
+      </p>
+      <p>
         AdMob may collect and use your device&apos;s Advertising ID, IP address, and other
         information to show personalized or non-personalized ads.
       </p>
