@@ -65,7 +65,7 @@ export async function edgeTts(text: string, voice = EDGE_VOICE): Promise<ArrayBu
     workerWs.accept();
     ws = workerWs;
   } else {
-    ws = new WebSocket(`wss://${path}`); // Node/dev fallback
+    ws = new (WebSocket as unknown as new (u: string, o?: unknown) => WebSocket)(`wss://${path}`, { headers }); // dev fallback
     await new Promise<void>((ok, bad) => {
       ws.addEventListener("open", () => ok());
       ws.addEventListener("error", () => bad(new Error("Edge TTS connect failed")));
