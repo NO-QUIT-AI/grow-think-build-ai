@@ -5,7 +5,11 @@ import { ExternalLink, Sparkles } from "lucide-react";
 // never in an iframe, never as a popup/redirect.
 export const SMARTLINK_URL = "https://omg10.com/4/11883852";
 
+// Hidden for AdSense review — set to true to show the sponsored bar again.
+const SHOW_SMARTLINK = false;
+
 export function SmartLinkCta({ className = "" }: { className?: string }) {
+  if (!SHOW_SMARTLINK) return null;
   return (
     <a
       href={SMARTLINK_URL}
