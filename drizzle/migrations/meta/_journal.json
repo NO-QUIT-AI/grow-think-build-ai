@@ -78,6 +78,13 @@
       "when": 1791159557405,
       "tag": "0010_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791936412601,
+      "tag": "0011_swap_owner_email",
+      "breakpoints": true
     }
   ]
 }

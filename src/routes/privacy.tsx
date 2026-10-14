@@ -106,7 +106,7 @@ function Privacy() {
       <h2>Your rights</h2>
       <p>
         You can request a copy of your data, ask us to correct it, or ask us to delete it by
-        contacting us at <a className="underline" href="mailto:noquitai1@gmail.com">noquitai1@gmail.com</a>.
+        contacting us at <a className="underline" href="mailto:ranaimranp2@gmail.com">ranaimranp2@gmail.com</a>.
       </p>
 
       <h2>Disclaimer on NQAI Points</h2>
@@ -118,7 +118,7 @@ function Privacy() {
       <h2>Contact</h2>
       <p>
         If you have questions about this policy, contact us at:{' '}
-        <a className="underline" href="mailto:noquitai1@gmail.com">noquitai1@gmail.com</a>
+        <a className="underline" href="mailto:ranaimranp2@gmail.com">ranaimranp2@gmail.com</a>
       </p>
     </LegalPage>
   );
