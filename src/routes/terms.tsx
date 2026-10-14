@@ -72,7 +72,7 @@ function Terms() {
       <h2>Changes and contact</h2>
       <p>
         We may update these terms; continued use means you accept the update. Questions:{" "}
-        <a className="underline" href="mailto:noquitai1@gmail.com">noquitai1@gmail.com</a>.
+        <a className="underline" href="mailto:ranaimranp2@gmail.com">ranaimranp2@gmail.com</a>.
       </p>
     </LegalPage>
   );
