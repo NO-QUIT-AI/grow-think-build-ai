@@ -204,6 +204,44 @@ export function genesisTools() {
         return { rolledBack: true, url: `https://${j["url"]}`, live: `https://nqai-${cleanProject(project)}.vercel.app` };
       },
     }),
+    run_command: tool({
+      description: "Terminal command chalao (npm install, npm run build, ls, cat). Build commands Vercel ke cloud server par asli chalti hain aur logs wapas aate hain.",
+      inputSchema: z.object({ project: z.string(), command: z.string() }),
+      execute: async ({ project, command }) => {
+        const name = cleanProject(project);
+        const cmd = command.trim();
+        const keys = await list(`project/${name}/`);
+        if (/^ls\b/.test(cmd)) return { stdout: keys.map((k) => k.split("/").slice(2).join("/")).join("\n") };
+        const cat = cmd.match(/^cat\s+(.+)$/);
+        if (cat) return { stdout: ((await getText(fileKey(name, cat[1]!))) ?? "No such file").slice(0, 20_000) };
+        if (!/^(npm|pnpm|yarn|bun|npx)\b/.test(cmd)) return { error: "Sirf ls, cat aur npm/bun build commands support hain." };
+        if (!keys.length) return { error: "Project me koi file nahi" };
+        const files = await Promise.all(keys.map(async (k) => ({ file: k.split("/").slice(2).join("/"), data: (await getText(k)) ?? "" })));
+        const hasPkg = files.some((f) => f.file === "package.json");
+        const isBuild = /build|install|ci\b/.test(cmd);
+        const json = await vercel("/v13/deployments?skipAutoDetectionConfirmation=1", {
+          method: "POST",
+          body: JSON.stringify({
+            name: `nqai-${name}`,
+            target: "preview",
+            files,
+            projectSettings: hasPkg
+              ? { buildCommand: isBuild && !/install/.test(cmd) ? cmd : undefined, installCommand: /install|ci\b/.test(cmd) ? cmd : undefined }
+              : { framework: null, buildCommand: null, outputDirectory: null, installCommand: null },
+          }),
+        });
+        const id = String(json["id"]);
+        let state = String(json["readyState"] ?? "");
+        for (let i = 0; i < 20 && !["READY", "ERROR", "CANCELED"].includes(state); i++) {
+          await new Promise((r) => setTimeout(r, 3000));
+          state = String((await vercel(`/v13/deployments/${id}`))["readyState"]);
+        }
+        const token = await vaultGet("VERCEL_TOKEN");
+        const ev = (await (await fetch(`https://api.vercel.com/v3/deployments/${id}/events?limit=200`, { headers: { authorization: `Bearer ${token}` } })).json().catch(() => [])) as { text?: string; payload?: { text?: string } }[];
+        const lines = (Array.isArray(ev) ? ev : []).map((e) => e.text ?? e.payload?.text ?? "").filter(Boolean);
+        return { command: cmd, exitCode: state === "READY" ? 0 : 1, state, stdout: lines.slice(-40).join("\n"), previewUrl: `https://${json["url"]}` };
+      },
+    }),
     web_search: tool({
       description: "Internet par search karo (latest docs/info).",
       inputSchema: z.object({ query: z.string() }),
