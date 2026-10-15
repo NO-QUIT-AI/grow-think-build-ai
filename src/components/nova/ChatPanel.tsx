@@ -75,9 +75,17 @@ const SUGGESTION_KEYS: TranslationKey[] = ["chatSuggestionDomain", "chatSuggesti
 
 type Thread = { id: string; title: string; updated_at: string };
 
-function FreeImage({ url, prompt }: { url: string; prompt: string }) {
+function FreeImage({ urls, prompt }: { urls: string[]; prompt: string }) {
+  const [idx, setIdx] = useState(0);
+  const [retrying, setRetrying] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
+  const url = urls[idx];
+  function onFail() {
+    if (idx + 1 >= urls.length) { setFailed(true); return; }
+    setRetrying(true);
+    setTimeout(() => { setIdx((n) => n + 1); }, 2000);
+  }
   async function download() {
     try {
       const blob = await (await fetch(url)).blob();
@@ -674,7 +682,7 @@ function ChatThread({
                   tools
                     .filter((p) => p.type === "tool-generate_image_free")
                     .map((p, i) => {
-                      const part = p as { state?: string; output?: { url?: string; prompt?: string } };
+                      const part = p as { state?: string; output?: { url?: string; urls?: string[]; prompt?: string } };
                       const out = part.output;
                       if (!out?.url)
                         return (
@@ -682,7 +690,7 @@ function ChatThread({
                             No Quit AI is creating your image...
                           </p>
                         );
-                      return <FreeImage key={`img-${i}`} url={out.url} prompt={out.prompt ?? ""} />;
+                      return <FreeImage key={`img-${i}`} urls={out.urls?.length ? out.urls : [out.url]} prompt={out.prompt ?? ""} />;
                     })}
                 {text ? (
                   isUser ? (
