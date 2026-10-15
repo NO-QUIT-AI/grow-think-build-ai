@@ -7,8 +7,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { supabase } from "@/integrations/supabase/client";
 import { renderHtmlToCanvas } from "@/lib/html-png";
 import avatarAsset from "@/assets/nqai-pro-avatar.jpg.asset.json";
+import { HdUpsellDialog } from "@/components/nova/HdUpsellDialog";
+import { needsHdPartner, type Quality } from "@/lib/hd-upsell";
 
-type Props = { html: string; title: string; memoryId?: string | null };
+type Props = { html: string; title: string; memoryId?: string | null; images?: string[]; story?: unknown };
 
 function narration(title: string) {
   return `Arey bhai, dekho! Maine abhi NO QUIT AI se sirf ek prompt me ${title} bana diya. Na code likha, na designer hire kiya. Ye dekho screens, buttons, sab kuch ready. Pehle aisa kaam din lagata tha, ab chand seconds. Tum bhi apna idea likho, aur NO QUIT AI tumhare liye build kar dega. Link bio me hai. No quit, just growth!`;
@@ -24,10 +26,13 @@ function loadImage(src: string) {
   });
 }
 
-export function ViralVideoButton({ html, title, memoryId }: Props) {
+export function ViralVideoButton({ html, title, memoryId, images = [], story }: Props) {
   const [busy, setBusy] = useState(false);
   const [step, setStep] = useState("");
   const [result, setResult] = useState<{ url: string; local: string } | null>(null);
+  const [dur, setDur] = useState(15);
+  const [quality, setQuality] = useState<Quality>("720p");
+  const [hd, setHd] = useState<string | null>(null);
 
   async function generate() {
     if (!html || busy) return;
@@ -181,17 +186,41 @@ export function ViralVideoButton({ html, title, memoryId }: Props) {
     }
   }
 
+  function start() {
+    if (needsHdPartner({ durationSec: dur, quality })) return setHd(`duration ${dur}s / ${quality}`);
+    void generate();
+  }
+
   return (
     <>
+      <select aria-label="Duration" value={dur} onChange={(e) => setDur(Number(e.target.value))} className="h-9 rounded-xl border border-border bg-card px-2 text-xs">
+        <option value={15}>15 sec (free)</option>
+        <option value={60}>1 min</option>
+        <option value={3600}>1 hour</option>
+      </select>
+      <select aria-label="Quality" value={quality} onChange={(e) => setQuality(e.target.value as Quality)} className="h-9 rounded-xl border border-border bg-card px-2 text-xs">
+        <option value="720p">720p (free)</option>
+        <option value="1080p">1080p HD</option>
+      </select>
       <Button
         size="sm"
         className="btn-green h-9 flex-1 gap-1.5 rounded-xl text-xs sm:flex-none"
         disabled={busy || !html}
-        onClick={() => void generate()}
+        onClick={start}
       >
         {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Clapperboard className="h-4 w-4" />}
         {busy ? step || "..." : "Generate Viral Build Video"}
       </Button>
+      <Button size="sm" variant="outline" className="h-9 rounded-xl text-xs" onClick={() => setHd("1 hour HD button")}>
+        Generate 1 Hour HD Video
+      </Button>
+      <HdUpsellDialog
+        open={!!hd}
+        onOpenChange={(o) => !o && setHd(null)}
+        reason={hd ?? ""}
+        images={images}
+        story={story ?? { title, narration: narration(title) }}
+      />
       <Dialog open={!!result} onOpenChange={(o) => !o && setResult(null)}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
