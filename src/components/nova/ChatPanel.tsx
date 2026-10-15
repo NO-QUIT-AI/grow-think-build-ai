@@ -627,10 +627,12 @@ function ChatThread({
         if (id) convRef.current = id;
       }
       if (id) {
-        await supabase.from("messages").insert([
+        const rows = [
           { conversation_id: id, user_id: userId, role: "user", content: question },
           { conversation_id: id, user_id: userId, role: "assistant", content: cached },
-        ]);
+        ];
+        backupToWorker("message", rows);
+        await supabase.from("messages").insert(rows);
         onTouched(id);
       }
       return cached;
@@ -662,10 +664,12 @@ function ChatThread({
       if (cid) convRef.current = cid;
     }
     if (cid) {
-      await supabase.from("messages").insert([
+      const rows = [
         { conversation_id: cid, user_id: userId, role: "user", content: question },
         { conversation_id: cid, user_id: userId, role: "assistant", content: answer },
-      ]);
+      ];
+        backupToWorker("message", rows);
+        await supabase.from("messages").insert(rows);
       onTouched(cid);
     }
     return answer;
