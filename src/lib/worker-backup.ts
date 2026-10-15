@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
  * never throws, never blocks the main save in Lovable Cloud.
  */
 export function backupToWorker(kind: "login" | "conversation" | "message" | "coins", data: unknown) {
-  const base = (import.meta.env["VITE_CLOUDFLARE_WORKER_URL"] as string | undefined)?.replace(/\/$/, "");
+  const base = ((import.meta.env["VITE_CLOUDFLARE_WORKER_URL"] as string | undefined) || "https://black-frost-f1d3.noquitai1.workers.dev").replace(/\/$/, "");
   if (!base || typeof window === "undefined") return;
   void (async () => {
     try {
