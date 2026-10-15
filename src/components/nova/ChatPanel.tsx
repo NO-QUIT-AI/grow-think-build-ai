@@ -102,17 +102,18 @@ function FreeImage({ urls, prompt }: { urls: string[]; prompt: string }) {
     <div className="mb-3 space-y-2">
       {!loaded && !failed && (
         <div className="flex aspect-square w-full max-w-sm animate-pulse items-center justify-center rounded-xl border border-border bg-secondary text-xs text-primary">
-          No Quit AI is creating your image...
+          {retrying ? "Thodi der lag rahi hai, dusra model try kar raha hu..." : "No Quit AI is creating your image..."}
         </div>
       )}
       {failed ? (
         <p className="text-xs text-destructive">Image nahi bani — thodi der baad dobara try karo.</p>
       ) : (
         <img
+          key={url}
           src={url}
           alt={prompt}
           onLoad={() => setLoaded(true)}
-          onError={() => setFailed(true)}
+          onError={onFail}
           className={loaded ? "w-full max-w-sm rounded-xl border border-border" : "hidden"}
         />
       )}
