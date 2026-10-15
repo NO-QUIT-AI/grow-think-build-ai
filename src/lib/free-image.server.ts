@@ -36,11 +36,42 @@ export async function enhanceImagePrompt(prompt: string) {
   return `${prompt}, ultra realistic, 4k, cinematic lighting, sharp focus`;
 }
 
-export function pollinationsUrl(prompt: string, seed = Math.floor(Math.random() * 1e9)) {
-  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&model=flux&enhance=true&nologo=true&seed=${seed}`;
+export function pollinationsUrl(prompt: string, model: "flux" | "turbo" = "flux", seed = Math.floor(Math.random() * 1e9)) {
+  const extra = model === "flux" ? "&enhance=true" : "";
+  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&model=${model}&nologo=true${extra}&seed=${seed}`;
 }
 
+/** Client tries these in order (each user's own IP limit). Last one is our server proxy. */
 export async function generateImageFree(prompt: string) {
   const enhanced = await enhanceImagePrompt(prompt);
-  return { prompt: enhanced, url: pollinationsUrl(enhanced) };
+  const urls = [
+    pollinationsUrl(enhanced, "flux"),
+    pollinationsUrl(enhanced, "turbo"),
+    `/api/free-image?prompt=${encodeURIComponent(enhanced)}`,
+  ];
+  return { prompt: enhanced, url: urls[0], urls };
+}
+
+/** Server fallback: Pollinations with POLLINATIONS_TOKEN (if set), then HuggingFace FLUX.1-schnell. */
+export async function serverImage(prompt: string): Promise<Response> {
+  const token = process.env["POLLINATIONS_TOKEN"];
+  if (token) {
+    try {
+      const r = await fetch(pollinationsUrl(prompt, "flux"), { headers: { authorization: `Bearer ${token}` } });
+      if (r.ok && r.headers.get("content-type")?.startsWith("image/")) return r;
+      console.error("[free-image] pollinations token", r.status);
+    } catch (e) { console.error("[free-image] pollinations token", e); }
+  }
+  const hf = process.env["HUGGINGFACE_API_KEY"];
+  const headers: Record<string, string> = { "content-type": "application/json", accept: "image/png" };
+  if (hf) headers["authorization"] = `Bearer ${hf}`;
+  // api-inference.huggingface.co is retired; router is the current free endpoint.
+  const r = await fetch("https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-schnell", {
+    method: "POST", headers, body: JSON.stringify({ inputs: prompt }),
+  });
+  if (!r.ok || !r.headers.get("content-type")?.startsWith("image/")) {
+    console.error("[free-image] huggingface", r.status, (await r.text()).slice(0, 200));
+    return new Response("All free image providers failed", { status: 502 });
+  }
+  return r;
 }

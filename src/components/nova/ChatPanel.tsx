@@ -75,12 +75,20 @@ const SUGGESTION_KEYS: TranslationKey[] = ["chatSuggestionDomain", "chatSuggesti
 
 type Thread = { id: string; title: string; updated_at: string };
 
-function FreeImage({ url, prompt }: { url: string; prompt: string }) {
+function FreeImage({ urls, prompt }: { urls: string[]; prompt: string }) {
+  const [idx, setIdx] = useState(0);
+  const [retrying, setRetrying] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
+  const url = urls[idx];
+  function onFail() {
+    if (idx + 1 >= urls.length) { setFailed(true); return; }
+    setRetrying(true);
+    setTimeout(() => { setIdx((n) => n + 1); }, 2000);
+  }
   async function download() {
     try {
-      const blob = await (await fetch(url)).blob();
+      const blob = await (await fetch(url!)).blob();
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
       a.download = `noquit-ai-image-${Date.now()}.jpg`;
@@ -94,17 +102,18 @@ function FreeImage({ url, prompt }: { url: string; prompt: string }) {
     <div className="mb-3 space-y-2">
       {!loaded && !failed && (
         <div className="flex aspect-square w-full max-w-sm animate-pulse items-center justify-center rounded-xl border border-border bg-secondary text-xs text-primary">
-          No Quit AI is creating your image...
+          {retrying ? "Thodi der lag rahi hai, dusra model try kar raha hu..." : "No Quit AI is creating your image..."}
         </div>
       )}
       {failed ? (
         <p className="text-xs text-destructive">Image nahi bani — thodi der baad dobara try karo.</p>
       ) : (
         <img
+          key={url}
           src={url}
           alt={prompt}
           onLoad={() => setLoaded(true)}
-          onError={() => setFailed(true)}
+          onError={onFail}
           className={loaded ? "w-full max-w-sm rounded-xl border border-border" : "hidden"}
         />
       )}
@@ -674,7 +683,7 @@ function ChatThread({
                   tools
                     .filter((p) => p.type === "tool-generate_image_free")
                     .map((p, i) => {
-                      const part = p as { state?: string; output?: { url?: string; prompt?: string } };
+                      const part = p as { state?: string; output?: { url?: string; urls?: string[]; prompt?: string } };
                       const out = part.output;
                       if (!out?.url)
                         return (
@@ -682,7 +691,7 @@ function ChatThread({
                             No Quit AI is creating your image...
                           </p>
                         );
-                      return <FreeImage key={`img-${i}`} url={out.url} prompt={out.prompt ?? ""} />;
+                      return <FreeImage key={`img-${i}`} urls={out.urls?.length ? out.urls : [out.url]} prompt={out.prompt ?? ""} />;
                     })}
                 {text ? (
                   isUser ? (
