@@ -189,6 +189,15 @@ export const Route = createFileRoute("/api/chat")({
               : gateway!("google/gemini-3.7-flash");
 
         const tools = {
+          generate_image_free: tool({
+            description:
+              "FREE image banao jab user image/photo/picture maange. User ka idea pass karo; tool khud prompt enhance karke image URL deta hai. Reply me image dobara markdown me mat likho, chat khud dikhati hai.",
+            inputSchema: z.object({ prompt: z.string() }),
+            execute: async ({ prompt }) => {
+              const { generateImageFree } = await import("@/lib/free-image.server");
+              return await generateImageFree(prompt.slice(0, 1000));
+            },
+          }),
           recall_knowledge: tool({
             description: "Apni saved knowledge base me se relevant memories dhoondo.",
             inputSchema: z.object({ query: z.string() }),

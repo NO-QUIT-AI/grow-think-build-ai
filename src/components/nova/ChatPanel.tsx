@@ -75,6 +75,48 @@ const SUGGESTION_KEYS: TranslationKey[] = ["chatSuggestionDomain", "chatSuggesti
 
 type Thread = { id: string; title: string; updated_at: string };
 
+function FreeImage({ url, prompt }: { url: string; prompt: string }) {
+  const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
+  async function download() {
+    try {
+      const blob = await (await fetch(url)).blob();
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `noquit-ai-image-${Date.now()}.jpg`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    } catch {
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+  }
+  return (
+    <div className="mb-3 space-y-2">
+      {!loaded && !failed && (
+        <div className="flex aspect-square w-full max-w-sm animate-pulse items-center justify-center rounded-xl border border-border bg-secondary text-xs text-primary">
+          No Quit AI is creating your image...
+        </div>
+      )}
+      {failed ? (
+        <p className="text-xs text-destructive">Image nahi bani — thodi der baad dobara try karo.</p>
+      ) : (
+        <img
+          src={url}
+          alt={prompt}
+          onLoad={() => setLoaded(true)}
+          onError={() => setFailed(true)}
+          className={loaded ? "w-full max-w-sm rounded-xl border border-border" : "hidden"}
+        />
+      )}
+      {loaded && (
+        <button type="button" onClick={() => void download()} className="btn-green h-9 rounded-xl px-4 text-xs">
+          Download Image
+        </button>
+      )}
+    </div>
+  );
+}
+
 function messageText(message: UIMessage) {
   return message.parts
     .map((part) => (part.type === "text" ? part.text : ""))
@@ -628,6 +670,20 @@ function ChatThread({
                     })}
                   </div>
                 )}
+                {!isUser &&
+                  tools
+                    .filter((p) => p.type === "tool-generate_image_free")
+                    .map((p, i) => {
+                      const part = p as { state?: string; output?: { url?: string; prompt?: string } };
+                      const out = part.output;
+                      if (!out?.url)
+                        return (
+                          <p key={`img-${i}`} className="mb-2 animate-pulse text-xs text-primary">
+                            No Quit AI is creating your image...
+                          </p>
+                        );
+                      return <FreeImage key={`img-${i}`} url={out.url} prompt={out.prompt ?? ""} />;
+                    })}
                 {text ? (
                   isUser ? (
                     <p className="whitespace-pre-wrap">{text}</p>
