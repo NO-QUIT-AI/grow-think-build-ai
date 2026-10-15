@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 
 import { supabase } from "@/integrations/supabase/client";
+import { backupToWorker } from "@/lib/worker-backup";
 
 export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
@@ -9,7 +10,14 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      if (event === "SIGNED_IN" && nextSession?.user) {
+        const key = `nqai_login_backup_${nextSession.user.id}`;
+        if (!sessionStorage.getItem(key)) {
+          sessionStorage.setItem(key, "1");
+          backupToWorker("login", { id: nextSession.user.id, email: nextSession.user.email ?? null });
+        }
+      }
       setSession(nextSession);
       setUser(nextSession?.user ?? null);
       setLoading(false);
