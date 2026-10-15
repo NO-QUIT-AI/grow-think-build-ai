@@ -88,7 +88,7 @@ function FreeImage({ urls, prompt }: { urls: string[]; prompt: string }) {
   }
   async function download() {
     try {
-      const blob = await (await fetch(url)).blob();
+      const blob = await (await fetch(url!)).blob();
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
       a.download = `noquit-ai-image-${Date.now()}.jpg`;

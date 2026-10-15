@@ -64,7 +64,7 @@ export async function serverImage(prompt: string): Promise<Response> {
   }
   const hf = process.env["HUGGINGFACE_API_KEY"];
   const headers: Record<string, string> = { "content-type": "application/json", accept: "image/png" };
-  if (hf) headers.authorization = `Bearer ${hf}`;
+  if (hf) headers["authorization"] = `Bearer ${hf}`;
   // api-inference.huggingface.co is retired; router is the current free endpoint.
   const r = await fetch("https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-schnell", {
     method: "POST", headers, body: JSON.stringify({ inputs: prompt }),
