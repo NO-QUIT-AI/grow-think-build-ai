@@ -24,6 +24,7 @@ import { downloadHtmlAsPng } from "@/lib/html-png";
 import { ImageDown } from "lucide-react";
 import { ViralVideoButton } from "@/components/nova/ViralVideoButton";
 import { ProVideoButtons } from "@/components/nova/ProVideoButtons";
+import { liveUrls } from "@/components/nova/BuildDomain";
 
 type Memory = {
   id: string;
@@ -34,6 +35,7 @@ type Memory = {
   blueprint: Record<string, unknown>;
   version: number;
   created_at: string;
+  subdomain: string | null;
 };
 
 export function StudioPanel({
@@ -58,7 +60,7 @@ export function StudioPanel({
   useEffect(() => {
     supabase
       .from("memories")
-      .select("id, prompt, project_type, code, summary, blueprint, version, created_at")
+      .select("id, prompt, project_type, code, summary, blueprint, version, created_at, subdomain")
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .then(({ data }) => {
@@ -81,6 +83,25 @@ export function StudioPanel({
   }, [active?.id]);
 
   const html = active?.project_type === "website" ? code : "";
+
+  // Har website build ka apna live link: agar subdomain nahi hai to abhi bana do.
+  const [publishing, setPublishing] = useState(false);
+  async function ensureSubdomain(): Promise<string | null> {
+    if (!active || active.project_type !== "website") return null;
+    if (active.subdomain) return active.subdomain;
+    setPublishing(true);
+    const { data, error } = await supabase.rpc("publish_build", { _build_id: active.id });
+    setPublishing(false);
+    if (error || !data) return null;
+    const sub = data as string;
+    setMemories((prev) => prev.map((m) => (m.id === active.id ? { ...m, subdomain: sub } : m)));
+    return sub;
+  }
+  useEffect(() => {
+    if (active && active.project_type === "website" && !active.subdomain) void ensureSubdomain();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active?.id]);
+  const liveLink = active?.subdomain ? liveUrls(active.subdomain).share : "";
 
   async function save() {
     if (!active) return;
@@ -200,10 +221,15 @@ export function StudioPanel({
 
   async function copyLink() {
     if (!html) return;
-    const url = URL.createObjectURL(new Blob([html], { type: "text/html" }));
+    const sub = await ensureSubdomain();
+    if (!sub) {
+      toast.error("Live link nahi ban saka, dobara try karein");
+      return;
+    }
+    const url = liveUrls(sub).share;
     try {
       await navigator.clipboard.writeText(url);
-      toast.success("Link copy ho gaya — isi browser me khulega");
+      toast.success("Live link copy ho gaya", { description: url });
     } catch {
       toast.error("Copy nahi ho saka");
     }
@@ -274,6 +300,25 @@ export function StudioPanel({
           )}
         </div>
       </div>
+
+      {active?.project_type === "website" && html && (
+        <div className="panel flex items-center gap-2 p-2">
+          <span className="shrink-0 text-xs font-medium text-muted-foreground">Live URL:</span>
+          <input
+            readOnly
+            value={liveLink || (publishing ? "Link ban raha hai…" : "")}
+            aria-label="Live URL"
+            onFocus={(e) => e.currentTarget.select()}
+            className="min-w-0 flex-1 rounded-lg border border-border bg-background px-2 py-1.5 font-mono text-xs text-primary outline-none"
+          />
+          <Button size="sm" variant="secondary" className="h-8 gap-1 text-xs" disabled={!liveLink} onClick={() => window.open(liveLink, "_blank", "noopener")}>
+            <ExternalLink className="h-3.5 w-3.5" /> Visit
+          </Button>
+          <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" disabled={!liveLink} onClick={() => void copyLink()}>
+            <Copy className="h-3.5 w-3.5" /> Copy
+          </Button>
+        </div>
+      )}
 
       {active?.project_type === "website" && html && (
         <div className="flex flex-wrap gap-2">
