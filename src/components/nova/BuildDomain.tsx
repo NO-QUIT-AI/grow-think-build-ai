@@ -53,7 +53,11 @@ export function BuildDomain({
     setBusy(false);
     if (error || !data) { toast.error("Publish nahi ho saka"); return; }
     onChange(data, edits);
-    toast.success(`Live: ${data}.noquitai.com`);
+    const link = liveUrls(data).share;
+    toast.success("App live ho gayi 🎉", {
+      description: link,
+      action: { label: "Copy", onClick: () => void navigator.clipboard.writeText(link) },
+    });
   }
 
   async function rename() {
@@ -79,8 +83,8 @@ export function BuildDomain({
     <div className="mt-3 w-full rounded-xl border border-primary/30 bg-primary/5 p-3">
       <div className="flex flex-wrap items-center gap-2">
         <Globe className="h-4 w-4 text-primary" />
-        <span className="min-w-0 flex-1 truncate font-mono text-xs text-primary">{urls.pretty}</span>
-        <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs" onClick={() => { void navigator.clipboard.writeText(urls.pretty); toast.success("Copied"); }}>
+        <span className="min-w-0 flex-1 truncate font-mono text-xs text-primary">{urls.share}</span>
+        <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs" onClick={() => { void navigator.clipboard.writeText(urls.share); toast.success("Link copy ho gaya"); }}>
           <Copy className="h-3.5 w-3.5" /> Copy
         </Button>
         <Button variant="secondary" size="sm" className="h-7 gap-1 text-xs" onClick={() => window.open(urls.working, "_blank", "noopener")}>
