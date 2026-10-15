@@ -32,6 +32,7 @@ import { Route as ApiCvPolishRouteImport } from './routes/api/cv-polish'
 import { Route as ApiCvStoreRouteImport } from './routes/api/cv-store'
 import { Route as ApiEditImageRouteImport } from './routes/api/edit-image'
 import { Route as ApiFalVideoRouteImport } from './routes/api/fal-video'
+import { Route as ApiFreeImageRouteImport } from './routes/api/free-image'
 import { Route as ApiGenerateVideoRouteImport } from './routes/api/generate-video'
 import { Route as ApiMindRouteImport } from './routes/api/mind'
 import { Route as ApiNasaApodRouteImport } from './routes/api/nasa-apod'
@@ -165,6 +166,11 @@ const ApiFalVideoRoute = ApiFalVideoRouteImport.update({
   path: '/api/fal-video',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiFreeImageRoute = ApiFreeImageRouteImport.update({
+  id: '/api/free-image',
+  path: '/api/free-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiGenerateVideoRoute = ApiGenerateVideoRouteImport.update({
   id: '/api/generate-video',
   path: '/api/generate-video',
@@ -275,6 +281,7 @@ export interface FileRoutesByFullPath {
   '/api/cv-store': typeof ApiCvStoreRoute
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/fal-video': typeof ApiFalVideoRoute
+  '/api/free-image': typeof ApiFreeImageRoute
   '/api/generate-video': typeof ApiGenerateVideoRoute
   '/api/mind': typeof ApiMindRouteWithChildren
   '/api/nasa-apod': typeof ApiNasaApodRoute
@@ -317,6 +324,7 @@ export interface FileRoutesByTo {
   '/api/cv-store': typeof ApiCvStoreRoute
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/fal-video': typeof ApiFalVideoRoute
+  '/api/free-image': typeof ApiFreeImageRoute
   '/api/generate-video': typeof ApiGenerateVideoRoute
   '/api/mind': typeof ApiMindRouteWithChildren
   '/api/nasa-apod': typeof ApiNasaApodRoute
@@ -360,6 +368,7 @@ export interface FileRoutesById {
   '/api/cv-store': typeof ApiCvStoreRoute
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/fal-video': typeof ApiFalVideoRoute
+  '/api/free-image': typeof ApiFreeImageRoute
   '/api/generate-video': typeof ApiGenerateVideoRoute
   '/api/mind': typeof ApiMindRouteWithChildren
   '/api/nasa-apod': typeof ApiNasaApodRoute
@@ -404,6 +413,7 @@ export interface FileRouteTypes {
     | '/api/cv-store'
     | '/api/edit-image'
     | '/api/fal-video'
+    | '/api/free-image'
     | '/api/generate-video'
     | '/api/mind'
     | '/api/nasa-apod'
@@ -446,6 +456,7 @@ export interface FileRouteTypes {
     | '/api/cv-store'
     | '/api/edit-image'
     | '/api/fal-video'
+    | '/api/free-image'
     | '/api/generate-video'
     | '/api/mind'
     | '/api/nasa-apod'
@@ -488,6 +499,7 @@ export interface FileRouteTypes {
     | '/api/cv-store'
     | '/api/edit-image'
     | '/api/fal-video'
+    | '/api/free-image'
     | '/api/generate-video'
     | '/api/mind'
     | '/api/nasa-apod'
@@ -531,6 +543,7 @@ export interface RootRouteChildren {
   ApiCvStoreRoute: typeof ApiCvStoreRoute
   ApiEditImageRoute: typeof ApiEditImageRoute
   ApiFalVideoRoute: typeof ApiFalVideoRoute
+  ApiFreeImageRoute: typeof ApiFreeImageRoute
   ApiGenerateVideoRoute: typeof ApiGenerateVideoRoute
   ApiMindRoute: typeof ApiMindRouteWithChildren
   ApiNasaApodRoute: typeof ApiNasaApodRoute
@@ -712,6 +725,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiFalVideoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/free-image': {
+      id: '/api/free-image'
+      path: '/api/free-image'
+      fullPath: '/api/free-image'
+      preLoaderRoute: typeof ApiFreeImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/generate-video': {
       id: '/api/generate-video'
       path: '/api/generate-video'
@@ -869,6 +889,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCvStoreRoute: ApiCvStoreRoute,
   ApiEditImageRoute: ApiEditImageRoute,
   ApiFalVideoRoute: ApiFalVideoRoute,
+  ApiFreeImageRoute: ApiFreeImageRoute,
   ApiGenerateVideoRoute: ApiGenerateVideoRoute,
   ApiMindRoute: ApiMindRouteWithChildren,
   ApiNasaApodRoute: ApiNasaApodRoute,
