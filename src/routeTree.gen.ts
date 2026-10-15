@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as CallbackRouteImport } from './routes/callback'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CvRouteImport } from './routes/cv'
@@ -64,6 +65,11 @@ const AboutRoute = AboutRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CallbackRoute = CallbackRouteImport.update({
+  id: '/callback',
+  path: '/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommunityRoute = CommunityRouteImport.update({
@@ -261,6 +267,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
+  '/callback': typeof CallbackRoute
   '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
   '/cv': typeof CvRoute
@@ -304,6 +311,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
+  '/callback': typeof CallbackRoute
   '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
   '/cv': typeof CvRoute
@@ -348,6 +356,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
+  '/callback': typeof CallbackRoute
   '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
   '/cv': typeof CvRoute
@@ -393,6 +402,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/auth'
+    | '/callback'
     | '/community'
     | '/contact'
     | '/cv'
@@ -436,6 +446,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/auth'
+    | '/callback'
     | '/community'
     | '/contact'
     | '/cv'
@@ -479,6 +490,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/auth'
+    | '/callback'
     | '/community'
     | '/contact'
     | '/cv'
@@ -523,6 +535,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRoute
+  CallbackRoute: typeof CallbackRoute
   CommunityRoute: typeof CommunityRoute
   ContactRoute: typeof ContactRoute
   CvRoute: typeof CvRoute
@@ -583,6 +596,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/callback': {
+      id: '/callback'
+      path: '/callback'
+      fullPath: '/callback'
+      preLoaderRoute: typeof CallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/community': {
@@ -869,6 +889,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AuthRoute: AuthRoute,
+  CallbackRoute: CallbackRoute,
   CommunityRoute: CommunityRoute,
   ContactRoute: ContactRoute,
   CvRoute: CvRoute,

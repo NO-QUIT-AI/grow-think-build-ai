@@ -34,6 +34,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { VoiceModal, getSpeechRecognition } from "@/components/nova/VoiceModal";
 import { useLanguage } from "@/i18n/LanguageContext";
 import type { TranslationKey } from "@/i18n/translations";
+import { connectPollinations, generateWithUserKey, getUserPollinationsKey } from "@/lib/pollinations";
 
 const VOICE_CACHE_KEY = "nqai_voice_cache";
 function voiceKey(q: string, lang: string) {
@@ -76,6 +77,41 @@ const SUGGESTION_KEYS: TranslationKey[] = ["chatSuggestionDomain", "chatSuggesti
 type Thread = { id: string; title: string; updated_at: string };
 
 function FreeImage({ urls, prompt }: { urls: string[]; prompt: string }) {
+  const [connected, setConnected] = useState<boolean | null>(null);
+  const [skipConnect, setSkipConnect] = useState(false);
+  const [userUrl, setUserUrl] = useState<string | null>(null);
+  useEffect(() => {
+    const has = !!getUserPollinationsKey();
+    setConnected(has);
+    if (!has) return;
+    generateWithUserKey(prompt)
+      .then(setUserUrl)
+      .catch((e: unknown) => {
+        if (e instanceof Error && e.message === "not-connected") setConnected(false);
+        else setSkipConnect(true);
+      });
+  }, [prompt]);
+  if (connected === null) return null;
+  if (!connected && !skipConnect) {
+    return (
+      <div className="mb-3 max-w-sm space-y-2 rounded-xl border border-border bg-secondary p-4">
+        <p className="text-sm">Pollinations se connect karo - 100% free hai, 1 click me</p>
+        <button type="button" onClick={() => void connectPollinations().catch(() => toast.error("Connect start nahi hua"))} className="btn-green h-9 rounded-xl px-4 text-xs">
+          Connect with Pollinations (Free)
+        </button>
+        <button type="button" onClick={() => setSkipConnect(true)} className="block text-xs text-muted-foreground underline">
+          Bina connect try karo
+        </button>
+      </div>
+    );
+  }
+  if (connected && !skipConnect) {
+    return <FreeImageView urls={userUrl ? [userUrl] : []} prompt={prompt} waiting={!userUrl} />;
+  }
+  return <FreeImageView urls={urls} prompt={prompt} />;
+}
+
+function FreeImageView({ urls, prompt, waiting }: { urls: string[]; prompt: string; waiting?: boolean }) {
   const [idx, setIdx] = useState(0);
   const [retrying, setRetrying] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -85,6 +121,13 @@ function FreeImage({ urls, prompt }: { urls: string[]; prompt: string }) {
     if (idx + 1 >= urls.length) { setFailed(true); return; }
     setRetrying(true);
     setTimeout(() => { setIdx((n) => n + 1); }, 2000);
+  }
+  if (waiting) {
+    return (
+      <div className="mb-3 flex aspect-square w-full max-w-sm animate-pulse items-center justify-center rounded-xl border border-border bg-secondary text-xs text-primary">
+        No Quit AI is creating your image...
+      </div>
+    );
   }
   async function download() {
     try {
