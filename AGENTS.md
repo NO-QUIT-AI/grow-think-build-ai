@@ -11,3 +11,4 @@
 
 - Owner table (owners, is_owner) controls owner-only data; plans in user_plans, viral videos in viral_videos — server routes set plan-sensitive fields, not the client.
 - Viral build videos are rendered in the browser (canvas + MediaRecorder) because the Worker runtime has no ffmpeg; uploaded to R2 videos/viral/.
+- Build subdomains live on memories.subdomain (one per build, not per profile); served by src/server.ts host match + /s/$subdomain via security-definer RPCs — why: users have many builds and anon must read only published HTML.
