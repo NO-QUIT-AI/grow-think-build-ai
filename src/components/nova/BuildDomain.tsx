@@ -5,9 +5,16 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
-/** Wildcard DNS live hone tak path URL hamesha kaam karta hai. */
+/**
+ * Flip to true once *.noquitai.com wildcard DNS + hosting actually serves
+ * subdomains. Until then, shared links use the path URL so they never 404.
+ */
+export const SUBDOMAINS_LIVE = false;
+
 export function liveUrls(sub: string) {
-  return { pretty: `https://${sub}.noquitai.com`, working: `https://noquitai.com/s/${sub}` };
+  const pretty = `https://${sub}.noquitai.com`;
+  const working = `https://noquitai.com/s/${sub}`;
+  return { pretty, working, share: SUBDOMAINS_LIVE ? pretty : working };
 }
 
 export async function checkSubdomainAvailability(sub: string): Promise<boolean> {
