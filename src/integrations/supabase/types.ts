@@ -359,11 +359,15 @@ export type Database = {
           blueprint: Json
           code: string
           created_at: string
+          custom_domain: string | null
+          domain_status: string
           id: string
           liked: boolean
           parent_id: string | null
           project_type: string
           prompt: string
+          subdomain: string | null
+          subdomain_edits: number
           summary: string
           user_id: string
           version: number
@@ -372,11 +376,15 @@ export type Database = {
           blueprint?: Json
           code?: string
           created_at?: string
+          custom_domain?: string | null
+          domain_status?: string
           id?: string
           liked?: boolean
           parent_id?: string | null
           project_type?: string
           prompt: string
+          subdomain?: string | null
+          subdomain_edits?: number
           summary?: string
           user_id: string
           version?: number
@@ -385,11 +393,15 @@ export type Database = {
           blueprint?: Json
           code?: string
           created_at?: string
+          custom_domain?: string | null
+          domain_status?: string
           id?: string
           liked?: boolean
           parent_id?: string | null
           project_type?: string
           prompt?: string
+          subdomain?: string | null
+          subdomain_edits?: number
           summary?: string
           user_id?: string
           version?: number
@@ -670,10 +682,13 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string
+          custom_domain: string | null
           display_name: string | null
+          domain_status: string | null
           id: string
           invite_code: string | null
           reputation_points: number
+          subdomain: string | null
           total_apps_built: number
           updated_at: string
           username: string | null
@@ -682,10 +697,13 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          custom_domain?: string | null
           display_name?: string | null
+          domain_status?: string | null
           id: string
           invite_code?: string | null
           reputation_points?: number
+          subdomain?: string | null
           total_apps_built?: number
           updated_at?: string
           username?: string | null
@@ -694,10 +712,13 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          custom_domain?: string | null
           display_name?: string | null
+          domain_status?: string | null
           id?: string
           invite_code?: string | null
           reputation_points?: number
+          subdomain?: string | null
           total_apps_built?: number
           updated_at?: string
           username?: string | null
@@ -789,7 +810,12 @@ export type Database = {
     Functions: {
       ad_stats: { Args: never; Returns: Json }
       are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
+      check_subdomain_availability: {
+        Args: { _subdomain: string }
+        Returns: boolean
+      }
       gen_invite_code: { Args: never; Returns: string }
+      get_site_by_subdomain: { Args: { _subdomain: string }; Returns: string }
       is_owner: { Args: { _uid: string }; Returns: boolean }
       nqai_award: {
         Args: { _amount: number; _reason: string; _user: string }
@@ -804,6 +830,13 @@ export type Database = {
       nqai_redeem_invite: { Args: { _code: string }; Returns: Json }
       nqai_share_bonus: { Args: never; Returns: Json }
       nqai_start_mining: { Args: never; Returns: Json }
+      publish_build: { Args: { _build_id: string }; Returns: string }
+      rename_build_subdomain: {
+        Args: { _build_id: string; _subdomain: string }
+        Returns: string
+      }
+      slugify: { Args: { _t: string }; Returns: string }
+      subdomain_valid: { Args: { _s: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

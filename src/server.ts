@@ -47,6 +47,13 @@ function isH3SwallowedErrorBody(body: string): boolean {
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      // Wildcard subdomains: app-name.noquitai.com -> user's build
+      const host = (request.headers.get("host") ?? "").toLowerCase().split(":")[0] ?? "";
+      const m = host.match(/^([a-z0-9-]+)\.noquitai\.com$/);
+      if (m && m[1] !== "www") {
+        const { serveSubdomain } = await import("./routes/s.$subdomain");
+        return await serveSubdomain(m[1]!);
+      }
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);

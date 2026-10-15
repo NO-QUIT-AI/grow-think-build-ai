@@ -15,6 +15,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { ShortcutAppDialog, type ShortcutTarget } from "@/components/nova/ShortcutAppDialog";
+import { BuildDomain } from "@/components/nova/BuildDomain";
 import { supabase } from "@/integrations/supabase/client";
 import { useT } from "@/i18n/LanguageContext";
 
@@ -28,6 +29,8 @@ type Memory = {
   liked: boolean;
   version: number;
   created_at: string;
+  subdomain: string | null;
+  subdomain_edits: number;
 };
 
 export function BuildsPanel({
@@ -49,7 +52,7 @@ export function BuildsPanel({
     setLoading(true);
     supabase
       .from("memories")
-      .select("id, prompt, project_type, code, summary, blueprint, liked, version, created_at")
+      .select("id, prompt, project_type, code, summary, blueprint, liked, version, created_at, subdomain, subdomain_edits")
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .then(({ data }) => {
@@ -226,6 +229,16 @@ export function BuildsPanel({
             <Button variant="outline" size="sm" className="h-7 gap-1 text-xs" disabled>
               <MessageSquareQuote className="h-3.5 w-3.5" /> Deploy
             </Button>
+            {item.project_type === "website" && (
+              <BuildDomain
+                buildId={item.id}
+                subdomain={item.subdomain}
+                edits={item.subdomain_edits}
+                onChange={(sub, edits) =>
+                  setItems((prev) => prev.map((x) => (x.id === item.id ? { ...x, subdomain: sub, subdomain_edits: edits } : x)))
+                }
+              />
+            )}
           </div>
         </article>
       ))}
