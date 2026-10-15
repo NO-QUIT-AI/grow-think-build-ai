@@ -48,6 +48,7 @@ import { Route as ApiVoiceAgentTokenRouteImport } from './routes/api/voice-agent
 import { Route as ApiVoiceChatRouteImport } from './routes/api/voice-chat'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as SSubdomainRouteImport } from './routes/s.$subdomain'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as ApiMindThinkRouteImport } from './routes/api/mind/think'
 import { Route as ApiPublicR2VideoRouteImport } from './routes/api/public/r2-video'
@@ -247,6 +248,11 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
   path: '/blog/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SSubdomainRoute = SSubdomainRouteImport.update({
+  id: '/s/$subdomain',
+  path: '/s/$subdomain',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UUsernameRoute = UUsernameRouteImport.update({
   id: '/u/$username',
   path: '/u/$username',
@@ -302,6 +308,7 @@ export interface FileRoutesByFullPath {
   '/api/voice-agent-token': typeof ApiVoiceAgentTokenRoute
   '/api/voice-chat': typeof ApiVoiceChatRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/s/$subdomain': typeof SSubdomainRoute
   '/u/$username': typeof UUsernameRoute
   '/blog/': typeof BlogIndexRoute
   '/api/mind/think': typeof ApiMindThinkRoute
@@ -346,6 +353,7 @@ export interface FileRoutesByTo {
   '/api/voice-agent-token': typeof ApiVoiceAgentTokenRoute
   '/api/voice-chat': typeof ApiVoiceChatRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/s/$subdomain': typeof SSubdomainRoute
   '/u/$username': typeof UUsernameRoute
   '/blog': typeof BlogIndexRoute
   '/api/mind/think': typeof ApiMindThinkRoute
@@ -391,6 +399,7 @@ export interface FileRoutesById {
   '/api/voice-agent-token': typeof ApiVoiceAgentTokenRoute
   '/api/voice-chat': typeof ApiVoiceChatRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/s/$subdomain': typeof SSubdomainRoute
   '/u/$username': typeof UUsernameRoute
   '/blog/': typeof BlogIndexRoute
   '/api/mind/think': typeof ApiMindThinkRoute
@@ -437,6 +446,7 @@ export interface FileRouteTypes {
     | '/api/voice-agent-token'
     | '/api/voice-chat'
     | '/blog/$slug'
+    | '/s/$subdomain'
     | '/u/$username'
     | '/blog/'
     | '/api/mind/think'
@@ -481,6 +491,7 @@ export interface FileRouteTypes {
     | '/api/voice-agent-token'
     | '/api/voice-chat'
     | '/blog/$slug'
+    | '/s/$subdomain'
     | '/u/$username'
     | '/blog'
     | '/api/mind/think'
@@ -525,6 +536,7 @@ export interface FileRouteTypes {
     | '/api/voice-agent-token'
     | '/api/voice-chat'
     | '/blog/$slug'
+    | '/s/$subdomain'
     | '/u/$username'
     | '/blog/'
     | '/api/mind/think'
@@ -570,6 +582,7 @@ export interface RootRouteChildren {
   ApiVoiceAgentTokenRoute: typeof ApiVoiceAgentTokenRoute
   ApiVoiceChatRoute: typeof ApiVoiceChatRoute
   BlogSlugRoute: typeof BlogSlugRoute
+  SSubdomainRoute: typeof SSubdomainRoute
   UUsernameRoute: typeof UUsernameRoute
   BlogIndexRoute: typeof BlogIndexRoute
   ApiPublicR2VideoRoute: typeof ApiPublicR2VideoRoute
@@ -850,6 +863,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/s/$subdomain': {
+      id: '/s/$subdomain'
+      path: '/s/$subdomain'
+      fullPath: '/s/$subdomain'
+      preLoaderRoute: typeof SSubdomainRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/u/$username': {
       id: '/u/$username'
       path: '/u/$username'
@@ -924,6 +944,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiVoiceAgentTokenRoute: ApiVoiceAgentTokenRoute,
   ApiVoiceChatRoute: ApiVoiceChatRoute,
   BlogSlugRoute: BlogSlugRoute,
+  SSubdomainRoute: SSubdomainRoute,
   UUsernameRoute: UUsernameRoute,
   BlogIndexRoute: BlogIndexRoute,
   ApiPublicR2VideoRoute: ApiPublicR2VideoRoute,
