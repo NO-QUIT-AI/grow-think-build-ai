@@ -34,7 +34,7 @@ export function BuildDomain({
   useEffect(() => {
     if (!editing) return;
     const v = value.trim().toLowerCase();
-    if (v.length < 3) return setAvail(null);
+    if (v.length < 3) { setAvail(null); return; }
     setAvail("checking");
     const t = setTimeout(() => void checkSubdomainAvailability(v).then(setAvail), 350);
     return () => clearTimeout(t);
@@ -44,7 +44,7 @@ export function BuildDomain({
     setBusy(true);
     const { data, error } = await supabase.rpc("publish_build", { _build_id: buildId });
     setBusy(false);
-    if (error || !data) return toast.error("Publish nahi ho saka");
+    if (error || !data) { toast.error("Publish nahi ho saka"); return; }
     onChange(data, edits);
     toast.success(`Live: ${data}.noquitai.com`);
   }
@@ -53,7 +53,7 @@ export function BuildDomain({
     setBusy(true);
     const { data, error } = await supabase.rpc("rename_build_subdomain", { _build_id: buildId, _subdomain: value.trim().toLowerCase() });
     setBusy(false);
-    if (error || !data) return toast.error(error?.message ?? "Rename fail");
+    if (error || !data) { toast.error(error?.message ?? "Rename fail"); return; }
     onChange(data, edits + 1);
     setEditing(false);
     toast.success("Subdomain update ho gaya");
