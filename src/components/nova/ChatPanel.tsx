@@ -1,4 +1,5 @@
 import { ToolsMenu, CHAT_ACTION_EVT } from "@/components/nova/ToolsMenu";
+import { backupToWorker } from "@/lib/worker-backup";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -298,6 +299,7 @@ export function ChatPanel({
         .insert({ user_id: userId, title })
         .select("id, title, updated_at")
         .single();
+      if (!error && created) backupToWorker("conversation", { ...created, user_id: userId });
       if (error || !created) {
         toast.error(t("chatSaveFailed"));
         return null;
@@ -553,12 +555,14 @@ function ChatThread({
       }
       const id = convRef.current;
       if (!text || !id) return;
-      await supabase.from("messages").insert({
+      const __rows = {
         conversation_id: id,
         user_id: userId,
         role: "assistant",
         content: text,
-      });
+      };
+      backupToWorker("message", __rows);
+      await supabase.from("messages").insert(__rows);
       await supabase
         .from("conversations")
         .update({ updated_at: new Date().toISOString() })
@@ -595,12 +599,14 @@ function ChatThread({
       if (!id) return;
       convRef.current = id;
     }
-    await supabase.from("messages").insert({
+    const __rows = {
       conversation_id: id,
       user_id: userId,
       role: "user",
       content: value,
-    });
+    };
+      backupToWorker("message", __rows);
+      await supabase.from("messages").insert(__rows);
     void sendMessage({ text: value });
   }
 
@@ -621,10 +627,12 @@ function ChatThread({
         if (id) convRef.current = id;
       }
       if (id) {
-        await supabase.from("messages").insert([
+        const rows = [
           { conversation_id: id, user_id: userId, role: "user", content: question },
           { conversation_id: id, user_id: userId, role: "assistant", content: cached },
-        ]);
+        ];
+        backupToWorker("message", rows);
+        await supabase.from("messages").insert(rows);
         onTouched(id);
       }
       return cached;
@@ -656,10 +664,12 @@ function ChatThread({
       if (cid) convRef.current = cid;
     }
     if (cid) {
-      await supabase.from("messages").insert([
+      const rows = [
         { conversation_id: cid, user_id: userId, role: "user", content: question },
         { conversation_id: cid, user_id: userId, role: "assistant", content: answer },
-      ]);
+      ];
+        backupToWorker("message", rows);
+        await supabase.from("messages").insert(rows);
       onTouched(cid);
     }
     return answer;

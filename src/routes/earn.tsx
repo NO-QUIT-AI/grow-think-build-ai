@@ -9,6 +9,7 @@ import { SmartLinkCta } from "@/components/ads/SmartLinkCta";
 import { CommunityShell } from "@/components/community/CommunityShell";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { backupToWorker } from "@/lib/worker-backup";
 import { useT } from "@/i18n/LanguageContext";
 import { fetchInviteCode, inviteLink } from "@/lib/referral";
 import {
@@ -133,6 +134,7 @@ function Earn({ userId }: { userId: string }) {
     try {
       const result = await claimMining();
       if (result.ok) {
+        backupToWorker("coins", { reward: result.reward ?? 0, next_claim_at: result.next_claim_at ?? null });
         toast.success(`+${formatCoins(result.reward ?? 0)} ${COIN} claim ho gaye!`);
         showRewardAd();
       } else if (result.reason === "cooldown") {
