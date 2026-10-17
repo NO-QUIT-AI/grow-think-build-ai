@@ -78,6 +78,10 @@
   --border: oklch(0.32 0.033 244);
   --input: oklch(0.3 0.032 244);
   --ring: oklch(0.82 0.155 178);
+  --video-stage: #080c10;
+  --video-caption: #ffffff;
+  --video-caption-stroke: #000000;
+  --video-accent: #00e0c6;
   --chart-1: oklch(0.82 0.155 178);
   --chart-2: oklch(0.81 0.16 78);
   --chart-3: oklch(0.7 0.15 300);
@@ -253,3 +257,7 @@
   transform-origin: top;
 }
 @utility galaxy-talking { animation: galaxy-talk 0.28s ease-in-out infinite; }
+
+.auto-video-page h1, .auto-video-page h2 { letter-spacing: 0; }
+.video-stage { background: var(--video-stage); }
+.video-caption { color: var(--video-caption); -webkit-text-stroke: 1px var(--video-caption-stroke); paint-order: stroke fill; }
