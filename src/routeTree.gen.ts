@@ -28,6 +28,7 @@ import { Route as StudioRouteImport } from './routes/studio'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AdminAdsRouteImport } from './routes/admin.ads'
 import { Route as AdminOwnerRouteImport } from './routes/admin.owner'
+import { Route as ApiAutoVideoClipsRouteImport } from './routes/api/auto-video-clips'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiCvPolishRouteImport } from './routes/api/cv-polish'
 import { Route as ApiCvStoreRouteImport } from './routes/api/cv-store'
@@ -146,6 +147,11 @@ const AdminAdsRoute = AdminAdsRouteImport.update({
 const AdminOwnerRoute = AdminOwnerRouteImport.update({
   id: '/admin/owner',
   path: '/admin/owner',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAutoVideoClipsRoute = ApiAutoVideoClipsRouteImport.update({
+  id: '/api/auto-video-clips',
+  path: '/api/auto-video-clips',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
@@ -289,6 +295,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/admin/ads': typeof AdminAdsRoute
   '/admin/owner': typeof AdminOwnerRoute
+  '/api/auto-video-clips': typeof ApiAutoVideoClipsRoute
   '/api/chat': typeof ApiChatRoute
   '/api/cv-polish': typeof ApiCvPolishRoute
   '/api/cv-store': typeof ApiCvStoreRoute
@@ -334,6 +341,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/admin/ads': typeof AdminAdsRoute
   '/admin/owner': typeof AdminOwnerRoute
+  '/api/auto-video-clips': typeof ApiAutoVideoClipsRoute
   '/api/chat': typeof ApiChatRoute
   '/api/cv-polish': typeof ApiCvPolishRoute
   '/api/cv-store': typeof ApiCvStoreRoute
@@ -380,6 +388,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/admin/ads': typeof AdminAdsRoute
   '/admin/owner': typeof AdminOwnerRoute
+  '/api/auto-video-clips': typeof ApiAutoVideoClipsRoute
   '/api/chat': typeof ApiChatRoute
   '/api/cv-polish': typeof ApiCvPolishRoute
   '/api/cv-store': typeof ApiCvStoreRoute
@@ -427,6 +436,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin/ads'
     | '/admin/owner'
+    | '/api/auto-video-clips'
     | '/api/chat'
     | '/api/cv-polish'
     | '/api/cv-store'
@@ -472,6 +482,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin/ads'
     | '/admin/owner'
+    | '/api/auto-video-clips'
     | '/api/chat'
     | '/api/cv-polish'
     | '/api/cv-store'
@@ -517,6 +528,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin/ads'
     | '/admin/owner'
+    | '/api/auto-video-clips'
     | '/api/chat'
     | '/api/cv-polish'
     | '/api/cv-store'
@@ -563,6 +575,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   AdminAdsRoute: typeof AdminAdsRoute
   AdminOwnerRoute: typeof AdminOwnerRoute
+  ApiAutoVideoClipsRoute: typeof ApiAutoVideoClipsRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiCvPolishRoute: typeof ApiCvPolishRoute
   ApiCvStoreRoute: typeof ApiCvStoreRoute
@@ -721,6 +734,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/owner'
       fullPath: '/admin/owner'
       preLoaderRoute: typeof AdminOwnerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auto-video-clips': {
+      id: '/api/auto-video-clips'
+      path: '/api/auto-video-clips'
+      fullPath: '/api/auto-video-clips'
+      preLoaderRoute: typeof ApiAutoVideoClipsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/chat': {
@@ -925,6 +945,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   AdminAdsRoute: AdminAdsRoute,
   AdminOwnerRoute: AdminOwnerRoute,
+  ApiAutoVideoClipsRoute: ApiAutoVideoClipsRoute,
   ApiChatRoute: ApiChatRoute,
   ApiCvPolishRoute: ApiCvPolishRoute,
   ApiCvStoreRoute: ApiCvStoreRoute,

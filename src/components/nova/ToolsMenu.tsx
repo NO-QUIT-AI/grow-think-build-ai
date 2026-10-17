@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
   Camera, ChevronRight, FileText, Flashlight, Globe, Hammer, History, ImageIcon, Instagram,
-  Link2, MessageCircle, Mic, Music, Phone, Plus, Radio, Search, FileSearch,
+  Link2, MessageCircle, Mic, Music, Phone, Plus, Radio, Search, FileSearch, Clapperboard,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -27,6 +27,7 @@ const TOOLS: Tool[] = [
   { id: "instagram", name: "Instagram Opener", icon: Instagram, section: "PHONE TOOLS" },
   { id: "jalsa", name: "Jalsa Mode (Offline Mesh)", icon: Radio, section: "PHONE TOOLS" },
   { id: "t2i", name: "Text to Image", icon: ImageIcon, section: "AI TOOLS" },
+  { id: "auto-video", name: "Auto Story to Video", icon: Clapperboard, section: "AI TOOLS" },
   { id: "pdf", name: "PDF Reader", icon: FileSearch, section: "AI TOOLS" },
   { id: "voice", name: "Voice Tools", icon: Mic, section: "AI TOOLS" },
   { id: "space", name: "Space Photo (NASA)", icon: ImageIcon, section: "AI TOOLS" },
@@ -76,6 +77,7 @@ export function ToolsMenu({ onNewChat, onClose, history }: { onNewChat: () => vo
       case "builds": case "websites": case "domains": tab("builds"); return;
       case "cvs": onClose(); void navigate({ to: "/cv" }); return;
       case "space": onClose(); void navigate({ to: "/space" }); return;
+      case "auto-video": onClose(); void navigate({ to: "/auto-video" }); return;
       case "whatsapp": case "call": setModal(id); return;
       case "music": open("https://music.youtube.com"); return;
       case "flash": void toggleTorch(); return;

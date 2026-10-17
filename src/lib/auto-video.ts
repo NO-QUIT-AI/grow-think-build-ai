@@ -10,7 +10,7 @@ const KEYWORDS: [RegExp, string][] = [
 ];
 
 export function searchKeyword(text: string): string {
-  return KEYWORDS.find(([pattern]) => pattern.test(text))?.[1] ?? text.replace(/[^a-zA-Z\s]/g, " ").trim().split(/\s+/).slice(0, 3).join(" ") || "nature";
+  return KEYWORDS.find(([pattern]) => pattern.test(text))?.[1] ?? (text.replace(/[^a-zA-Z\s]/g, " ").trim().split(/\s+/).slice(0, 3).join(" ") || "nature");
 }
 
 /** Keeps the user's words in order; short stories are spread across five scenes, never invented. */
