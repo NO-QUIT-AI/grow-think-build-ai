@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AutoVideoRouteImport } from './routes/auto-video'
 import { Route as CallbackRouteImport } from './routes/callback'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -67,6 +68,11 @@ const AboutRoute = AboutRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AutoVideoRoute = AutoVideoRouteImport.update({
+  id: '/auto-video',
+  path: '/auto-video',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CallbackRoute = CallbackRouteImport.update({
@@ -279,6 +285,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
+  '/auto-video': typeof AutoVideoRoute
   '/callback': typeof CallbackRoute
   '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
@@ -325,6 +332,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
+  '/auto-video': typeof AutoVideoRoute
   '/callback': typeof CallbackRoute
   '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
@@ -372,6 +380,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
+  '/auto-video': typeof AutoVideoRoute
   '/callback': typeof CallbackRoute
   '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
@@ -420,6 +429,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/auth'
+    | '/auto-video'
     | '/callback'
     | '/community'
     | '/contact'
@@ -466,6 +476,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/auth'
+    | '/auto-video'
     | '/callback'
     | '/community'
     | '/contact'
@@ -512,6 +523,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/auth'
+    | '/auto-video'
     | '/callback'
     | '/community'
     | '/contact'
@@ -559,6 +571,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRoute
+  AutoVideoRoute: typeof AutoVideoRoute
   CallbackRoute: typeof CallbackRoute
   CommunityRoute: typeof CommunityRoute
   ContactRoute: typeof ContactRoute
@@ -622,6 +635,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auto-video': {
+      id: '/auto-video'
+      path: '/auto-video'
+      fullPath: '/auto-video'
+      preLoaderRoute: typeof AutoVideoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/callback': {
@@ -929,6 +949,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AuthRoute: AuthRoute,
+  AutoVideoRoute: AutoVideoRoute,
   CallbackRoute: CallbackRoute,
   CommunityRoute: CommunityRoute,
   ContactRoute: ContactRoute,
