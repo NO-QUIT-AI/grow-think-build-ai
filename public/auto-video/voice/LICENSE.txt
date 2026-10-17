@@ -1,0 +1,1 @@
+meSpeak/eSpeak: GNU GPL. Source and license: https://github.com/mikolalysenko/mespeak and https://www.masswerk.at/mespeak/ . Bundled from mespeak 2.0.2, with CommonJS wrapper converted to a browser global. ffmpeg.wasm core: GPL-2.0-or-later https://github.com/ffmpegwasm/ffmpeg.wasm .
