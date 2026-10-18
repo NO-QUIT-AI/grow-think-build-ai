@@ -54,7 +54,7 @@ async function png(canvas: HTMLCanvasElement): Promise<Uint8Array> {
   return new Uint8Array(await blob.arrayBuffer());
 }
 
-export async function renderStoryVideo(scenes: VideoScene[], options: { natural: boolean; music: boolean; musicFile?: File; onProgress: (percent: number, label: string) => void; signal: AbortSignal }): Promise<Blob> {
+export async function renderStoryVideo(scenes: VideoScene[], options: { natural: boolean; music: boolean; musicFile?: File | undefined; onProgress: (percent: number, label: string) => void; signal: AbortSignal }): Promise<Blob> {
   const { FFmpeg } = await import("@ffmpeg/ffmpeg");
   const { toBlobURL } = await import("@ffmpeg/util");
   const ff = new FFmpeg();
