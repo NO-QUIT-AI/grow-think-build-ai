@@ -65,6 +65,51 @@ export type Database = {
         }
         Relationships: []
       }
+      call_invites: {
+        Row: {
+          call_type: string
+          created_at: string
+          from_user: string
+          id: string
+          room_id: string
+          status: string
+          to_user: string
+        }
+        Insert: {
+          call_type: string
+          created_at?: string
+          from_user: string
+          id?: string
+          room_id: string
+          status?: string
+          to_user: string
+        }
+        Update: {
+          call_type?: string
+          created_at?: string
+          from_user?: string
+          id?: string
+          room_id?: string
+          status?: string
+          to_user?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_invites_from_user_fkey"
+            columns: ["from_user"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_invites_to_user_fkey"
+            columns: ["to_user"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       community_posts: {
         Row: {
           app_link: string | null

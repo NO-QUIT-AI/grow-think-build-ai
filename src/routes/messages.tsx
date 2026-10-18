@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Loader2, Lock, Send } from "lucide-react";
+import { ArrowLeft, Loader2, Lock, Phone, PhoneOff, Send, Video } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,16 @@ import {
   type CommunityProfile,
 } from "@/lib/community";
 import { fetchFriendState, type FriendState } from "@/lib/friends";
+import {
+  CALL_SYSTEM_PREFIX,
+  createCallInvite,
+  hasActiveCall,
+  sendCallSystemMessage,
+  startRingtone,
+  updateCallStatus,
+  type CallInvite,
+  type CallType,
+} from "@/lib/calls";
 import { useT } from "@/i18n/LanguageContext";
 
 type Search = { u?: string | undefined };
@@ -90,6 +100,9 @@ function Inbox({ meId }: { meId: string }) {
   const [draft, setDraft] = useState("");
   const [friendState, setFriendState] = useState<FriendState>("none");
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const [outgoing, setOutgoing] = useState<CallInvite | null>(null);
+  const stopRingtone = useRef<(() => void) | null>(null);
+  const missedTimer = useRef<number | null>(null);
 
   const loadConversations = useCallback(async () => {
     const { data } = await supabase
@@ -185,6 +198,94 @@ function Inbox({ meId }: { meId: string }) {
     void loadConversations();
   }
 
+  const cleanupOutgoing = useCallback(() => {
+    stopRingtone.current?.();
+    stopRingtone.current = null;
+    if (missedTimer.current !== null) {
+      window.clearTimeout(missedTimer.current);
+      missedTimer.current = null;
+    }
+    setOutgoing(null);
+  }, []);
+
+  // Watch the outgoing invite: accept -> join the call room, reject/missed -> close.
+  useEffect(() => {
+    if (!outgoing) return;
+    const channel = supabase
+      .channel(`outgoing-call-${outgoing.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "call_invites",
+          filter: `id=eq.${outgoing.id}`,
+        },
+        (payload) => {
+          const row = payload.new as CallInvite;
+          if (row.status === "accepted") {
+            const invite = outgoing;
+            cleanupOutgoing();
+            void navigate({
+              to: "/call/$roomId",
+              params: { roomId: invite.room_id },
+              search: { type: invite.call_type, friendId: invite.to_user, inviteId: invite.id },
+            });
+          } else if (row.status === "rejected" || row.status === "missed") {
+            cleanupOutgoing();
+            toast.error("Call answer nahi hui");
+          }
+        },
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [outgoing, cleanupOutgoing, navigate]);
+
+  async function startCall(callType: CallType) {
+    if (!otherId || friendState !== "friends") return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: callType === "video",
+      });
+      stream.getTracks().forEach((track) => track.stop());
+    } catch {
+      toast.error("Mic/Camera permission chahiye call ke liye");
+      return;
+    }
+    if (await hasActiveCall(meId)) {
+      toast.error("Already in call");
+      return;
+    }
+    const invite = await createCallInvite(meId, otherId, callType);
+    if (!invite) {
+      toast.error("Call start nahi hui");
+      return;
+    }
+    setOutgoing(invite);
+    stopRingtone.current?.();
+    stopRingtone.current = startRingtone();
+    missedTimer.current = window.setTimeout(() => {
+      void (async () => {
+        await updateCallStatus(invite.id, "missed");
+        await sendCallSystemMessage(meId, invite.to_user, meId, `missed ${invite.call_type}`);
+        cleanupOutgoing();
+      })();
+    }, 30_000);
+  }
+
+  function cancelOutgoing() {
+    if (!outgoing) return;
+    const invite = outgoing;
+    cleanupOutgoing();
+    void (async () => {
+      await updateCallStatus(invite.id, "missed");
+      await sendCallSystemMessage(meId, invite.to_user, meId, `missed ${invite.call_type}`);
+    })();
+  }
+
   if (active) {
     const other = profiles[otherId ?? ""];
     return (
@@ -205,6 +306,28 @@ function Inbox({ meId }: { meId: string }) {
                {t("openProfile")}
             </Button>
           )}
+          {friendState === "friends" && (
+            <span className="ml-auto flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Audio call"
+                className="hover:text-primary"
+                onClick={() => void startCall("audio")}
+              >
+                <Phone className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Video call"
+                className="hover:text-primary"
+                onClick={() => void startCall("video")}
+              >
+                <Video className="h-4 w-4" />
+              </Button>
+            </span>
+          )}
         </div>
 
         <div className="panel flex min-h-[60vh] flex-1 flex-col gap-2 overflow-y-auto p-3">
@@ -213,6 +336,21 @@ function Inbox({ meId }: { meId: string }) {
           )}
           {messages.map((message) => {
             const mine = message.sender_id === meId;
+            if (message.text.startsWith(CALL_SYSTEM_PREFIX)) {
+              const kind = message.text.slice(CALL_SYSTEM_PREFIX.length);
+              const missed = kind.startsWith("missed");
+              return (
+                <div key={message.id} className="flex justify-center">
+                  <span
+                    className={`rounded-full px-3 py-1 text-[11px] ${
+                      missed ? "bg-destructive/15 text-destructive" : "bg-secondary text-muted-foreground"
+                    }`}
+                  >
+                    {missed ? `Missed ${kind.replace("missed ", "")} call` : "Call ended"} · {timeAgo(message.created_at)}
+                  </span>
+                </div>
+              );
+            }
             return (
               <div
                 key={message.id}
@@ -266,6 +404,43 @@ function Inbox({ meId }: { meId: string }) {
             >
               <Send className="h-4 w-4" />
             </Button>
+          </div>
+        )}
+
+        {outgoing && (
+          <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-black/95 px-6 text-center">
+            <div className="relative">
+              {other?.avatar_url ? (
+                <img
+                  src={other.avatar_url}
+                  alt={nameOf(other)}
+                  className="h-28 w-28 rounded-full object-cover"
+                />
+              ) : (
+                <span className="flex h-28 w-28 items-center justify-center rounded-full bg-secondary text-2xl font-semibold text-foreground">
+                  {initials(other)}
+                </span>
+              )}
+              <span className="absolute inset-0 -z-10 animate-ping rounded-full bg-primary/30" />
+            </div>
+            <div>
+              <p className="text-xl font-semibold text-foreground">{nameOf(other)}</p>
+              <p className="mt-1 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                {outgoing.call_type === "video" ? (
+                  <Video className="h-4 w-4" />
+                ) : (
+                  <Phone className="h-4 w-4" />
+                )}
+                Calling…
+              </p>
+            </div>
+            <button
+              onClick={cancelOutgoing}
+              aria-label="Cancel call"
+              className="flex h-16 w-16 items-center justify-center rounded-full bg-destructive text-destructive-foreground transition-transform hover:scale-105"
+            >
+              <PhoneOff className="h-7 w-7" />
+            </button>
           </div>
         )}
       </CommunityShell>

@@ -13,6 +13,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
 import { InstallAppBanner } from "@/components/InstallAppBanner";
+import { IncomingCallListener } from "@/components/calls/IncomingCallListener";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { initAdsConfig } from "@/lib/adsense";
 import { LanguageProvider } from "@/i18n/LanguageContext";
@@ -159,6 +160,7 @@ function RootComponent() {
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
         <InstallAppBanner />
+        <IncomingCallListener />
         <Toaster position="top-center" richColors />
         <RewardAdHost />
       </LanguageProvider>
