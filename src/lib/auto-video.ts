@@ -1,6 +1,6 @@
 export type StoryScene = { id: number; text: string; voiceover_text: string; search_keyword: string };
 export type StockClip = { url: string; thumbnail: string; page: string; author: string };
-export type VideoScene = StoryScene & { clip?: StockClip; localClip?: File; duration?: number };
+export type VideoScene = StoryScene & { clip?: StockClip | undefined; localClip?: File | undefined; duration?: number | undefined };
 
 const KEYWORDS: [RegExp, string][] = [
   [/gareeb|poor|poverty/i, "city street"], [/ameer|rich|success/i, "business success"],

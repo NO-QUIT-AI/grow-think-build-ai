@@ -54,7 +54,7 @@ async function png(canvas: HTMLCanvasElement): Promise<Uint8Array> {
   return new Uint8Array(await blob.arrayBuffer());
 }
 
-export async function renderStoryVideo(scenes: VideoScene[], options: { natural: boolean; music: boolean; musicFile?: File; onProgress: (percent: number, label: string) => void; signal: AbortSignal }): Promise<Blob> {
+export async function renderStoryVideo(scenes: VideoScene[], options: { natural: boolean; music: boolean; musicFile?: File | undefined; onProgress: (percent: number, label: string) => void; signal: AbortSignal }): Promise<Blob> {
   const { FFmpeg } = await import("@ffmpeg/ffmpeg");
   const { toBlobURL } = await import("@ffmpeg/util");
   const ff = new FFmpeg();
@@ -95,7 +95,7 @@ export async function renderStoryVideo(scenes: VideoScene[], options: { natural:
       options.onProgress(phase, `Scene ${i + 1}: captions aur clip…`);
       let hasClip = false;
       if (scene.localClip || scene.clip) {
-        const blob = scene.localClip ?? await fetch(scene.clip?.url ?? "", { signal: options.signal }).then(r => { if (!r.ok) throw new Error("Clip download fail; apna clip choose karo"); return r.blob(); });
+        const blob: Blob = scene.localClip ?? await fetch(scene.clip?.url ?? "", { signal: options.signal }).then(r => { if (!r.ok) throw new Error("Clip download fail; apna clip choose karo"); return r.blob(); });
         await ff.writeFile("clip.mp4", new Uint8Array(await blob.arrayBuffer())); hasClip = true;
       }
       const words = scene.text.split(/\s+/).filter(Boolean);

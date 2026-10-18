@@ -59,7 +59,7 @@ function AutoVideo() {
   async function stock(keyword: string, signal?: AbortSignal): Promise<StockClip[]> {
     const { data } = await supabase.auth.getSession();
     if (!data.session) { setNotice("Free stock clips ke liye login karo. Apne clips abhi choose kar sakte ho."); return []; }
-    const response = await fetch(`/api/auto-video-clips?q=${encodeURIComponent(keyword)}`, { headers: { authorization: `Bearer ${data.session.access_token}` }, signal });
+    const response = await fetch(`/api/auto-video-clips?q=${encodeURIComponent(keyword)}`, { headers: { authorization: `Bearer ${data.session.access_token}` }, signal: signal ?? null });
     const body = await response.json() as { clips?: StockClip[]; error?: string; configured?: boolean };
     if (!response.ok) throw new Error(body.error ?? "Clips unavailable");
     if (body.configured === false) setNotice("Pexels ki free key abhi connected nahi. Apne clips choose karo, ya text-scene video export karo.");
