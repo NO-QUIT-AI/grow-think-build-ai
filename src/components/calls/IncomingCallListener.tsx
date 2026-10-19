@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { Phone, PhoneOff, Video } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +14,8 @@ import {
 } from "@/lib/community";
 import {
   sendCallSystemMessage,
+  CALL_RING_TIMEOUT_MS,
+  isFreshRingingCall,
   startRingtone,
   updateCallStatus,
   type CallInvite,
@@ -26,9 +30,21 @@ export function IncomingCallListener() {
   const [invite, setInvite] = useState<CallInvite | null>(null);
   const [caller, setCaller] = useState<CommunityProfile | null>(null);
   const stopRingtone = useRef<(() => void) | null>(null);
+  const [answering, setAnswering] = useState(false);
 
   useEffect(() => {
     if (!user) return;
+    let disposed = false;
+    const receive = (row: CallInvite) => {
+      if (disposed || !isFreshRingingCall(row) || window.location.pathname.startsWith("/call")) return;
+      setInvite(previous => previous?.id === row.id ? previous : row);
+    };
+    const refresh = async () => {
+      const { data } = await supabase.from("call_invites").select("*").eq("to_user", user.id).eq("status", "ringing")
+        .gte("created_at", new Date(Date.now() - CALL_RING_TIMEOUT_MS).toISOString()).order("created_at", { ascending: false }).limit(1);
+      const row = data?.[0];
+      if (row) receive(row as CallInvite);
+    };
     const channel = supabase
       .channel("incoming-calls")
       .on(
@@ -40,26 +56,43 @@ export function IncomingCallListener() {
           filter: `to_user=eq.${user.id}`,
         },
         (payload) => {
-          const row = payload.new as CallInvite;
-          if (row.status !== "ringing") return;
-          // Already on the call screen — ignore.
-          if (window.location.pathname.startsWith("/call")) return;
-          setInvite(row);
-          void fetchProfiles([row.from_user]).then((p) =>
-            setCaller(p[row.from_user] ?? null),
-          );
-          stopRingtone.current?.();
-          stopRingtone.current = startRingtone();
-          navigator.vibrate?.([500, 300, 500]);
+          receive(payload.new as CallInvite);
         },
       )
-      .subscribe();
+      .subscribe(status => { if (status === "SUBSCRIBED") void refresh(); });
+    void refresh();
     return () => {
+      disposed = true;
       void supabase.removeChannel(channel);
       stopRingtone.current?.();
       stopRingtone.current = null;
     };
   }, [user]);
+
+  useEffect(() => {
+    if (!invite) return;
+    let disposed = false;
+    void fetchProfiles([invite.from_user]).then(p => { if (!disposed) setCaller(p[invite.from_user] ?? null); });
+    stopRingtone.current = startRingtone();
+    navigator.vibrate?.([500, 300, 500]);
+    const closeInvite = () => { if (!disposed) { setInvite(null); setCaller(null); } };
+    const channel = supabase.channel(`incoming-status-${invite.id}`).on("postgres_changes", {
+      event: "UPDATE", schema: "public", table: "call_invites", filter: `id=eq.${invite.id}`,
+    }, payload => { if ((payload.new as CallInvite).status !== "ringing") closeInvite(); }).subscribe();
+    const timer = window.setTimeout(() => {
+      closeInvite();
+      void updateCallStatus(invite.id, "missed").catch(() => {});
+    }, Math.max(0, CALL_RING_TIMEOUT_MS - (Date.now() - Date.parse(invite.created_at))));
+    const poll = window.setInterval(() => {
+      void supabase.from("call_invites").select("status").eq("id", invite.id).maybeSingle().then(({data}) => {
+        if (data && data.status !== "ringing") closeInvite();
+      });
+    }, 1500);
+    return () => {
+      disposed = true; window.clearTimeout(timer); window.clearInterval(poll);
+      void supabase.removeChannel(channel); stopRingtone.current?.(); stopRingtone.current = null;
+    };
+  }, [invite]);
 
   // Hide the overlay while on the call page itself.
   if (!invite || pathname.startsWith("/call")) return null;
@@ -73,9 +106,12 @@ export function IncomingCallListener() {
 
   const accept = async () => {
     const current = invite;
-    close();
-    await updateCallStatus(current.id, "accepted");
-    void navigate({
+    setAnswering(true);
+    try {
+      const changed = await updateCallStatus(current.id, "accepted");
+      close();
+      if (!changed) { toast.error("Call ab available nahi hai"); return; }
+      void navigate({
       to: "/call/$roomId",
       params: { roomId: current.room_id },
       search: {
@@ -83,23 +119,29 @@ export function IncomingCallListener() {
         friendId: current.from_user,
         inviteId: current.id,
       },
-    });
+      });
+    } catch { toast.error("Call accept nahi hui; dobara try karo"); }
+    finally { setAnswering(false); }
   };
 
   const reject = async () => {
     const current = invite;
-    close();
-    await updateCallStatus(current.id, "rejected");
-    await sendCallSystemMessage(
+    setAnswering(true);
+    try {
+      const changed = await updateCallStatus(current.id, "rejected");
+      close();
+      if (changed) await sendCallSystemMessage(
       current.from_user,
       current.to_user,
       current.to_user,
       `missed ${current.call_type}`,
-    );
+      );
+    } catch { toast.error("Call reject nahi hui; dobara try karo"); }
+    finally { setAnswering(false); }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-black/95 px-6 text-center">
+    <div role="dialog" aria-label="Incoming call" className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-background/95 px-6 text-center">
       <div className="relative">
         {caller?.avatar_url ? (
           <img
@@ -128,14 +170,14 @@ export function IncomingCallListener() {
         </p>
       </div>
       <div className="flex items-center gap-10">
-        <button
+        <Button variant="destructive" size="icon" disabled={answering}
           onClick={() => void reject()}
           aria-label="Reject call"
           className="flex h-16 w-16 items-center justify-center rounded-full bg-destructive text-destructive-foreground transition-transform hover:scale-105"
         >
           <PhoneOff className="h-7 w-7" />
-        </button>
-        <button
+        </Button>
+        <Button size="icon" disabled={answering}
           onClick={() => void accept()}
           aria-label="Accept call"
           className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform hover:scale-105"
@@ -145,7 +187,7 @@ export function IncomingCallListener() {
           ) : (
             <Phone className="h-7 w-7" />
           )}
-        </button>
+        </Button>
       </div>
     </div>
   );
