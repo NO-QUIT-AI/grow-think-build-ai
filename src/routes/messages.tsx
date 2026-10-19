@@ -299,6 +299,7 @@ function Inbox({ meId }: { meId: string }) {
   }
 
   useEffect(() => () => {
+    if (!outgoing) return;
     stopRingtone.current?.();
     if (missedTimer.current !== null) window.clearTimeout(missedTimer.current);
     if (outgoing) void updateCallStatus(outgoing.id, "missed").catch(() => {});

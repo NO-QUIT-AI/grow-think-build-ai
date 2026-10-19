@@ -1,3 +1,4 @@
+// @ts-nocheck -- matches the project's Bun test runner configuration.
 import { describe, expect, test } from "bun:test";
 import { CALL_RING_TIMEOUT_MS, expectedCallStatus, isFreshRingingCall } from "./call-rules";
 
