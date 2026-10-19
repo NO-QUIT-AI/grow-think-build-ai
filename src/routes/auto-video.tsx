@@ -101,6 +101,10 @@ function AutoVideo() {
     if (!active || !("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel(); const speech = new SpeechSynthesisUtterance(active.voiceover_text); speech.rate = 0.95; window.speechSynthesis.speak(speech);
   }
+  async function playResult() {
+    try { await player.current?.play(); }
+    catch { toast.error("Is browser mein MP4 play nahi hui; download karke video player mein kholo."); }
+  }
 
   return (
     <main className="auto-video-page mx-auto min-h-screen max-w-6xl px-4 py-6 sm:px-8">
@@ -158,7 +162,7 @@ function AutoVideo() {
             <div className="flex items-center justify-between text-sm"><span role="status">{busy ? status : result ? "MP4 ready" : "Ready when you are"}</span><span className="font-mono text-primary">{Math.round(progress)}%</span></div>
             <Progress value={progress} aria-label="Video rendering progress" className="h-2" />
             {busy && <Button variant="outline" onClick={() => cancel.current?.abort()} className="gap-2 rounded-lg"><X className="h-4 w-4" />Cancel render</Button>}
-            {result && <div className="flex flex-wrap gap-3"><Button onClick={() => void player.current?.play()} className="gap-2 rounded-lg"><Play className="h-4 w-4" />Play</Button><Button asChild variant="outline" className="gap-2 rounded-lg"><a href={result} download="NO-QUIT-AI-story.mp4"><Download className="h-4 w-4" />Download MP4</a></Button></div>}
+            {result && <div className="flex flex-wrap gap-3"><Button onClick={() => void playResult()} className="gap-2 rounded-lg"><Play className="h-4 w-4" />Play</Button><Button asChild variant="outline" className="gap-2 rounded-lg"><a href={result} download="NO-QUIT-AI-story.mp4"><Download className="h-4 w-4" />Download MP4</a></Button></div>}
             <dl className="divide-y divide-border text-sm"><div className="flex justify-between py-3"><dt className="text-muted-foreground">Format</dt><dd>360 × 640 · 12 fps</dd></div><div className="flex justify-between py-3"><dt className="text-muted-foreground">Voice</dt><dd>{natural ? "Edge / offline fallback" : "Offline free voice"}</dd></div><div className="flex justify-between py-3"><dt className="text-muted-foreground">Captions</dt><dd>Word pop</dd></div><div className="flex justify-between py-3"><dt className="text-muted-foreground">Export</dt><dd>On this device</dd></div></dl>
           </div>
         </div>

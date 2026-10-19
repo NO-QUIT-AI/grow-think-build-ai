@@ -1,9 +1,12 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Loader2, PhoneOff } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 import { useAuth } from "@/hooks/useAuth";
-import { sendCallSystemMessage, updateCallStatus } from "@/lib/calls";
+import { fetchCallInvite, sendCallSystemMessage, updateCallStatus } from "@/lib/calls";
+import { supabase } from "@/integrations/supabase/client";
 
 declare global {
   interface Window {
@@ -51,32 +54,33 @@ function CallPage() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const apiRef = useRef<{ dispose: () => void } | null>(null);
   const endedRef = useRef(false);
-  const [failed, setFailed] = useState(false);
-
-  useEffect(() => {
-    if (!loading && !user) navigate({ to: "/auth" });
-  }, [user, loading, navigate]);
+  const [failed, setFailed] = useState("");
+  const [ready, setReady] = useState(false);
+  const peerRef = useRef<string | undefined>(undefined);
 
   const endCall = async () => {
     if (endedRef.current) return;
     endedRef.current = true;
     apiRef.current?.dispose();
     apiRef.current = null;
-    if (inviteId) await updateCallStatus(inviteId, "ended");
-    if (user && friendId) {
-      await sendCallSystemMessage(user.id, friendId, user.id, `ended ${type ?? "audio"}`);
-      navigate({ to: "/messages", search: { u: friendId } });
-    } else {
-      navigate({ to: "/messages", search: { u: undefined } });
-    }
+    try {
+      const changed = inviteId && await updateCallStatus(inviteId, "ended");
+      if (changed && user && peerRef.current) await sendCallSystemMessage(user.id, peerRef.current, user.id, `ended ${type}`);
+    } catch { toast.error("Call band ho gayi; history update nahi hui"); }
+    finally { void navigate({ to: "/messages", search: { u: peerRef.current } }); }
   };
 
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
+    let validated = false;
+    let script: HTMLScriptElement | undefined;
+    let channel: ReturnType<typeof supabase.channel> | undefined;
+    let poll: number | undefined;
+    setFailed(""); setReady(false); endedRef.current = false;
 
     const boot = () => {
-      if (cancelled || !containerRef.current || !window.JitsiMeetExternalAPI) return;
+      if (cancelled || !validated || !containerRef.current || !window.JitsiMeetExternalAPI) return;
       const api = new window.JitsiMeetExternalAPI("meet.jit.si", {
         roomName: roomId,
         parentNode: containerRef.current,
@@ -94,53 +98,76 @@ function CallPage() {
       });
       api.addListener("videoConferenceLeft", () => void endCall());
       apiRef.current = api;
+      setReady(true);
     };
-
-    if (window.JitsiMeetExternalAPI) {
-      boot();
-    } else {
-      const script = document.createElement("script");
-      script.src = "https://meet.jit.si/external_api.js";
-      script.async = true;
-      script.onload = boot;
-      script.onerror = () => setFailed(true);
-      document.head.appendChild(script);
-    }
+    const validate = async () => {
+      if (!inviteId) throw new Error("Call invitation nahi mili.");
+      const invite = await fetchCallInvite(inviteId);
+      if (!invite || invite.room_id !== roomId || invite.status !== "accepted" || (invite.from_user !== user.id && invite.to_user !== user.id)) {
+        throw new Error("Call ab active nahi hai ya aap is call ka hissa nahi hain.");
+      }
+      const peer = invite.from_user === user.id ? invite.to_user : invite.from_user;
+      if (invite.call_type !== type || (friendId && friendId !== peer)) throw new Error("Call invitation match nahi hui.");
+      if (cancelled) return;
+      validated = true; peerRef.current = peer;
+      const refresh = () => {
+        void fetchCallInvite(inviteId).then(row => { if (!cancelled && row?.status !== "accepted") void endCall(); }).catch(() => {});
+      };
+      channel = supabase.channel(`active-call-${inviteId}`).on("postgres_changes", {
+        event: "UPDATE", schema: "public", table: "call_invites", filter: `id=eq.${inviteId}`,
+      }, refresh).subscribe();
+      poll = window.setInterval(refresh, 2000);
+      if (window.JitsiMeetExternalAPI) boot();
+      else {
+        script = document.createElement("script");
+        script.src = "https://meet.jit.si/external_api.js"; script.async = true;
+        script.onload = boot;
+        script.onerror = () => { if (!cancelled) setFailed("Call service load nahi hui. Internet check karke dobara try karo."); };
+        document.head.appendChild(script);
+      }
+    };
+    void validate().catch(error => { if (!cancelled) setFailed(error instanceof Error ? error.message : "Call load nahi hui"); });
 
     return () => {
       cancelled = true;
+      if (poll !== undefined) window.clearInterval(poll);
+      if (channel) void supabase.removeChannel(channel);
+      script?.remove();
       apiRef.current?.dispose();
       apiRef.current = null;
+      if (validated && !endedRef.current && inviteId) void updateCallStatus(inviteId, "ended").catch(() => {});
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, roomId, type]);
+  }, [user?.id, roomId, type, friendId, inviteId]);
 
-  if (loading || !user) {
+  if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-black">
+      <main className="flex min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-6 w-6 animate-spin text-primary" />
       </main>
     );
   }
+  if (!user) return <main className="flex min-h-screen items-center justify-center bg-background"><Button asChild><Link to="/auth">Sign in to join call</Link></Button></main>;
 
   return (
-    <main className="flex min-h-screen flex-col bg-black">
-      <div className="flex-1" ref={containerRef}>
+    <main className="flex min-h-dvh flex-col bg-background">
+      <div className="relative min-h-[70dvh] flex-1" ref={containerRef}>
+        {!ready && !failed && <div className="absolute inset-0 flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}
         {failed && (
-          <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
+            <div role="alert" className="flex min-h-[70dvh] flex-col items-center justify-center gap-3 px-4 text-center">
             <p className="text-sm text-muted-foreground">
-              Call service load nahi hui. Internet check karke dobara try karo.
+              {failed}
             </p>
           </div>
         )}
       </div>
-      <div className="flex items-center justify-center gap-3 bg-black py-4">
-        <button
+      <div className="flex items-center justify-center gap-3 bg-background py-4">
+        <Button variant="destructive"
           onClick={() => void endCall()}
           className="flex items-center gap-2 rounded-full bg-destructive px-6 py-3 text-sm font-semibold text-destructive-foreground transition-transform hover:scale-105"
         >
           <PhoneOff className="h-5 w-5" /> End Call
-        </button>
+        </Button>
       </div>
     </main>
   );

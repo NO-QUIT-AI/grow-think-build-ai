@@ -114,16 +114,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       { rel: "manifest", href: "/manifest.webmanifest" },
     ],
-    // AdSense loader script in <head> so Google can verify the site.
-    scripts: [
-      {
-        src: "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2482034823952749",
-        async: true,
-        crossOrigin: "anonymous",
-      },
-      // Monetag scripts are NOT loaded globally anymore — they run only inside
-      // the sandboxed #monetag-ad-box in AdSidebar (never on login/auth pages).
-    ],
+    // AdSense is injected after hydration by initAdsConfig. Loading it before
+    // React hydrates lets Auto Ads mutate <body> and breaks page hydration.
   }),
   shellComponent: RootShell,
   component: RootComponent,

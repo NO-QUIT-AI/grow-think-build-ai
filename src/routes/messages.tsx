@@ -19,6 +19,8 @@ import {
 import { fetchFriendState, type FriendState } from "@/lib/friends";
 import {
   CALL_SYSTEM_PREFIX,
+  CALL_RING_TIMEOUT_MS,
+  fetchCallInvite,
   createCallInvite,
   hasActiveCall,
   sendCallSystemMessage,
@@ -103,6 +105,7 @@ function Inbox({ meId }: { meId: string }) {
   const [outgoing, setOutgoing] = useState<CallInvite | null>(null);
   const stopRingtone = useRef<(() => void) | null>(null);
   const missedTimer = useRef<number | null>(null);
+  const startingCall = useRef(false);
 
   const loadConversations = useCallback(async () => {
     const { data } = await supabase
@@ -131,7 +134,10 @@ function Inbox({ meId }: { meId: string }) {
 
   useEffect(() => {
     if (!otherId) return;
-    void fetchFriendState(meId, otherId).then(({ state }) => setFriendState(state));
+    let cancelled = false;
+    setFriendState("none");
+    void fetchFriendState(meId, otherId).then(({ state }) => { if (!cancelled) setFriendState(state); });
+    return () => { cancelled = true; };
   }, [meId, otherId]);
 
   const loadMessages = useCallback(async (conversationId: string) => {
@@ -211,6 +217,17 @@ function Inbox({ meId }: { meId: string }) {
   // Watch the outgoing invite: accept -> join the call room, reject/missed -> close.
   useEffect(() => {
     if (!outgoing) return;
+    let resolved = false;
+    const receive = (row: CallInvite) => {
+      if (resolved) return;
+      if (row.status === "accepted") {
+        resolved = true; cleanupOutgoing();
+        void navigate({ to: "/call/$roomId", params: { roomId: row.room_id }, search: { type: row.call_type, friendId: row.to_user, inviteId: row.id } });
+      } else if (["rejected", "missed", "ended"].includes(row.status)) {
+        resolved = true; cleanupOutgoing(); toast.error("Call answer nahi hui");
+      }
+    };
+    const refresh = () => { void fetchCallInvite(outgoing.id).then(row => { if (row) receive(row); }).catch(() => {}); };
     const channel = supabase
       .channel(`outgoing-call-${outgoing.id}`)
       .on(
@@ -222,29 +239,22 @@ function Inbox({ meId }: { meId: string }) {
           filter: `id=eq.${outgoing.id}`,
         },
         (payload) => {
-          const row = payload.new as CallInvite;
-          if (row.status === "accepted") {
-            const invite = outgoing;
-            cleanupOutgoing();
-            void navigate({
-              to: "/call/$roomId",
-              params: { roomId: invite.room_id },
-              search: { type: invite.call_type, friendId: invite.to_user, inviteId: invite.id },
-            });
-          } else if (row.status === "rejected" || row.status === "missed") {
-            cleanupOutgoing();
-            toast.error("Call answer nahi hui");
-          }
+          receive(payload.new as CallInvite);
         },
       )
-      .subscribe();
+      .subscribe(status => { if (status === "SUBSCRIBED") refresh(); });
+    refresh();
+    const poll = window.setInterval(refresh, 1500);
     return () => {
+      resolved = true; window.clearInterval(poll);
       void supabase.removeChannel(channel);
     };
   }, [outgoing, cleanupOutgoing, navigate]);
 
   async function startCall(callType: CallType) {
-    if (!otherId || friendState !== "friends") return;
+    if (!otherId || friendState !== "friends" || startingCall.current || outgoing) return;
+    startingCall.current = true;
+    try {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
@@ -269,11 +279,14 @@ function Inbox({ meId }: { meId: string }) {
     stopRingtone.current = startRingtone();
     missedTimer.current = window.setTimeout(() => {
       void (async () => {
-        await updateCallStatus(invite.id, "missed");
-        await sendCallSystemMessage(meId, invite.to_user, meId, `missed ${invite.call_type}`);
-        cleanupOutgoing();
-      })();
-    }, 30_000);
+        if (await updateCallStatus(invite.id, "missed")) {
+          await sendCallSystemMessage(meId, invite.to_user, meId, `missed ${invite.call_type}`);
+          cleanupOutgoing();
+        }
+      })().catch(() => { toast.error("Call status update nahi hui"); cleanupOutgoing(); });
+    }, Math.max(0, CALL_RING_TIMEOUT_MS - (Date.now() - Date.parse(invite.created_at))));
+    } catch { toast.error("Call start nahi hui; dobara try karo"); }
+    finally { startingCall.current = false; }
   }
 
   function cancelOutgoing() {
@@ -281,10 +294,16 @@ function Inbox({ meId }: { meId: string }) {
     const invite = outgoing;
     cleanupOutgoing();
     void (async () => {
-      await updateCallStatus(invite.id, "missed");
-      await sendCallSystemMessage(meId, invite.to_user, meId, `missed ${invite.call_type}`);
-    })();
+      if (await updateCallStatus(invite.id, "missed")) await sendCallSystemMessage(meId, invite.to_user, meId, `missed ${invite.call_type}`);
+    })().catch(() => toast.error("Call cancel status update nahi hui"));
   }
+
+  useEffect(() => () => {
+    if (!outgoing) return;
+    stopRingtone.current?.();
+    if (missedTimer.current !== null) window.clearTimeout(missedTimer.current);
+    if (outgoing) void updateCallStatus(outgoing.id, "missed").catch(() => {});
+  }, [outgoing]);
 
   if (active) {
     const other = profiles[otherId ?? ""];
@@ -408,7 +427,7 @@ function Inbox({ meId }: { meId: string }) {
         )}
 
         {outgoing && (
-          <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-black/95 px-6 text-center">
+          <div role="dialog" aria-label="Outgoing call" className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-background/95 px-6 text-center">
             <div className="relative">
               {other?.avatar_url ? (
                 <img
@@ -434,13 +453,13 @@ function Inbox({ meId }: { meId: string }) {
                 Calling…
               </p>
             </div>
-            <button
+            <Button variant="destructive" size="icon"
               onClick={cancelOutgoing}
               aria-label="Cancel call"
               className="flex h-16 w-16 items-center justify-center rounded-full bg-destructive text-destructive-foreground transition-transform hover:scale-105"
             >
               <PhoneOff className="h-7 w-7" />
-            </button>
+            </Button>
           </div>
         )}
       </CommunityShell>
