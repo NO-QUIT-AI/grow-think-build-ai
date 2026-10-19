@@ -1,9 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
-
-// call_invites is new and not yet present in the generated Database types,
-// so this module uses an untyped handle scoped to call features only.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-const db = supabase as any;
+import { CALL_RING_TIMEOUT_MS, expectedCallStatus } from "./call-rules";
+export { CALL_RING_TIMEOUT_MS, isFreshRingingCall } from "./call-rules";
 
 export type CallType = "audio" | "video";
 export type CallStatus = "ringing" | "accepted" | "rejected" | "ended" | "missed";
@@ -22,17 +19,18 @@ export interface CallInvite {
 export const CALL_SYSTEM_PREFIX = "__call__:";
 
 export function makeRoomId(fromUser: string, toUser: string): string {
-  return `NOQUIT-PRIVATE-${fromUser.slice(0, 6)}-${toUser.slice(0, 6)}-${Date.now()}`;
+  return `NOQUIT-PRIVATE-${crypto.randomUUID()}`;
 }
 
 export async function hasActiveCall(userId: string): Promise<boolean> {
-  const { data } = await db
+  const { data, error } = await supabase
     .from("call_invites")
-    .select("id")
+    .select("id, status, created_at")
     .or(`from_user.eq.${userId},to_user.eq.${userId}`)
     .in("status", ["ringing", "accepted"])
-    .limit(1);
-  return (data?.length ?? 0) > 0;
+    ;
+  if (error) throw error;
+  return (data ?? []).some(row => row.status === "accepted" || Date.now() - Date.parse(row.created_at) < CALL_RING_TIMEOUT_MS);
 }
 
 export async function createCallInvite(
@@ -40,7 +38,7 @@ export async function createCallInvite(
   toUser: string,
   callType: CallType,
 ): Promise<CallInvite | null> {
-  const { data, error } = await db
+  const { data, error } = await supabase
     .from("call_invites")
     .insert({
       from_user: fromUser,
@@ -55,12 +53,21 @@ export async function createCallInvite(
   return data as CallInvite;
 }
 
-export async function updateCallStatus(id: string, status: CallStatus): Promise<void> {
-  await db.from("call_invites").update({ status }).eq("id", id);
+export async function updateCallStatus(id: string, status: CallStatus): Promise<boolean> {
+  const { data, error } = await supabase.from("call_invites").update({ status }).eq("id", id)
+    .eq("status", expectedCallStatus(status)).select("id");
+  if (error) throw error;
+  return (data?.length ?? 0) > 0;
+}
+
+export async function fetchCallInvite(id: string): Promise<CallInvite | null> {
+  const { data, error } = await supabase.from("call_invites").select("*").eq("id", id).maybeSingle();
+  if (error) throw error;
+  return data as CallInvite | null;
 }
 
 export async function findConversationId(a: string, b: string): Promise<string | null> {
-  const { data } = await db
+  const { data } = await supabase
     .from("dm_conversations")
     .select("id")
     .or(
@@ -80,12 +87,12 @@ export async function sendCallSystemMessage(
 ): Promise<void> {
   const conversationId = await findConversationId(a, b);
   if (!conversationId) return;
-  await db.from("dm_messages").insert({
+  await supabase.from("dm_messages").insert({
     conversation_id: conversationId,
     sender_id: senderId,
     text: `${CALL_SYSTEM_PREFIX}${kind}`,
   });
-  await db
+  await supabase
     .from("dm_conversations")
     .update({ last_message: "📞 Call", updated_at: new Date().toISOString() })
     .eq("id", conversationId);
