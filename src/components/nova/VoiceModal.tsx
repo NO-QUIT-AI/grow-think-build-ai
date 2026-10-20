@@ -77,10 +77,7 @@ function GalaxyScene({
   phaseRef.current = phase;
   useEffect(() => {
     let raf = 0;
-    let last = performance.now();
     const loop = (t: number) => {
-      const dt = Math.min(0.1, (t - last) / 1000);
-      last = t;
       const p = phaseRef.current;
       const a = ampRef.current;
       if (imgRef.current) imgRef.current.style.opacity = String(p === "speaking" ? 0.55 + a * 0.3 : 0.45);
