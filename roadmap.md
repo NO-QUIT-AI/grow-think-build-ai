@@ -1,4 +1,5 @@
 # Pending completion
+- [ ] Upgrade Build Studio: Ctrl+K inline Claude edit, diff approval, persistent undo and Chat-to-Studio file connection; preserve existing features.
 - [x] Add separate /jalsa-chat, QR pairing, local offline queue and private online archive sync. Signed-in offline save → reconnect sync → cloud readback verified; mode OFF disables sending and mobile has no overflow. Calls/Pixabay regression tests pass.
 - [ ] Verify two-device direct Jalsa delivery and QR camera scan (blocked: sandbox WebRTC host candidate gathering never completes; real Wi-Fi/hotspot devices required).
 - [x] Fix call lifecycle, friend-only permissions, cancelled rings and stale invites; 7 regression tests pass.
