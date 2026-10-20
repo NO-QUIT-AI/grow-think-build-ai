@@ -363,6 +363,36 @@ export type Database = {
         }
         Relationships: []
       }
+      jalsa_messages: {
+        Row: {
+          created_at: string
+          delivery: string
+          id: string
+          owner_id: string
+          peer_id: string
+          sender_id: string
+          text: string
+        }
+        Insert: {
+          created_at: string
+          delivery: string
+          id: string
+          owner_id: string
+          peer_id: string
+          sender_id: string
+          text: string
+        }
+        Update: {
+          created_at?: string
+          delivery?: string
+          id?: string
+          owner_id?: string
+          peer_id?: string
+          sender_id?: string
+          text?: string
+        }
+        Relationships: []
+      }
       knowledge: {
         Row: {
           confidence: number
