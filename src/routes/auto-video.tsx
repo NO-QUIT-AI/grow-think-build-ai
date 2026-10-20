@@ -62,7 +62,8 @@ function AutoVideo() {
     const response = await fetch(`/api/auto-video-clips?q=${encodeURIComponent(keyword)}`, { headers: { authorization: `Bearer ${data.session.access_token}` }, signal: signal ?? null });
     const body = await response.json() as { clips?: StockClip[]; error?: string; configured?: boolean };
     if (!response.ok) throw new Error(body.error ?? "Clips unavailable");
-    if (body.configured === false) setNotice("Pexels ki free key abhi connected nahi. Apne clips choose karo, ya text-scene video export karo.");
+    if (body.configured === false) setNotice("Pixabay ki key abhi connected nahi. Offline voice aur captions wali video banegi.");
+    else if (!body.clips?.length) setNotice("Pixabay clips nahi mile. Offline voice aur captions wali video banegi; apna clip bhi choose kar sakte ho.");
     return body.clips ?? [];
   }
   async function searchClips() {
@@ -73,7 +74,7 @@ function AutoVideo() {
   }
   async function render(items: VideoScene[], controller: AbortController) {
     const { renderStoryVideo } = await import("@/lib/auto-video-render");
-    const blob = await renderStoryVideo(items, { natural, music, musicFile, signal: controller.signal, onProgress: (percent, label) => { setProgress(percent); setStatus(label); } });
+    const blob = await renderStoryVideo(items, { natural: natural && items.some(scene => scene.clip || scene.localClip), music, musicFile, signal: controller.signal, onProgress: (percent, label) => { setProgress(percent); setStatus(label); } });
     if (controller.signal.aborted) return;
     const url = URL.createObjectURL(blob); resultRef.current = url; setResult(url); toast.success("Video ready — download karo!");
   }
@@ -135,19 +136,19 @@ function AutoVideo() {
         {scenes.length === 0 ? <div className="flex h-32 items-center justify-center gap-2 border-y border-dashed border-border text-sm text-muted-foreground"><Film className="h-5 w-5" />Your story starts here</div> : <>
           <div className="flex gap-3 overflow-x-auto pb-3">
             {scenes.map((scene, i) => <Button key={scene.id} variant="ghost" disabled={busy} onClick={() => { setSelected(i); setChoices([]); }} aria-label={`Select scene ${i + 1}`} aria-pressed={i === selected} className={`relative h-36 w-40 shrink-0 flex-col items-start justify-end overflow-hidden rounded-lg border p-3 text-left ${i === selected ? "border-primary bg-primary/10" : "border-border bg-card"}`}>
-              {scene.clip && <img src={scene.clip.thumbnail} alt="" className="absolute inset-0 h-full w-full object-cover" />}
-              <div className="relative flex w-full flex-col gap-1 rounded bg-background/90 p-2"><span className="text-xs text-primary">SCENE {String(scene.id).padStart(2, "0")}</span><span className="line-clamp-2 whitespace-normal text-xs">{scene.text || "Pause"}</span><span className="text-[10px] text-muted-foreground">{scene.localClip ? scene.localClip.name : scene.clip ? "Pexels" : "Text scene"}</span></div>
+              {scene.clip?.thumbnail && <img src={scene.clip.thumbnail} alt="" className="absolute inset-0 h-full w-full object-cover" />}
+              <div className="relative flex w-full flex-col gap-1 rounded bg-background/90 p-2"><span className="text-xs text-primary">SCENE {String(scene.id).padStart(2, "0")}</span><span className="line-clamp-2 whitespace-normal text-xs">{scene.text || "Pause"}</span><span className="text-[10px] text-muted-foreground">{scene.localClip ? scene.localClip.name : scene.clip ? "Pixabay" : "Text scene"}</span></div>
             </Button>)}
           </div>
           {active && <div className="mt-3 grid gap-4 sm:grid-cols-2">
             <div><label htmlFor="scene-text" className="mb-2 block text-xs text-muted-foreground">Scene {active.id} · Caption & voiceover</label><Textarea id="scene-text" disabled={busy} value={active.text} onChange={e => updateScene({ text: e.target.value, voiceover_text: e.target.value })} className="rounded-lg" /><Button size="sm" variant="ghost" disabled={busy || !active.text} onClick={listen} className="mt-1 gap-2"><Volume2 className="h-4 w-4" />Listen</Button></div>
             <div className="space-y-3"><label htmlFor="keyword" className="block text-xs text-muted-foreground">Clip search</label><div className="flex gap-2"><Input id="keyword" disabled={busy} value={active.search_keyword} onChange={e => updateScene({ search_keyword: e.target.value })} className="min-w-0 rounded-lg" /><Button variant="outline" size="icon" disabled={busy || clipBusy} onClick={() => void searchClips()} aria-label="Search replacement clips" title="Search replacement clips">{clipBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}</Button></div>
               <Button variant="outline" asChild className="w-full rounded-lg"><label className={busy ? "pointer-events-none" : "cursor-pointer"}><Upload className="mr-2 h-4 w-4" />Replace with my clip<input aria-label="Replace scene clip" type="file" hidden accept="video/*" disabled={busy} onChange={e => { const file = e.target.files?.[0]; if (file) updateScene({ localClip: file, clip: undefined }); }} /></label></Button>
-              {active.clip && <a href={active.clip.page} target="_blank" rel="noopener noreferrer" className="text-xs text-primary">Video by {active.clip.author} on Pexels ↗</a>}
+              {active.clip && <a href={active.clip.page} target="_blank" rel="noopener noreferrer" className="text-xs text-primary">Video by {active.clip.author} on Pixabay ↗</a>}
               {(active.clip || active.localClip) && <Button size="sm" variant="ghost" disabled={busy} onClick={() => updateScene({ clip: undefined, localClip: undefined })}><X className="mr-1 h-3 w-3" />Remove clip</Button>}
             </div>
           </div>}
-          {choices.length > 0 && <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-6">{choices.map((clip, i) => <Button key={clip.url} variant="ghost" onClick={() => { updateScene({ clip, localClip: undefined }); setChoices([]); }} disabled={busy} className="h-24 overflow-hidden rounded-lg p-0" aria-label={`Use replacement clip ${i + 1}`}><img src={clip.thumbnail} alt={`Clip by ${clip.author}`} className="h-full w-full object-cover" /></Button>)}</div>}
+          {choices.length > 0 && <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-6">{choices.map((clip, i) => <Button key={clip.url} variant="ghost" onClick={() => { updateScene({ clip, localClip: undefined }); setChoices([]); }} disabled={busy} className="h-24 overflow-hidden rounded-lg p-0" aria-label={`Use replacement clip ${i + 1}`}>{clip.thumbnail ? <img src={clip.thumbnail} alt={`Clip by ${clip.author}`} className="h-full w-full object-cover" /> : <Film className="h-6 w-6 text-primary" />}</Button>)}</div>}
         </>}
       </section>
 
