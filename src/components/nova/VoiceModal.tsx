@@ -67,8 +67,9 @@ type ScenePhase = "connecting" | "listening" | "thinking" | "speaking";
 
 /** Full-screen galaxy: speed changes smoothly with phase (60s idle, 8s listening, 20s speaking). */
 function GalaxyScene({
-  phase, ampRef, status, text, muted, onMute, onEnd, onTap,
+  phase, ampRef, status, text, muted, onMute, onEnd, onTap, userTalking = false,
 }: {
+  userTalking?: boolean;
   phase: ScenePhase; ampRef: { current: number }; status: string; text: string;
   muted: boolean; onMute: () => void; onEnd: () => void; onTap?: () => void;
 }) {
@@ -108,8 +109,9 @@ function GalaxyScene({
         <div aria-hidden />
         <div aria-hidden />
         <div className="flex w-full flex-col items-center gap-6">
+          <div aria-live="polite" className={`galaxy-text text-sm font-semibold transition-opacity duration-150 ${userTalking && !muted ? "opacity-100" : "opacity-0"}`}>Listening...</div>
           <div className="flex items-center gap-5">
-            <button type="button" onClick={(e) => { e.stopPropagation(); onMute(); }} className="glass-btn galaxy-text flex h-16 items-center gap-2 rounded-full px-7 text-base font-semibold">
+            <button type="button" onClick={(e) => { e.stopPropagation(); onMute(); }} className={`glass-btn galaxy-text flex h-16 ${userTalking && !muted ? "animate-pulse ring-2 ring-primary" : ""} items-center gap-2 rounded-full px-7 text-base font-semibold`}>
               {muted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
               {muted ? "Unmute" : "Mute"}
             </button>
@@ -375,7 +377,7 @@ function LegacyVoiceModal({
   const shown = phase === "speaking" ? speakableText(reply) : text;
 
   return (
-    <GalaxyScene phase={phase} ampRef={ampRef} status={status} text={shown} muted={muted}
+    <GalaxyScene phase={phase} ampRef={ampRef} status={status} text={shown} muted={muted} userTalking={speaking && phase === "listening"}
       onMute={() => setMuted((m) => !m)} onEnd={onClose} onTap={stopOrSend} />
   );
 }
@@ -403,6 +405,8 @@ function LiveVoiceModal({ onClose, onFallback }: VoiceProps & { onFallback: () =
   const [heard, setHeard] = useState("");
   const [muted, setMuted] = useState(false);
   const [connected, setConnected] = useState(false);
+  const [userTalking, setUserTalking] = useState(false);
+  const talkTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const ampRef = useRef(0);
   const fellBack = useRef(false);
   const closing = useRef(false);
@@ -420,6 +424,12 @@ function LiveVoiceModal({ onClose, onFallback }: VoiceProps & { onFallback: () =
       if (!closing.current) fallback();
     },
     onError: () => fallback(),
+    onVadScore: ({ vadScore }: { vadScore: number }) => {
+      if (vadScore < 0.5) return;
+      setUserTalking(true);
+      if (talkTimer.current) clearTimeout(talkTimer.current);
+      talkTimer.current = setTimeout(() => setUserTalking(false), 600);
+    },
     onMessage: (m: any) => {
       if (m?.source === "user") setHeard(String(m.message ?? ""));
       else if (m?.message) setReply(String(m.message));
@@ -430,12 +440,12 @@ function LiveVoiceModal({ onClose, onFallback }: VoiceProps & { onFallback: () =
     let cancelled = false;
     (async () => {
       try {
-        await navigator.mediaDevices.getUserMedia({ audio: true });
-        const { data: s } = await supabase.auth.getSession();
-        const res = await fetch("/api/voice-agent-token", {
+        // Mic aur token saath saath — foran pre-connect
+        const tokenReq = supabase.auth.getSession().then(({ data: s }) => fetch("/api/voice-agent-token", {
           method: "POST",
           headers: { authorization: `Bearer ${s.session?.access_token ?? ""}` },
-        });
+        }));
+        const [, res] = await Promise.all([navigator.mediaDevices.getUserMedia({ audio: true }), tokenReq]);
         if (!res.ok) throw new Error("token");
         const { token } = (await res.json()) as { token: string };
         if (cancelled) return;
@@ -473,6 +483,6 @@ function LiveVoiceModal({ onClose, onFallback }: VoiceProps & { onFallback: () =
 
   return (
     <GalaxyScene phase={phase} ampRef={ampRef} status={status} text={speaking && reply ? reply : heard}
-      muted={muted} onMute={() => setMuted((m) => !m)} onEnd={onClose} />
+      muted={muted} userTalking={userTalking && !speaking} onMute={() => setMuted((m) => !m)} onEnd={onClose} />
   );
 }
