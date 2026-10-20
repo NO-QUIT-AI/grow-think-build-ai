@@ -38,7 +38,7 @@ export function useJalsaChat(ownerId: string | undefined) {
       const { data, error } = await supabase.from('jalsa_messages').select('id,peer_id,sender_id,text,delivery,created_at').eq('owner_id', ownerId);
       if (error) throw error;
       const merged = mergeJalsaMessages(archive.current.messages, (data ?? []) as JalsaMessage[]);
-      commit({ ...archive.current, messages: merged });
+      if (JSON.stringify(merged) !== JSON.stringify(archive.current.messages)) commit({ ...archive.current, messages: merged });
       if (merged.length) {
         const { error: writeError } = await supabase.from('jalsa_messages').upsert(merged.map(m => ({ ...m, owner_id: ownerId })), { onConflict: 'owner_id,id' });
         if (writeError) throw writeError;
@@ -91,5 +91,11 @@ export function useJalsaChat(ownerId: string | undefined) {
     const next = { ...identity, name: name.trim().slice(0,50) || 'Builder' };
     saveJalsaIdentity(next); setIdentity(next);
   }
-  return { identity, history, connected, online, storageError, syncState, newPeer, send, rename };
+  function disconnect(peerId?: string) {
+    for (const peer of sessions.current) {
+      if (!peerId || peer.identity?.id === peerId) { peer.close(); sessions.current.delete(peer); }
+    }
+    setConnected(previous => peerId ? previous.filter(id => id !== peerId) : []);
+  }
+  return { identity, history, connected, online, storageError, syncState, newPeer, send, rename, disconnect };
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Camera, ChevronRight, FileText, Flashlight, Globe, Hammer, History, ImageIcon, Instagram,

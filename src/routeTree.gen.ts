@@ -19,6 +19,7 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CvRouteImport } from './routes/cv'
 import { Route as EarnRouteImport } from './routes/earn'
 import { Route as InviteRouteImport } from './routes/invite'
+import { Route as JalsaChatRouteImport } from './routes/jalsa-chat'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as PlayerRouteImport } from './routes/player'
@@ -104,6 +105,11 @@ const EarnRoute = EarnRouteImport.update({
 const InviteRoute = InviteRouteImport.update({
   id: '/invite',
   path: '/invite',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JalsaChatRoute = JalsaChatRouteImport.update({
+  id: '/jalsa-chat',
+  path: '/jalsa-chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LeaderboardRoute = LeaderboardRouteImport.update({
@@ -298,6 +304,7 @@ export interface FileRoutesByFullPath {
   '/cv': typeof CvRoute
   '/earn': typeof EarnRoute
   '/invite': typeof InviteRoute
+  '/jalsa-chat': typeof JalsaChatRoute
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRoute
   '/player': typeof PlayerRoute
@@ -346,6 +353,7 @@ export interface FileRoutesByTo {
   '/cv': typeof CvRoute
   '/earn': typeof EarnRoute
   '/invite': typeof InviteRoute
+  '/jalsa-chat': typeof JalsaChatRoute
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRoute
   '/player': typeof PlayerRoute
@@ -395,6 +403,7 @@ export interface FileRoutesById {
   '/cv': typeof CvRoute
   '/earn': typeof EarnRoute
   '/invite': typeof InviteRoute
+  '/jalsa-chat': typeof JalsaChatRoute
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRoute
   '/player': typeof PlayerRoute
@@ -445,6 +454,7 @@ export interface FileRouteTypes {
     | '/cv'
     | '/earn'
     | '/invite'
+    | '/jalsa-chat'
     | '/leaderboard'
     | '/messages'
     | '/player'
@@ -493,6 +503,7 @@ export interface FileRouteTypes {
     | '/cv'
     | '/earn'
     | '/invite'
+    | '/jalsa-chat'
     | '/leaderboard'
     | '/messages'
     | '/player'
@@ -541,6 +552,7 @@ export interface FileRouteTypes {
     | '/cv'
     | '/earn'
     | '/invite'
+    | '/jalsa-chat'
     | '/leaderboard'
     | '/messages'
     | '/player'
@@ -590,6 +602,7 @@ export interface RootRouteChildren {
   CvRoute: typeof CvRoute
   EarnRoute: typeof EarnRoute
   InviteRoute: typeof InviteRoute
+  JalsaChatRoute: typeof JalsaChatRoute
   LeaderboardRoute: typeof LeaderboardRoute
   MessagesRoute: typeof MessagesRoute
   PlayerRoute: typeof PlayerRoute
@@ -697,6 +710,13 @@ declare module '@tanstack/react-router' {
       path: '/invite'
       fullPath: '/invite'
       preLoaderRoute: typeof InviteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/jalsa-chat': {
+      id: '/jalsa-chat'
+      path: '/jalsa-chat'
+      fullPath: '/jalsa-chat'
+      preLoaderRoute: typeof JalsaChatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/leaderboard': {
@@ -976,6 +996,7 @@ const rootRouteChildren: RootRouteChildren = {
   CvRoute: CvRoute,
   EarnRoute: EarnRoute,
   InviteRoute: InviteRoute,
+  JalsaChatRoute: JalsaChatRoute,
   LeaderboardRoute: LeaderboardRoute,
   MessagesRoute: MessagesRoute,
   PlayerRoute: PlayerRoute,
