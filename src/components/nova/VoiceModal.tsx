@@ -108,11 +108,9 @@ function GalaxyScene({
             <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="flex max-w-md flex-col items-center gap-4 text-center">
-          <p className="galaxy-text text-sm font-medium opacity-90">{status}</p>
-          {text && <p className="galaxy-text line-clamp-6 text-lg font-semibold leading-snug">{text}</p>}
-        </div>
+        <div aria-hidden data-text={text ? "1" : ""} />
         <div className="flex w-full flex-col items-center gap-6">
+          <p className="galaxy-text text-sm font-medium opacity-90">{status}</p>
           <div className="flex h-10 items-end gap-1.5" aria-hidden>
             {Array.from({ length: 16 }).map((_, i) => (
               <span key={i} className="w-1.5 rounded-full bg-primary"
