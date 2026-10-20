@@ -1,7 +1,7 @@
 import { ConversationProvider, useConversation } from "@elevenlabs/react";
 import { cleanTranscript, detectSpeechLang, mergeFinal } from "@/lib/voice-transcript";
 import { useEffect, useRef, useState } from "react";
-import { Mic, MicOff, X } from "lucide-react";
+import { Mic, MicOff } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -92,7 +92,8 @@ function GalaxyScene({
     return () => cancelAnimationFrame(raf);
   }, [ampRef]);
 
-  const waving = phase === "speaking" || (phase === "listening" && !muted);
+  void status; void text;
+  useEffect(() => { if (text) console.log("[voice transcript]", text); }, [text]);
   const end = () => { try { navigator.vibrate?.(60); } catch { /* ignore */ } onEnd(); };
 
   return (
@@ -103,20 +104,9 @@ function GalaxyScene({
       <div className="galaxy-overlay pointer-events-none" />
       <div ref={ringRef} aria-hidden className="pointer-events-none fixed left-1/2 top-[42%] h-64 w-64 rounded-full border-2 border-primary shadow-[0_0_60px_var(--primary)]" />
       <div className="relative z-10 flex h-full flex-col items-center justify-between px-6 pb-[calc(env(safe-area-inset-bottom)+120px)] pt-6">
-        <div className="flex w-full justify-end">
-          <button type="button" aria-label="Close voice chat" onClick={(e) => { e.stopPropagation(); onEnd(); }} className="glass-btn galaxy-text flex h-11 w-11 items-center justify-center rounded-full">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-        <div aria-hidden data-text={text ? "1" : ""} />
+        <div aria-hidden />
+        <div aria-hidden />
         <div className="flex w-full flex-col items-center gap-6">
-          <span className="sr-only" aria-live="polite">{status}</span>
-          <div className="flex h-10 items-end gap-1.5" aria-hidden>
-            {Array.from({ length: 16 }).map((_, i) => (
-              <span key={i} className="w-1.5 rounded-full bg-primary"
-                style={{ height: waving ? "100%" : "12%", animation: waving ? `voice-wave 1s ease-in-out ${i * 0.06}s infinite` : "none" }} />
-            ))}
-          </div>
           <div className="flex items-center gap-5">
             <button type="button" onClick={(e) => { e.stopPropagation(); onMute(); }} className="glass-btn galaxy-text flex h-16 items-center gap-2 rounded-full px-7 text-base font-semibold">
               {muted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
