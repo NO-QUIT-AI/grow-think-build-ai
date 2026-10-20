@@ -1,5 +1,6 @@
 import { ToolsMenu, CHAT_ACTION_EVT } from "@/components/nova/ToolsMenu";
 import { backupToWorker } from "@/lib/worker-backup";
+import type { StudioContext } from "@/lib/studio-edit";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -234,9 +235,13 @@ async function downloadDataUrl(dataUrl: string, filename: string) {
 export function ChatPanel({
   userId,
   onWorkChanged,
+  studioContext,
+  onOpenStudio,
 }: {
   userId: string;
   onWorkChanged: () => void;
+  studioContext: StudioContext | null;
+  onOpenStudio: (id: string) => void;
 }) {
   const { t } = useLanguage();
   const [threads, setThreads] = useState<Thread[]>([]);
@@ -390,6 +395,8 @@ export function ChatPanel({
           ensureConversation={ensureConversation}
           initialMessages={initialMessages}
           onWorkChanged={onWorkChanged}
+          studioContext={studioContext}
+          onOpenStudio={onOpenStudio}
           onTouched={(id) =>
             setThreads((prev) =>
               prev.map((t) => (t.id === id ? { ...t, updated_at: new Date().toISOString() } : t)),
@@ -408,6 +415,8 @@ function ChatThread({
   initialMessages,
   onWorkChanged,
   onTouched,
+  studioContext,
+  onOpenStudio,
 }: {
   userId: string;
   conversationId: string | null;
@@ -415,6 +424,8 @@ function ChatThread({
   initialMessages: UIMessage[];
   onWorkChanged: () => void;
   onTouched: (id: string) => void;
+  studioContext: StudioContext | null;
+  onOpenStudio: (id: string) => void;
 }) {
   const { lang, t } = useLanguage();
   const [input, setInput] = useState("");
@@ -531,13 +542,13 @@ function ChatThread({
     () =>
       new DefaultChatTransport({
         api: "/api/chat",
-        body: { lang },
+        body: { lang, studioContext },
         headers: async () => {
           const { data } = await supabase.auth.getSession();
           return { Authorization: `Bearer ${data.session?.access_token ?? ""}` };
         },
       }),
-    [lang],
+    [lang, studioContext],
   );
 
   const { messages, sendMessage, setMessages, status, error } = useChat({
@@ -554,6 +565,13 @@ function ChatThread({
         voiceResolveRef.current = null;
       }
       const id = convRef.current;
+      // Tool-only turns still refresh the Studio and open the saved file.
+      for (const part of message.parts ?? []) {
+        if (!String(part.type).startsWith("tool-")) continue;
+        const out = (part as { output?: { memoryId?: string; saved?: boolean } }).output;
+        if (out?.saved && out.memoryId) onOpenStudio(out.memoryId);
+      }
+      onWorkChanged();
       if (!text || !id) return;
       const __rows = {
         conversation_id: id,
@@ -568,7 +586,6 @@ function ChatThread({
         .update({ updated_at: new Date().toISOString() })
         .eq("id", id);
       onTouched(id);
-      onWorkChanged();
     },
     onError: (err) => toast.error(err.message || t("aiNoReply")),
   });

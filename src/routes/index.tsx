@@ -20,6 +20,7 @@ import { SmartLinkCta } from "@/components/ads/SmartLinkCta";
 import { useT } from "@/i18n/LanguageContext";
 import { AdSense } from "@/components/AdSense";
 import { useJalsaMode } from "@/hooks/useJalsaMode";
+import type { StudioContext } from "@/lib/studio-edit";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -51,6 +52,7 @@ function Home() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [activeTab, setActiveTab] = useState("chat");
   const [activeMemoryId, setActiveMemoryId] = useState<string | null>(null);
+  const [studioContext, setStudioContext] = useState<StudioContext | null>(null);
   const [inviteOpen, setInviteOpen] = useState(false);
 
   useEffect(() => {
@@ -162,7 +164,7 @@ function Home() {
         </TabsList>
 
         <TabsContent value="chat" className="mt-0 flex min-h-0 flex-1 flex-col">
-          <ChatPanel userId={user.id} onWorkChanged={() => setRefreshKey((key) => key + 1)} />
+          <ChatPanel userId={user.id} studioContext={studioContext} onOpenStudio={openMemoryInStudio} onWorkChanged={() => setRefreshKey((key) => key + 1)} />
         </TabsContent>
         <TabsContent value="memory" className="mt-0 flex-1 overflow-y-auto">
           <MemoryPanel userId={user.id} refreshKey={refreshKey} />
@@ -182,6 +184,7 @@ function Home() {
             refreshKey={refreshKey}
             activeMemoryId={activeMemoryId}
             onMemorySaved={() => setRefreshKey((key) => key + 1)}
+            onContextChanged={setStudioContext}
           />
         </TabsContent>
         <TabsContent value="mind" className="mt-0 flex-1 overflow-y-auto">

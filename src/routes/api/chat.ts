@@ -161,7 +161,7 @@ export const Route = createFileRoute("/api/chat")({
         if (userError || !userData.user) return new Response("Unauthorized", { status: 401 });
         const userId = userData.user.id;
 
-        const body = (await request.json()) as { messages?: unknown; lang?: unknown };
+        const body = (await request.json()) as { messages?: unknown; lang?: unknown; studioContext?: unknown };
         if (!Array.isArray(body.messages)) {
           return new Response("Messages are required", { status: 400 });
         }
