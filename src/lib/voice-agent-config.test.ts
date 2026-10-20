@@ -3,8 +3,10 @@ import { describe, expect, it } from "bun:test";
 import { voiceAgentUpdate } from "./voice-agent-config";
 
 describe("voice agent configuration", () => {
-  it("uses the requested multilingual voice model", () => {
-    expect(voiceAgentUpdate({}).conversation_config.tts.model_id).toBe("eleven_multilingual_v2");
+  it("uses the low-latency turbo voice, fast LLM and max latency optimization", () => {
+    expect(voiceAgentUpdate({}).conversation_config.tts.model_id).toBe("eleven_turbo_v2_5");
+    expect(voiceAgentUpdate({}).conversation_config.tts.optimize_streaming_latency).toBe(4);
+    expect(voiceAgentUpdate({}).conversation_config.agent.prompt.llm).toBe("gpt-4o-mini");
   });
   it("allows language detection throughout the call", () => {
     const tool = voiceAgentUpdate({}).conversation_config.agent.prompt.built_in_tools.language_detection;

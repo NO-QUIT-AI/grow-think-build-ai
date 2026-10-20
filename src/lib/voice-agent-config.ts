@@ -12,7 +12,8 @@ Detect language from last user utterance and match it 100%. Do not default to Fr
 
 Keep tone friendly, brother-like.`;
 
-export const VOICE_AGENT_MODEL = "eleven_multilingual_v2";
+export const VOICE_AGENT_MODEL = "eleven_turbo_v2_5";
+export const VOICE_AGENT_LLM = "gpt-4o-mini";
 export const VOICE_AGENT_LANGUAGES = ["en", "ar", "hi", "ta", "zh", "es", "pt", "fr", "de", "ja", "ko", "id", "it", "nl", "tr", "pl", "ru", "sv", "tl", "ms", "ro", "uk", "el", "cs", "da", "fi", "bg", "hr", "sk", "vi", "no", "hu", "pt-br", "fil"];
 
 type AgentSettings = {
@@ -34,6 +35,7 @@ export function voiceAgentUpdate(current: AgentSettings) {
         first_message: "",
         prompt: {
           prompt: VOICE_AGENT_PROMPT,
+          llm: VOICE_AGENT_LLM,
           built_in_tools: {
             ...current.agent?.prompt?.built_in_tools,
             language_detection: {
@@ -45,7 +47,7 @@ export function voiceAgentUpdate(current: AgentSettings) {
           },
         },
       },
-      tts: { model_id: VOICE_AGENT_MODEL },
+      tts: { model_id: VOICE_AGENT_MODEL, optimize_streaming_latency: 4 },
     },
   };
 }
