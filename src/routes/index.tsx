@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Brain, Coins, FileText, LogOut, Users, UserPlus } from "lucide-react";
+import { Brain, Coins, FileText, LogOut, Users, UserPlus, Radio } from "lucide-react";
 import logoAsset from "@/assets/logo.jpg.asset.json";
 
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import { AdSidebar } from "@/components/ads/AdSidebar";
 import { SmartLinkCta } from "@/components/ads/SmartLinkCta";
 import { useT } from "@/i18n/LanguageContext";
 import { AdSense } from "@/components/AdSense";
+import { useJalsaMode } from "@/hooks/useJalsaMode";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -46,6 +47,7 @@ function Home() {
   const navigate = useNavigate();
   const t = useT();
   const { user, loading, signOut } = useAuth();
+  const { enabled: jalsa } = useJalsaMode();
   const [refreshKey, setRefreshKey] = useState(0);
   const [activeTab, setActiveTab] = useState("chat");
   const [activeMemoryId, setActiveMemoryId] = useState<string | null>(null);
@@ -142,6 +144,7 @@ function Home() {
       </header>
 
       <div className="mb-3 flex items-center justify-end">
+        {jalsa && <Button asChild variant="outline" size="sm" className="mr-auto"><Link to="/jalsa-chat"><Radio /> Go to Jalsa Chat</Link></Button>}
         <LanguageSelector />
       </div>
 

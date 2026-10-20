@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Camera, ChevronRight, FileText, Flashlight, Globe, Hammer, History, ImageIcon, Instagram,
   Link2, MessageCircle, Mic, Music, Phone, Plus, Radio, Search, FileSearch, Clapperboard,
@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import { useJalsaMode } from "@/hooks/useJalsaMode";
 
 type Tool = { id: string; name: string; icon: typeof Plus; section: string };
 
@@ -25,7 +27,7 @@ const TOOLS: Tool[] = [
   { id: "flash", name: "Flashlight", icon: Flashlight, section: "PHONE TOOLS" },
   { id: "camera", name: "Camera", icon: Camera, section: "PHONE TOOLS" },
   { id: "instagram", name: "Instagram Opener", icon: Instagram, section: "PHONE TOOLS" },
-  { id: "jalsa", name: "Jalsa Mode (Offline Mesh)", icon: Radio, section: "PHONE TOOLS" },
+  { id: "jalsa", name: "Jalsa Mode (Local Chat)", icon: Radio, section: "PHONE TOOLS" },
   { id: "t2i", name: "Text to Image", icon: ImageIcon, section: "AI TOOLS" },
   { id: "auto-video", name: "Auto Story to Video", icon: Clapperboard, section: "AI TOOLS" },
   { id: "pdf", name: "PDF Reader", icon: FileSearch, section: "AI TOOLS" },
@@ -45,10 +47,8 @@ export function ToolsMenu({ onNewChat, onClose, history }: { onNewChat: () => vo
   const [modal, setModal] = useState<"whatsapp" | "call" | null>(null);
   const [phone, setPhone] = useState("");
   const [msg, setMsg] = useState("");
-  const [jalsa, setJalsa] = useState(false);
+  const { enabled: jalsa, setEnabled: setJalsa } = useJalsaMode();
   const [torch, setTorch] = useState<MediaStreamTrack | null>(null);
-
-  useEffect(() => setJalsa(localStorage.getItem("nqai_jalsa") === "1"), []);
 
   const list = useMemo(() => TOOLS.filter((t) => t.name.toLowerCase().includes(q.toLowerCase().trim())), [q]);
   const sections = [...new Set(list.map((t) => t.section))];
@@ -88,8 +88,8 @@ export function ToolsMenu({ onNewChat, onClose, history }: { onNewChat: () => vo
       }
       case "instagram": open("https://instagram.com"); return;
       case "jalsa": {
-        const v = !jalsa; setJalsa(v); localStorage.setItem("nqai_jalsa", v ? "1" : "0");
-        toast(v ? "Jalsa Mode ON (offline mesh jald aa raha hai)" : "Jalsa Mode OFF");
+        const v = !jalsa; setJalsa(v);
+        toast(v ? "Jalsa Mode Active — QR connect ready" : "Jalsa Mode OFF");
         return;
       }
       case "t2i": chat({ prefill: "Ek image banao: " }); return;
@@ -120,15 +120,22 @@ export function ToolsMenu({ onNewChat, onClose, history }: { onNewChat: () => vo
             <p className="px-2 pb-1 pt-2 text-[10px] font-semibold tracking-widest text-muted-foreground">{s}</p>
             {list.filter((t) => t.section === s).map((t) => (
               <div key={t.id}>
+                {t.id === "jalsa" ? (
+                  <div className="px-2 py-2.5">
+                    <div className="flex items-center gap-3 text-sm">
+                      <Radio className="h-4 w-4 text-primary" />
+                      <span className="flex-1">{t.name}</span>
+                      <Switch aria-label="Jalsa Mode" checked={jalsa} onCheckedChange={setJalsa} />
+                    </div>
+                    {jalsa && <Button asChild size="sm" variant="outline" className="mt-3 w-full"><Link to="/jalsa-chat" onClick={onClose}>Go to Jalsa Chat</Link></Button>}
+                  </div>
+                ) : (
                 <button onClick={() => run(t.id)} className="flex w-full items-center gap-3 rounded-xl px-2 py-2.5 text-left text-sm transition-colors hover:bg-secondary/70">
                   <t.icon className="h-4 w-4 text-primary" />
                   <span className="flex-1">{t.name}</span>
-                  {t.id === "jalsa" ? (
-                    <Switch checked={jalsa} onClick={(e) => e.stopPropagation()} onCheckedChange={() => run("jalsa")} />
-                  ) : (
                     <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform ${t.id === "history" && showHistory ? "rotate-90" : ""}`} />
-                  )}
                 </button>
+                )}
                 {t.id === "history" && showHistory && <div className="ml-4 border-l border-border/50 pl-1">{history}</div>}
               </div>
             ))}
