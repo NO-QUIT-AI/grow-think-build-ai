@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Editor, { DiffEditor, loader } from "@monaco-editor/react";
-import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
+import * as monaco from "monaco-editor";
 import EditorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
-import "monaco-editor/esm/vs/basic-languages/html/html.contribution";
 import { Sparkles, Undo2, X, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
