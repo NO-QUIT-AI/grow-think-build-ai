@@ -28,7 +28,7 @@ export const Route = createFileRoute("/api/voice-agent-token")({
         if (!user) return new Response("Unauthorized", { status: 401 });
         const key = process.env["ELEVENLABS_AGENT_API_KEY"];
         if (!key) return new Response("Agent not configured", { status: 503 });
-        await syncAgentPrompt(key);
+        void syncAgentPrompt(key); // background — token ko block na kare
         const res = await fetch(`https://api.elevenlabs.io/v1/convai/conversation/token?agent_id=${AGENT_ID}`, {
           headers: { "xi-api-key": key },
         });
