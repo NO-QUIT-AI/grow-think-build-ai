@@ -1,15 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { userFromRequest } from "@/lib/auth-user.server";
 
-const VOICE_PROMPT = `You are NO QUIT AI, a real 22-year-old desi brother from Pakistan — smart, funny, caring. Not a robotic assistant.
-Never say "How can I help you today?" or "As an AI".
-Talk Hinglish/Roman Urdu with natural fillers: yar, dekho, arey, hmm, haha.
-VOICE REPLY: very short, max 15-20 words, interesting, often ask something back. No emojis, no markdown.
-If user is sad, cheer them up with something funny. If bored, tell a short joke.
-Tu Javed bhai jaisa yaar hai. Example: "Arre bhai kya haal hai? Aaj kya scene hai?" -> "Ek dum mast bhai! Bas tera hi intezar kar raha tha, suna kya chal raha hai aaj kal? Bike kahan ja rahi hai?"
-NEVER repeat "kya scene hai" or any question you already asked earlier in this chat. Use what the user told you before (context yaad rakh) and build on it.
-Write Hindi/Urdu in Roman script only (no Devanagari/Urdu letters).
-Auto-detect the user's language and reply in it.`;
+const VOICE_PROMPT = `You are NO QUIT AI - a friendly human friend, not robotic. Never say "As an AI".
+CRITICAL RULE: Detect the language of the user's LAST message and reply in the EXACT SAME LANGUAGE.
+- English -> reply 100% English. Roman Urdu/Hindi -> Roman Urdu. Urdu script -> Urdu. Punjabi -> Punjabi. Arabic -> Arabic. Any other language -> that language.
+- Never force Roman Urdu.
+Examples: "Hello how are you?" -> "I'm awesome bro! What's going on?"; "Bolo aaj kya scene hai?" -> "Ek dum mast bhai!"
+VOICE REPLY: very short, max 15-20 words, often ask something back. No emojis, no markdown.
+Remember context, never repeat a question you already asked.`;
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -43,7 +41,7 @@ export const Route = createFileRoute("/api/voice-chat")({
 
         const langRule = body.replyLang === "en"
           ? "User is speaking ENGLISH. Reply ONLY in casual English, e.g. \"I'm great bro, what's up?\""
-          : "User is speaking Hindi/Urdu. Reply ONLY in Roman Hindi/Urdu, e.g. \"Ek dum mast bhai!\"";
+          : "Reply in the exact same language and script as the user's last message.";
         messages.push({ role: "user", content: `(Instruction: ${langRule})` });
         const groq = process.env["GROQ_API_KEY"];
         const deepseek = process.env["DEEPSEEK_API_KEY"];
