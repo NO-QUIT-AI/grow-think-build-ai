@@ -1,4 +1,5 @@
 import { ToolsMenu, CHAT_ACTION_EVT } from "@/components/nova/ToolsMenu";
+import { detectSpeechLang } from "@/lib/voice-transcript";
 import { backupToWorker } from "@/lib/worker-backup";
 import type { StudioContext } from "@/lib/studio-edit";
 import { useChat } from "@ai-sdk/react";
@@ -664,7 +665,7 @@ function ChatThread({
     const res = await fetch("/api/voice-chat", {
       method: "POST",
       headers: { "content-type": "application/json", authorization: `Bearer ${s.session?.access_token ?? ""}` },
-      body: JSON.stringify({ messages: [...history, { role: "user", content: question }] }),
+      body: JSON.stringify({ messages: [...history, { role: "user", content: question }], replyLang: detectSpeechLang(question) }),
     }).catch(() => null);
     const answer = res?.ok ? String(((await res.json()) as { text?: string }).text ?? "") : "";
     if (!answer) return t("aiNoReply");
