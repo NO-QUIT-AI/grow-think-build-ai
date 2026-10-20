@@ -266,7 +266,7 @@ function LegacyVoiceModal({
       setP("speaking");
       try { recRef.current?.start(); } catch { /* already running */ }
       const userLang = detectSpeechLang(value);
-      if (recRef.current) recRef.current.lang = userLang === "en" ? "en-IN" : "hi-IN";
+
       void speakHuman(answer, userLang, () => {
         if (aliveRef.current) startListening();
       }, ampRef);
@@ -285,7 +285,7 @@ function LegacyVoiceModal({
     }
     const rec = new Ctor();
     recRef.current = rec;
-    rec.lang = LOCALES[lang] ?? "hi-IN";
+    rec.lang = "en-IN"; // Latin script: English aur Roman Hindi dono
     rec.continuous = true;
     rec.interimResults = true;
 
