@@ -52,6 +52,13 @@ async function snapshot(project: string, path: string) {
   if (old !== null) await put(`project-history/${cleanProject(project)}/${cleanPath(path)}@${Date.now()}`, old);
 }
 
+/** Shared by owner Genesis tools and the owner-authorized Studio bridge. */
+export async function writeGenesisFile(project: string, path: string, content: string) {
+  if (content.length > MAX_FILE) throw new Error("File bohot bari hai, chhoti files me todo.");
+  await snapshot(project, path);
+  await put(fileKey(project, path), content);
+}
+
 async function vercel(path: string, init?: RequestInit) {
   const token = await vaultGet("VERCEL_TOKEN");
   if (!token) throw new Error("VERCEL_TOKEN vault me nahi — request_secret se mangwao.");
@@ -105,8 +112,7 @@ export function genesisTools() {
       inputSchema: z.object({ project: z.string(), path: z.string(), content: z.string() }),
       execute: async ({ project, path, content }) => {
         if (content.length > MAX_FILE) return { error: "File bohot bari hai, chhoti files me todo." };
-        await snapshot(project, path);
-        await put(fileKey(project, path), content);
+        await writeGenesisFile(project, path, content);
         return { written: cleanPath(path), project: cleanProject(project), bytes: content.length };
       },
     }),
