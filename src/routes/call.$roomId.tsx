@@ -151,7 +151,7 @@ function CallPage() {
 
   return (
     <main className="flex min-h-dvh flex-col bg-background">
-      <div className="relative min-h-[70dvh] flex-1" ref={containerRef}>
+      <div className="relative min-h-[70dvh] flex-1 [&>iframe]:absolute [&>iframe]:inset-0 [&>iframe]:h-full [&>iframe]:w-full" ref={containerRef}>
         {!ready && !failed && <div className="absolute inset-0 flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}
         {failed && (
             <div role="alert" className="flex min-h-[70dvh] flex-col items-center justify-center gap-3 px-4 text-center">
