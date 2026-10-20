@@ -363,6 +363,36 @@ export type Database = {
         }
         Relationships: []
       }
+      jalsa_messages: {
+        Row: {
+          created_at: string
+          delivery: string
+          id: string
+          owner_id: string
+          peer_id: string
+          sender_id: string
+          text: string
+        }
+        Insert: {
+          created_at: string
+          delivery: string
+          id: string
+          owner_id: string
+          peer_id: string
+          sender_id: string
+          text: string
+        }
+        Update: {
+          created_at?: string
+          delivery?: string
+          id?: string
+          owner_id?: string
+          peer_id?: string
+          sender_id?: string
+          text?: string
+        }
+        Relationships: []
+      }
       knowledge: {
         Row: {
           confidence: number
@@ -882,6 +912,7 @@ export type Database = {
       }
       slugify: { Args: { _t: string }; Returns: string }
       subdomain_valid: { Args: { _s: string }; Returns: boolean }
+      sync_jalsa_messages: { Args: { items: Json }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

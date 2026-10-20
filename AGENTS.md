@@ -16,3 +16,4 @@
 - Build subdomains live on memories.subdomain (one per build, not per profile); served by src/server.ts host match + /s/$subdomain via security-definer RPCs — why: users have many builds and anon must read only published HTML.
 - Call invitations use conditional status updates and database validation of friendship/participants; call pages verify the accepted invite before opening media — prevents cancelled rings and forged app invitations.
 - Load AdSense after hydration through the shared configuration loader — Auto Ads must not mutate the server HTML before React hydrates.
+- Jalsa uses QR-exchanged compressed WebRTC SDP with local ICE candidates only; local messages persist before send and require peer acknowledgments, while jalsa_messages is an owner-scoped archive, never a Community transport — browsers cannot provide Bluetooth peripheral mesh.
