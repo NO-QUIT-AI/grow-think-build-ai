@@ -16,6 +16,7 @@
     "rolldown": "1.2.1"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^4.0.82",
     "@ai-sdk/openai-compatible": "^3.0.39",
     "@ai-sdk/react": "^4.0.86",
     "@elevenlabs/react": "^1.17.0",
@@ -24,6 +25,7 @@
     "@ffmpeg/util": "^0.12.2",
     "@hookform/resolvers": "^5.2.2",
     "@lovable.dev/cloud-auth-js": "^1.0.0",
+    "@monaco-editor/react": "^4.7.0",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-aspect-ratio": "^1.1.8",
@@ -71,6 +73,7 @@
     "jszip": "^3.10.2",
     "lucide-react": "^0.575.0",
     "mespeak": "^2.0.2",
+    "monaco-editor": "^0.57.0",
     "qrcode": "^1.5.4",
     "react": "^19.2.0",
     "react-day-picker": "^9.14.0",
