@@ -1,7 +1,7 @@
 import { ConversationProvider, useConversation } from "@elevenlabs/react";
 import { cleanTranscript, detectSpeechLang, mergeFinal } from "@/lib/voice-transcript";
 import { useEffect, useRef, useState } from "react";
-import { Mic, MicOff, X } from "lucide-react";
+import { Mic, MicOff } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -104,11 +104,7 @@ function GalaxyScene({
       <div className="galaxy-overlay pointer-events-none" />
       <div ref={ringRef} aria-hidden className="pointer-events-none fixed left-1/2 top-[42%] h-64 w-64 rounded-full border-2 border-primary shadow-[0_0_60px_var(--primary)]" />
       <div className="relative z-10 flex h-full flex-col items-center justify-between px-6 pb-[calc(env(safe-area-inset-bottom)+120px)] pt-6">
-        <div className="flex w-full justify-end">
-          <button type="button" aria-label="Close voice chat" onClick={(e) => { e.stopPropagation(); onEnd(); }} className="glass-btn galaxy-text flex h-11 w-11 items-center justify-center rounded-full">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
+        <div aria-hidden />
         <div aria-hidden />
         <div className="flex w-full flex-col items-center gap-6">
           <div className="flex items-center gap-5">
