@@ -95,8 +95,14 @@ export async function renderStoryVideo(scenes: VideoScene[], options: { natural:
       options.onProgress(phase, `Scene ${i + 1}: captions aur clip…`);
       let hasClip = false;
       if (scene.localClip || scene.clip) {
-        const blob: Blob = scene.localClip ?? await fetch(scene.clip?.url ?? "", { signal: options.signal }).then(r => { if (!r.ok) throw new Error("Clip download fail; apna clip choose karo"); return r.blob(); });
-        await ff.writeFile("clip.mp4", new Uint8Array(await blob.arrayBuffer())); hasClip = true;
+        try {
+          const blob: Blob = scene.localClip ?? await fetch(scene.clip?.url ?? "", { signal: options.signal }).then(r => { if (!r.ok) throw new Error("Clip download fail"); return r.blob(); });
+          await ff.writeFile("clip.mp4", new Uint8Array(await blob.arrayBuffer())); hasClip = true;
+        } catch (error) {
+          check();
+          if (scene.localClip) throw error;
+          options.onProgress(phase, `Scene ${i + 1}: offline voice aur captions…`);
+        }
       }
       const words = scene.text.split(/\s+/).filter(Boolean);
       const frames = Math.ceil(duration * 12);
