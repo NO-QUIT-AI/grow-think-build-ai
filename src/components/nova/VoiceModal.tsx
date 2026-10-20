@@ -62,25 +62,92 @@ export function stopHuman() {
   if (typeof window !== "undefined") window.speechSynthesis?.cancel();
 }
 
-function ProAvatar({ phase, ampRef }: { phase: string; ampRef: { current: number } }) {
-  const ref = useRef<HTMLImageElement | null>(null);
+type ScenePhase = "connecting" | "listening" | "thinking" | "speaking";
+
+/** Full-screen galaxy: speed changes smoothly with phase (60s idle, 8s listening, 20s speaking). */
+function GalaxyScene({
+  phase, ampRef, status, text, muted, onMute, onEnd, onTap,
+}: {
+  phase: ScenePhase; ampRef: { current: number }; status: string; text: string;
+  muted: boolean; onMute: () => void; onEnd: () => void; onTap?: () => void;
+}) {
+  const imgRef = useRef<HTMLImageElement | null>(null);
+  const ringRef = useRef<HTMLDivElement | null>(null);
+  const phaseRef = useRef(phase);
+  phaseRef.current = phase;
   useEffect(() => {
     let raf = 0;
+    let angle = 0;
+    let last = performance.now();
     const loop = (t: number) => {
+      const dt = Math.min(0.1, (t - last) / 1000);
+      last = t;
+      const p = phaseRef.current;
+      const period = p === "speaking" ? 20 : p === "listening" ? 8 : 60;
+      angle = (angle + (dt * 360) / period) % 360;
       const a = ampRef.current;
-      const breathe = Math.sin(t / 900) * 0.01;
-      if (ref.current) ref.current.style.transform = `scale(${1.02 + breathe + a * 0.03}) rotate(${Math.sin(t / 700) * a * 1.5}deg)`;
+      const pulse = p === "speaking" ? 1.025 + Math.sin(t / 400) * 0.025 + a * 0.03 : 1;
+      if (imgRef.current) {
+        imgRef.current.style.transform = `rotate(${angle}deg) scale(${pulse})`;
+        imgRef.current.style.filter = p === "speaking"
+          ? `brightness(${1.2 + a * 0.3}) contrast(1.1)` : "brightness(1.2) contrast(1.1)";
+      }
+      if (ringRef.current) {
+        const k = p === "speaking" ? 0.4 + a : p === "listening" ? 0.25 + Math.abs(Math.sin(t / 500)) * 0.2 : 0.1;
+        ringRef.current.style.transform = `translate(-50%,-50%) scale(${0.9 + k * 0.4})`;
+        ringRef.current.style.opacity = String(Math.min(1, 0.25 + k));
+      }
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
   }, [ampRef]);
+
+  const waving = phase === "speaking" || (phase === "listening" && !muted);
+  const end = () => { try { navigator.vibrate?.(60); } catch { /* ignore */ } onEnd(); };
+
   return (
-    <div className={`relative aspect-[3/4] w-52 overflow-hidden rounded-3xl border border-primary/40 transition-shadow duration-[400ms] sm:w-60 ${phase === "speaking" ? "shadow-[0_0_50px_hsl(var(--primary)/0.6)]" : "shadow-[0_0_25px_hsl(var(--primary)/0.25)]"}`}>
-      <img ref={ref} src={proAvatar.url} alt="NO QUIT AI voice agent" className="h-full w-full object-cover will-change-transform" draggable={false} />
-      {phase === "thinking" && <div className="absolute inset-x-0 bottom-3 text-center text-xs text-foreground">...</div>}
+    <div className="fixed inset-0 z-[70] overflow-hidden bg-background" onClick={onTap}>
+      <img ref={imgRef} src={proAvatar.url} alt="" aria-hidden className="galaxy-bg pointer-events-none select-none" draggable={false} />
+      <div className="galaxy-overlay pointer-events-none" />
+      <div ref={ringRef} aria-hidden className="pointer-events-none fixed left-1/2 top-[42%] h-64 w-64 rounded-full border-2 border-primary shadow-[0_0_60px_var(--primary)]" />
+      <div className="relative z-10 flex h-full flex-col items-center justify-between px-6 pb-[calc(env(safe-area-inset-bottom)+54px)] pt-6">
+        <div className="flex w-full justify-end">
+          <button type="button" aria-label="Close voice chat" onClick={(e) => { e.stopPropagation(); onEnd(); }} className="glass-btn galaxy-text flex h-11 w-11 items-center justify-center rounded-full">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="flex max-w-md flex-col items-center gap-4 text-center">
+          <p className="galaxy-text text-sm font-medium opacity-90">{status}</p>
+          {text && <p className="galaxy-text line-clamp-6 text-lg font-semibold leading-snug">{text}</p>}
+        </div>
+        <div className="flex w-full flex-col items-center gap-6">
+          <div className="flex h-10 items-end gap-1.5" aria-hidden>
+            {Array.from({ length: 16 }).map((_, i) => (
+              <span key={i} className="w-1.5 rounded-full bg-primary"
+                style={{ height: waving ? "100%" : "12%", animation: waving ? `voice-wave 1s ease-in-out ${i * 0.06}s infinite` : "none" }} />
+            ))}
+          </div>
+          <div className="flex items-center gap-5">
+            <button type="button" onClick={(e) => { e.stopPropagation(); onMute(); }} className="glass-btn galaxy-text flex h-16 items-center gap-2 rounded-full px-7 text-base font-semibold">
+              {muted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+              {muted ? "Unmute" : "Mute"}
+            </button>
+            <button type="button" onClick={(e) => { e.stopPropagation(); end(); }} className="btn-green flex h-16 items-center rounded-full px-10 text-base font-bold">
+              End
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
+}
+
+/** Connecting max 0.8s dikhe, phir listening. */
+function useFastConnect(connected: boolean) {
+  const [quick, setQuick] = useState(false);
+  useEffect(() => { const id = setTimeout(() => setQuick(true), 800); return () => clearTimeout(id); }, []);
+  return connected || quick;
 }
 
 type SpeechRecognitionLike = {
@@ -208,6 +275,7 @@ function LegacyVoiceModal({
       finalRef.current = "";
       setText("");
       setP("speaking");
+      try { recRef.current?.start(); } catch { /* already running */ }
       void speakHuman(answer, lang, () => {
         if (aliveRef.current) startListening();
       }, ampRef);
@@ -231,7 +299,16 @@ function LegacyVoiceModal({
     rec.interimResults = true;
 
     rec.onresult = (event: any) => {
-      if (mutedRef.current || phaseRef.current !== "listening") return;
+      if (mutedRef.current) return;
+      if (phaseRef.current === "speaking") {
+        // Barge-in: user bola to AI foran chup
+        const said = String(event.results[event.results.length - 1]?.[0]?.transcript ?? "").trim();
+        if (said.split(/\s+/).length < 2) return;
+        stopHuman();
+        ampRef.current = 0;
+        phaseRef.current = "listening";
+        setPhase("listening");
+      } else if (phaseRef.current !== "listening") return;
       // Sirf FINAL results state me jaate hain; interim sirf dikhane ke liye.
       let interim = "";
       let final = finalRef.current;
@@ -271,7 +348,7 @@ function LegacyVoiceModal({
     rec.onend = () => {
       setSpeaking(false);
       // Mobile browsers band kar dete hain — listening phase me dobara chalu karo
-      if (aliveRef.current && phaseRef.current === "listening") {
+      if (aliveRef.current && phaseRef.current !== "thinking") {
         try {
           rec.start();
         } catch {
@@ -280,7 +357,7 @@ function LegacyVoiceModal({
       }
     };
     // Voice khulte hi user se khud baat shuru kare
-    const greet = "Arre bhai, kya haal hai? Bolo, aaj kya scene hai?";
+    const greet = "Arre bhai, aa gaya tu! Suna, aaj kal kya chal raha hai?";
     setReply(greet);
     setP("speaking");
     void speakHuman(greet, lang, () => {
@@ -314,65 +391,15 @@ function LegacyVoiceModal({
     else onClose();
   }
 
-  const active = (phase === "listening" && speaking && !muted) || phase === "speaking";
   const status =
-    phase === "thinking"
-      ? "Thinking..."
-      : phase === "speaking"
-        ? "Speaking... (tap to interrupt)"
-        : muted
-          ? "Muted"
-          : speaking
-            ? "Listening..."
-            : "Bolo, main sun raha hoon";
+    phase === "thinking" ? "Soch raha hoon..."
+      : phase === "speaking" ? "Speaking... (bol kar tok sakte ho)"
+        : muted ? "Muted" : speaking ? "Sun raha hoon..." : "Bolo, main sun raha hoon";
+  const shown = phase === "speaking" ? speakableText(reply) : text;
 
   return (
-    <div className="fixed inset-0 z-[70] flex flex-col items-center justify-between bg-background/80 px-6 py-8 backdrop-blur-xl">
-      <div className="flex w-full items-center justify-end">
-        <Button variant="ghost" size="icon" aria-label="Close voice chat" onClick={onClose}>
-          <X className="h-5 w-5" />
-        </Button>
-      </div>
-
-      <div className="flex flex-col items-center gap-6">
-        <button type="button" onClick={stopOrSend} aria-label="Voice agent" className="block bg-transparent">
-          <ProAvatar phase={phase} ampRef={ampRef} />
-        </button>
-
-        <p className="text-center text-sm text-muted-foreground">{status}</p>
-        {text && phase !== "speaking" && (
-          <p className="max-w-md text-center text-base font-medium text-foreground">{text}</p>
-        )}
-        {reply && phase === "speaking" && (
-          <p className="line-clamp-6 max-w-md text-center text-sm text-foreground/90">{speakableText(reply)}</p>
-        )}
-      </div>
-
-      <div className="flex w-full flex-col items-center gap-6">
-        <div className="flex h-12 items-end gap-1.5" aria-hidden>
-          {Array.from({ length: 16 }).map((_, i) => (
-            <span
-              key={i}
-              className="w-1.5 rounded-full bg-primary/70"
-              style={{
-                height: active ? "100%" : "12%",
-                animation: active ? `voice-wave 1s ease-in-out ${i * 0.06}s infinite` : "none",
-              }}
-            />
-          ))}
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Button type="button" variant="outline" size="lg" className="rounded-full" onClick={() => setMuted((m) => !m)}>
-            {muted ? <MicOff className="mr-2 h-4 w-4" /> : <Mic className="mr-2 h-4 w-4" />}
-            {muted ? "Unmute" : "Mute"}
-          </Button>
-          <Button type="button" size="lg" className="btn-green rounded-full px-8" onClick={onClose}>
-            End
-          </Button>
-        </div>
-      </div>
-    </div>
+    <GalaxyScene phase={phase} ampRef={ampRef} status={status} text={shown} muted={muted}
+      onMute={() => setMuted((m) => !m)} onEnd={onClose} onTap={stopOrSend} />
   );
 }
 
@@ -463,34 +490,12 @@ function LiveVoiceModal({ onClose, onFallback }: VoiceProps & { onFallback: () =
     return () => cancelAnimationFrame(raf);
   }, [speaking, conversation]);
 
-  const phase = !connected ? "thinking" : speaking ? "speaking" : "listening";
-  const status = !connected ? "Connecting..." : speaking ? "Speaking... (bol kar tok sakte ho)" : muted ? "Muted" : "Bolo, main sun raha hoon";
+  const ready = useFastConnect(connected);
+  const phase: ScenePhase = !ready ? "connecting" : speaking ? "speaking" : "listening";
+  const status = !ready ? "Connecting..." : speaking ? "Speaking... (bol kar tok sakte ho)" : muted ? "Muted" : "Bolo, main sun raha hoon";
 
   return (
-    <div className="fixed inset-0 z-[70] flex flex-col items-center justify-between bg-background/80 px-6 py-8 backdrop-blur-xl">
-      <div className="flex w-full items-center justify-end">
-        <Button variant="ghost" size="icon" aria-label="Close voice chat" onClick={onClose}>
-          <X className="h-5 w-5" />
-        </Button>
-      </div>
-      <div className="flex flex-col items-center gap-6">
-        <ProAvatar phase={phase} ampRef={ampRef} />
-        <p className="text-center text-sm text-muted-foreground">{status}</p>
-        {speaking && reply ? (
-          <p className="line-clamp-6 max-w-md text-center text-sm text-foreground/90">{reply}</p>
-        ) : heard ? (
-          <p className="max-w-md text-center text-base font-medium text-foreground">{heard}</p>
-        ) : null}
-      </div>
-      <div className="flex items-center gap-3">
-        <Button type="button" variant="outline" size="lg" className="rounded-full" onClick={() => setMuted((m) => !m)}>
-          {muted ? <MicOff className="mr-2 h-4 w-4" /> : <Mic className="mr-2 h-4 w-4" />}
-          {muted ? "Unmute" : "Mute"}
-        </Button>
-        <Button type="button" size="lg" className="btn-green rounded-full px-8" onClick={onClose}>
-          End
-        </Button>
-      </div>
-    </div>
+    <GalaxyScene phase={phase} ampRef={ampRef} status={status} text={speaking && reply ? reply : heard}
+      muted={muted} onMute={() => setMuted((m) => !m)} onEnd={onClose} />
   );
 }
