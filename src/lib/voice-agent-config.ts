@@ -12,7 +12,7 @@ Never start in Hindi if user spoke English. Detect language from last user messa
 Keep tone desi, motivational, brother-like, but in user's language.`;
 
 export const VOICE_AGENT_MODEL = "eleven_multilingual_v2";
-export const VOICE_AGENT_LANGUAGES = ["en", "ar", "hi", "ur", "pa", "bn", "ta", "zh", "es", "pt", "fr", "de", "ja", "ko", "id", "it", "nl", "tr", "pl", "ru", "sv", "tl", "ms", "ro", "uk", "el", "cs", "da", "fi", "bg", "hr", "sk", "vi", "no", "hu"];
+export const VOICE_AGENT_LANGUAGES = ["en", "ar", "hi", "ta", "zh", "es", "pt", "fr", "de", "ja", "ko", "id", "it", "nl", "tr", "pl", "ru", "sv", "tl", "ms", "ro", "uk", "el", "cs", "da", "fi", "bg", "hr", "sk", "vi", "no", "hu", "pt-br", "fil"];
 
 type AgentSettings = {
   language_presets?: Record<string, unknown>;

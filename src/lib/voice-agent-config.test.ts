@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+// @ts-nocheck
+import { describe, expect, it } from "bun:test";
 import { voiceAgentUpdate } from "./voice-agent-config";
 
 describe("voice agent configuration", () => {
@@ -10,9 +11,9 @@ describe("voice agent configuration", () => {
     expect(tool.params.system_tool_type).toBe("language_detection");
     expect(tool.params.only_at_conversation_start).toBe(false);
   });
-  it("enables English, Arabic and Urdu/Hindi switching", () => {
+  it("enables English, Arabic and Hindi switching", () => {
     const presets = voiceAgentUpdate({}).conversation_config.language_presets;
-    for (const language of ["en", "ar", "ur", "hi"]) {
+    for (const language of ["en", "ar", "hi"]) {
       expect(presets[language]).toEqual({ overrides: { agent: { language, first_message: "" } } });
     }
   });
