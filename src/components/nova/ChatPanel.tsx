@@ -603,7 +603,7 @@ function ChatThread({
       return;
     }
     if (!value || busy) return;
-    if (readVoiceCache(value, lang)) {
+    if (!studioContext && readVoiceCache(value, lang)) {
       void askByVoice(value);
       return;
     }
@@ -629,7 +629,7 @@ function ChatThread({
 
   // Voice agent: cache (device par save) me ho to AI call nahi, warna AI se poocho.
   async function askByVoice(question: string): Promise<string> {
-    const cached = readVoiceCache(question, lang);
+    const cached = studioContext ? null : readVoiceCache(question, lang);
     if (cached) {
       setInput("");
       const stamp = Date.now();
