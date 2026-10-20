@@ -1,14 +1,24 @@
 import { useEffect, useRef, useState } from "react";
 import Editor, { DiffEditor, loader } from "@monaco-editor/react";
 import * as monaco from "monaco-editor";
-import EditorWorker from "monaco-editor/editor/editor.worker.js?worker";
+import EditorWorker from "monaco-editor/esm/vs/editor/editor.worker.js?worker";
+import HtmlWorker from "monaco-editor/esm/vs/language/html/html.worker.js?worker";
+import CssWorker from "monaco-editor/esm/vs/language/css/css.worker.js?worker";
+import TsWorker from "monaco-editor/esm/vs/language/typescript/ts.worker.js?worker";
+import JsonWorker from "monaco-editor/esm/vs/language/json/json.worker.js?worker";
 import { Sparkles, Undo2, X, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { claudeFrames, editedCode } from "@/lib/studio-edit";
 
-globalThis.MonacoEnvironment = { getWorker: () => new EditorWorker() };
+globalThis.MonacoEnvironment = { getWorker: (_module, label) => {
+  if (["html", "handlebars", "razor"].includes(label)) return new HtmlWorker();
+  if (["css", "scss", "less"].includes(label)) return new CssWorker();
+  if (["typescript", "javascript"].includes(label)) return new TsWorker();
+  if (label === "json") return new JsonWorker();
+  return new EditorWorker();
+} };
 loader.config({ monaco });
 
 export default function StudioCodeEditor({ memoryId, code, canUndo, onChange, onSaved }: {
