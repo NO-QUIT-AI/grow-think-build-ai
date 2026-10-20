@@ -104,7 +104,7 @@ export default function StudioCodeEditor({ memoryId, code, canUndo, onChange, on
         <Button variant="ghost" size="sm" disabled={busy || applying} onClick={() => setDraft(null)}><X /> Discard</Button>
         <Button size="sm" disabled={busy || applying} onClick={() => void apply()}>{applying ? <Loader2 className="animate-spin" /> : <Check />} Apply</Button>
       </div>
-      <DiffEditor height="420px" original={original} modified={draft} language="html" theme="vs-dark" options={{ readOnly: true, renderSideBySide: false, minimap: { enabled: false }, automaticLayout: true, fontSize: 12, scrollBeyondLastLine: false }} />
+      <DiffEditor height="420px" original={original} modified={draft} originalModelPath={`studio/${memoryId}/original.html`} modifiedModelPath={`studio/${memoryId}/proposed.html`} keepCurrentOriginalModel keepCurrentModifiedModel language="html" theme="vs-dark" options={{ readOnly: true, renderSideBySide: false, minimap: { enabled: false }, automaticLayout: true, fontSize: 12, scrollBeyondLastLine: false }} />
     </> : <Editor height="420px" language="html" theme="vs-dark" value={code} onChange={(value) => onChange(value ?? "")} options={{ minimap: { enabled: false }, automaticLayout: true, wordWrap: "on", fontSize: 12, scrollBeyondLastLine: false }} onMount={(editor) => {
       editor.addAction({ id: "nqai-inline-edit", label: "NO QUIT AI Edit", keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK], run: () => setOpen(true) });
     }} />}
