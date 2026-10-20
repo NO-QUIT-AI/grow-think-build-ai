@@ -1,3 +1,4 @@
+/// <reference types="bun" />
 import { describe, expect, test } from 'bun:test';
 import { mergeJalsaMessages, validJalsaText, type JalsaMessage } from './jalsa-store';
 const queued: JalsaMessage = { id: 'a', peer_id: 'b', sender_id: 'c', text: 'hello', delivery: 'queued', created_at: '2026-10-20T04:00:00Z' };
