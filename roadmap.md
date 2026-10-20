@@ -1,4 +1,5 @@
 # Pending completion
+- [ ] Build separate QR-paired local Jalsa chat, persistent offline queue, private online archive sync; preserve Calls and Pixabay.
 - [x] Fix call lifecycle, friend-only permissions, cancelled rings and stale invites; 7 regression tests pass.
 - [x] Verify signed-in invalid-invite rejection and database self-call rejection.
 - [x] Two-browser test: accepted the chosen accounts' pending friendship, verified ring, reject→Missed bubble, accept→same call room, hangup→Ended bubble in both browsers. Fixed clipped Jitsi iframe; build OK and 3 call tests pass.
