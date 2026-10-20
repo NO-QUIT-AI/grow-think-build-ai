@@ -8,6 +8,9 @@ describe("voice agent configuration", () => {
     expect(voiceAgentUpdate({}).conversation_config.tts.optimize_streaming_latency).toBe(4);
     expect(voiceAgentUpdate({}).conversation_config.agent.prompt.llm).toBe("gpt-4o-mini");
   });
+  it("answers as soon as the user stops talking", () => {
+    expect(voiceAgentUpdate({}).conversation_config.turn).toEqual({ turn_eagerness: "eager", speculative_turn: true });
+  });
   it("allows language detection throughout the call", () => {
     const tool = voiceAgentUpdate({}).conversation_config.agent.prompt.built_in_tools.language_detection;
     expect(tool.params.system_tool_type).toBe("language_detection");
