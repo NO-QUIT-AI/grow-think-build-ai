@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import proAvatar from "@/assets/nqai-galaxy-avatar.jpg.asset.json";
+import { VoiceSphere } from "./VoiceSphere";
 
 let currentAudio: HTMLAudioElement | null = null;
 
@@ -102,7 +103,7 @@ function GalaxyScene({
       <div ref={imgRef} aria-hidden className="galaxy-layer galaxy-near" style={{ backgroundImage: `url(${proAvatar.url})` }} />
       <div aria-hidden className="galaxy-stars pointer-events-none" />
       <div className="galaxy-overlay pointer-events-none" />
-      <div ref={ringRef} aria-hidden className="pointer-events-none fixed left-1/2 top-[42%] h-64 w-64 rounded-full border-2 border-primary shadow-[0_0_60px_var(--primary)]" />
+      <VoiceSphere aiAmpRef={ampRef} />
       <div className="relative z-10 flex h-full flex-col items-center justify-between px-6 pb-[calc(env(safe-area-inset-bottom)+120px)] pt-6">
         <div aria-hidden />
         <div aria-hidden />

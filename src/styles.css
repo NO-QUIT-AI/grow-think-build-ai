@@ -306,10 +306,11 @@
   border: 1px solid color-mix(in oklab, var(--foreground) 25%, transparent);
 }
 
-@keyframes galaxyMove {
-  0% { background-position: 0% 0%; transform: scale(1); }
-  50% { background-position: 100% 50%; transform: scale(1.2); }
-  100% { background-position: 0% 0%; transform: scale(1); }
+/* ~1px per 2s drift: 160px over 320s, no zoom, camera fixed */
+@keyframes galaxyDrift {
+  0% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(-160px, -80px, 0); }
+  100% { transform: translate3d(0, 0, 0); }
 }
 @keyframes starTwinkle {
   0%, 100% { opacity: 0.35; }
@@ -317,27 +318,26 @@
 }
 @utility galaxy-layer {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-size: 120%;
+  top: -120px;
+  left: -200px;
+  width: calc(100vw + 400px);
+  height: calc(100vh + 240px);
   background-position: center;
   background-repeat: no-repeat;
   pointer-events: none;
-  will-change: transform, background-position;
+  will-change: transform;
 }
 @utility galaxy-far {
   background-size: cover;
   filter: brightness(1.2) contrast(1.1);
-  animation: galaxyMove 40s ease-in-out infinite;
+  animation: galaxyDrift 640s linear infinite;
 }
 @utility galaxy-near {
-  background-size: 160%;
+  background-size: cover;
   mix-blend-mode: screen;
   opacity: 0.45;
   filter: brightness(1.3) contrast(1.15) saturate(1.2);
-  animation: galaxyMove 22s ease-in-out infinite reverse;
+  animation: galaxyDrift 900s linear infinite reverse;
 }
 @utility galaxy-glow {
   filter: brightness(1.4) contrast(1.15);
