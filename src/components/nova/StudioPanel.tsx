@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import {
   Check,
   Code2,
@@ -17,7 +17,8 @@ import { Group, Panel, Separator } from "react-resizable-panels";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import type { StudioContext } from "@/lib/studio-edit";
+const StudioCodeEditor = lazy(() => import("./StudioCodeEditor"));
 import { supabase } from "@/integrations/supabase/client";
 import { downloadHtmlAsPdf } from "@/lib/html-pdf";
 import { downloadHtmlAsPng } from "@/lib/html-png";
@@ -43,11 +44,13 @@ export function StudioPanel({
   refreshKey,
   activeMemoryId,
   onMemorySaved,
+  onContextChanged,
 }: {
   userId: string;
   refreshKey: number;
   activeMemoryId: string | null;
   onMemorySaved: () => void;
+  onContextChanged: (context: StudioContext) => void;
 }) {
   const [memories, setMemories] = useState<Memory[]>([]);
   const [activeId, setActiveId] = useState<string | null>(activeMemoryId);
@@ -80,7 +83,11 @@ export function StudioPanel({
 
   useEffect(() => {
     if (active) setCode(active.code);
-  }, [active?.id]);
+  }, [active?.id, active?.code]);
+
+  useEffect(() => {
+    if (active?.project_type === "website") onContextChanged({ memoryId: active.id, code });
+  }, [active?.id, code]);
 
   const html = active?.project_type === "website" ? code : "";
 
@@ -106,15 +113,22 @@ export function StudioPanel({
   async function save() {
     if (!active) return;
     setSaving(true);
-    const { error } = await supabase.from("memories").update({ code }).eq("id", active.id);
-    setSaving(false);
-    if (error) {
-      toast.error("Save nahi ho saka");
-      return;
-    }
-    setMemories((prev) => prev.map((m) => (m.id === active.id ? { ...m, code } : m)));
+    try {
+      const { data } = await supabase.auth.getSession();
+      const response = await fetch("/api/studio", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${data.session?.access_token ?? ""}` }, body: JSON.stringify({ action: "file_edit", memoryId: active.id, code, expected: active.code }) });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error);
+      savedCode(result.code, result.canUndo);
+      toast.success("Code save ho gaya");
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Save nahi ho saka"); }
+    finally { setSaving(false); }
+  }
+
+  function savedCode(next: string, canUndo: boolean) {
+    if (!active) return;
+    setCode(next);
+    setMemories((prev) => prev.map((m) => m.id === active.id ? { ...m, code: next, blueprint: { ...m.blueprint, studio_history: canUndo ? ["saved"] : [] } } : m));
     onMemorySaved();
-    toast.success("Code save ho gaya");
   }
 
   function openInTab() {
@@ -249,7 +263,7 @@ export function StudioPanel({
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3">
+    <div className="studio-workspace flex min-h-0 flex-1 flex-col gap-3">
       <div className="panel flex flex-wrap items-center gap-2 p-2">
         <div className="flex gap-2 overflow-x-auto pb-1 md:pb-0">
           {memories.map((memory) => (
@@ -393,12 +407,9 @@ export function StudioPanel({
                 Save
               </Button>
             </div>
-            <Textarea
-              value={code}
-              onChange={(event) => setCode(event.target.value)}
-              className="min-h-0 flex-1 resize-none rounded-xl border-border bg-secondary/50 font-mono text-xs leading-relaxed"
-              spellCheck={false}
-            />
+            {active && <Suspense fallback={<div className="flex h-[440px] items-center justify-center"><Loader2 className="animate-spin" /></div>}>
+              <StudioCodeEditor key={active.id} memoryId={active.id} code={code} onChange={setCode} canUndo={Array.isArray(active.blueprint?.["studio_history"]) && active.blueprint["studio_history"].length > 0} onSaved={savedCode} />
+            </Suspense>}
           </Panel>
           <Separator className="mx-1 w-1 rounded-full bg-border transition hover:bg-primary" />
           <Panel defaultSize="50" minSize="20" className="flex min-h-0 flex-col">
