@@ -12,7 +12,7 @@ Detect language from last user utterance and match it 100%. Do not default to Fr
 
 Keep tone friendly, brother-like.`;
 
-export const VOICE_AGENT_MODEL = "eleven_turbo_v2_5";
+export const VOICE_AGENT_MODEL = "eleven_turbo_v2";
 export const VOICE_AGENT_LLM = "gpt-4o-mini";
 export const VOICE_AGENT_LANGUAGES = ["en", "ar", "hi", "ta", "zh", "es", "pt", "fr", "de", "ja", "ko", "id", "it", "nl", "tr", "pl", "ru", "sv", "tl", "ms", "ro", "uk", "el", "cs", "da", "fi", "bg", "hr", "sk", "vi", "no", "hu", "pt-br", "fil"];
 
