@@ -360,6 +360,7 @@ function LegacyVoiceModal({
     const greet = "Arre bhai, aa gaya tu! Suna, aaj kal kya chal raha hai?";
     setReply(greet);
     setP("speaking");
+    try { rec.start(); } catch { /* ignore */ }
     void speakHuman(greet, lang, () => {
       if (aliveRef.current) startListening();
     }, ampRef);
