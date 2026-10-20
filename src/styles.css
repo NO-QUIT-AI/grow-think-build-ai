@@ -261,3 +261,13 @@
 .auto-video-page h1, .auto-video-page h2 { letter-spacing: 0; }
 .video-stage { background: var(--video-stage); }
 .video-caption { color: var(--video-caption); -webkit-text-stroke: 1px var(--video-caption-stroke); paint-order: stroke fill; }
+
+.studio-workspace {
+  --background: #000000;
+  --primary: #00EEFF;
+  --primary-foreground: #000000;
+  --ring: #00EEFF;
+  --gradient-surface: linear-gradient(#090d0f, #090d0f);
+  --border: #263137;
+}
+.studio-editor { background: var(--background); }

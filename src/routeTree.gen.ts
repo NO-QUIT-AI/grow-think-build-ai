@@ -44,6 +44,7 @@ import { Route as ApiOwnerRouteImport } from './routes/api/owner'
 import { Route as ApiR2UploadRouteImport } from './routes/api/r2-upload'
 import { Route as ApiRunwayVideoRouteImport } from './routes/api/runway-video'
 import { Route as ApiScoutRouteImport } from './routes/api/scout'
+import { Route as ApiStudioRouteImport } from './routes/api/studio'
 import { Route as ApiTtsRouteImport } from './routes/api/tts'
 import { Route as ApiVaultRouteImport } from './routes/api/vault'
 import { Route as ApiViralVideoRouteImport } from './routes/api/viral-video'
@@ -232,6 +233,11 @@ const ApiScoutRoute = ApiScoutRouteImport.update({
   path: '/api/scout',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiStudioRoute = ApiStudioRouteImport.update({
+  id: '/api/studio',
+  path: '/api/studio',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiTtsRoute = ApiTtsRouteImport.update({
   id: '/api/tts',
   path: '/api/tts',
@@ -329,6 +335,7 @@ export interface FileRoutesByFullPath {
   '/api/r2-upload': typeof ApiR2UploadRoute
   '/api/runway-video': typeof ApiRunwayVideoRoute
   '/api/scout': typeof ApiScoutRoute
+  '/api/studio': typeof ApiStudioRoute
   '/api/tts': typeof ApiTtsRoute
   '/api/vault': typeof ApiVaultRoute
   '/api/viral-video': typeof ApiViralVideoRoute
@@ -378,6 +385,7 @@ export interface FileRoutesByTo {
   '/api/r2-upload': typeof ApiR2UploadRoute
   '/api/runway-video': typeof ApiRunwayVideoRoute
   '/api/scout': typeof ApiScoutRoute
+  '/api/studio': typeof ApiStudioRoute
   '/api/tts': typeof ApiTtsRoute
   '/api/vault': typeof ApiVaultRoute
   '/api/viral-video': typeof ApiViralVideoRoute
@@ -428,6 +436,7 @@ export interface FileRoutesById {
   '/api/r2-upload': typeof ApiR2UploadRoute
   '/api/runway-video': typeof ApiRunwayVideoRoute
   '/api/scout': typeof ApiScoutRoute
+  '/api/studio': typeof ApiStudioRoute
   '/api/tts': typeof ApiTtsRoute
   '/api/vault': typeof ApiVaultRoute
   '/api/viral-video': typeof ApiViralVideoRoute
@@ -479,6 +488,7 @@ export interface FileRouteTypes {
     | '/api/r2-upload'
     | '/api/runway-video'
     | '/api/scout'
+    | '/api/studio'
     | '/api/tts'
     | '/api/vault'
     | '/api/viral-video'
@@ -528,6 +538,7 @@ export interface FileRouteTypes {
     | '/api/r2-upload'
     | '/api/runway-video'
     | '/api/scout'
+    | '/api/studio'
     | '/api/tts'
     | '/api/vault'
     | '/api/viral-video'
@@ -577,6 +588,7 @@ export interface FileRouteTypes {
     | '/api/r2-upload'
     | '/api/runway-video'
     | '/api/scout'
+    | '/api/studio'
     | '/api/tts'
     | '/api/vault'
     | '/api/viral-video'
@@ -627,6 +639,7 @@ export interface RootRouteChildren {
   ApiR2UploadRoute: typeof ApiR2UploadRoute
   ApiRunwayVideoRoute: typeof ApiRunwayVideoRoute
   ApiScoutRoute: typeof ApiScoutRoute
+  ApiStudioRoute: typeof ApiStudioRoute
   ApiTtsRoute: typeof ApiTtsRoute
   ApiVaultRoute: typeof ApiVaultRoute
   ApiViralVideoRoute: typeof ApiViralVideoRoute
@@ -887,6 +900,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiScoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/studio': {
+      id: '/api/studio'
+      path: '/api/studio'
+      fullPath: '/api/studio'
+      preLoaderRoute: typeof ApiStudioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/tts': {
       id: '/api/tts'
       path: '/api/tts'
@@ -1021,6 +1041,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiR2UploadRoute: ApiR2UploadRoute,
   ApiRunwayVideoRoute: ApiRunwayVideoRoute,
   ApiScoutRoute: ApiScoutRoute,
+  ApiStudioRoute: ApiStudioRoute,
   ApiTtsRoute: ApiTtsRoute,
   ApiVaultRoute: ApiVaultRoute,
   ApiViralVideoRoute: ApiViralVideoRoute,

@@ -17,3 +17,5 @@
 - Call invitations use conditional status updates and database validation of friendship/participants; call pages verify the accepted invite before opening media — prevents cancelled rings and forged app invitations.
 - Load AdSense after hydration through the shared configuration loader — Auto Ads must not mutate the server HTML before React hydrates.
 - Jalsa uses QR-exchanged compressed WebRTC SDP with local ICE candidates only; local messages persist before send and require peer acknowledgments, while jalsa_messages is an owner-scoped archive, never a Community transport — browsers cannot provide Bluetooth peripheral mesh.
+- Studio's lazily loaded bundled Monaco editor uses /api/studio and memories as the source of truth; persistent history and optimistic version checks prevent stale diff application, while owner writes mirror through the existing Genesis R2 writer.
+- Chat passes the active Studio memory ID and draft code, uses user-scoped file_edit/file_undo tools, and opens successful build results by memoryId; unrelated chat model routing remains unchanged.
