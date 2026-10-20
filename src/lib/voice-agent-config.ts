@@ -50,6 +50,8 @@ export function voiceAgentUpdate(current: AgentSettings) {
           },
         },
       },
+      // Baat khatam hote hi foran jawab — turn detection ka intezar kam
+      turn: { turn_eagerness: "eager", speculative_turn: true },
       tts: { model_id: VOICE_AGENT_MODEL, optimize_streaming_latency: 4 },
     },
   };
