@@ -41,7 +41,8 @@ export async function saveStudioFile(sb: Client, userId: string, id: string, con
   return { saved: true, memoryId: id, code: next, canUndo: history.length > 0 };
 }
 
-export function studioFileTools(sb: Client, userId: string, activeId?: string) {
+export function studioFileTools(sb: Client, userId: string, activeId?: string, expectedBase?: string) {
+  let base = expectedBase;
   return {
     file_edit: tool({
       description: "Edit the active Studio index.html. Returns memoryId for opening Studio. Preserves persistent file_undo history.",
@@ -51,7 +52,9 @@ export function studioFileTools(sb: Client, userId: string, activeId?: string) {
         if (!id) return { error: "No active file. Create it with build_website first." };
         try {
           const memory = await studioMemory(sb, userId, id);
-          return await saveStudioFile(sb, userId, id, content, memory.code);
+          const saved = await saveStudioFile(sb, userId, id, content, id === activeId && base !== undefined ? base : memory.code);
+          if (id === activeId) base = saved.code;
+          return saved;
         } catch (e) { return { error: e instanceof Error ? e.message : "Edit failed" }; }
       },
     }),

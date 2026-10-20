@@ -170,10 +170,13 @@ export const Route = createFileRoute("/api/chat")({
         const { studioMemory, studioFileTools } = await import("@/lib/studio-files.server");
         let activeStudio: Awaited<ReturnType<typeof studioMemory>> | null = null;
         if (contextParsed.success) {
-          try { activeStudio = await studioMemory(supabase, userId, contextParsed.data.memoryId); }
+          try {
+            activeStudio = await studioMemory(supabase, userId, contextParsed.data.memoryId);
+            if (activeStudio.code !== contextParsed.data.code) return Response.json({ error: "Save your Studio draft before editing through Chat." }, { status: 409 });
+          }
           catch { return Response.json({ error: "Studio file not found." }, { status: 404 }); }
         }
-        const studioTools = studioFileTools(supabase, userId, activeStudio?.id);
+        const studioTools = studioFileTools(supabase, userId, activeStudio?.id, activeStudio?.code);
 
         const apiKey = process.env["LOVABLE_API_KEY"];
         const deepseekKey = process.env["DEEPSEEK_API_KEY"];

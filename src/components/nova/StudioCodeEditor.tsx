@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Editor, { DiffEditor, loader } from "@monaco-editor/react";
 import * as monaco from "monaco-editor";
-import EditorWorker from "monaco-editor/esm/vs/editor/editor.worker.js?worker";
+import EditorWorker from "monaco-editor/editor/editor.worker.js?worker";
 import { Sparkles, Undo2, X, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -60,7 +60,7 @@ export default function StudioCodeEditor({ memoryId, code, canUndo, onChange, on
       setDraft(editedCode(text));
     } catch (e) {
       setDraft(null);
-      if (!controller.signal.aborted) setError(e instanceof Error ? e.message : "Edit failed.");
+      setError(controller.signal.aborted ? "Edit stopped. No changes applied." : e instanceof Error ? e.message : "Edit failed.");
     } finally { setBusy(false); abort.current = null; }
   }
   async function apply(undo = false) {
