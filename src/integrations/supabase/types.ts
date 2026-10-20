@@ -912,6 +912,7 @@ export type Database = {
       }
       slugify: { Args: { _t: string }; Returns: string }
       subdomain_valid: { Args: { _s: string }; Returns: boolean }
+      sync_jalsa_messages: { Args: { items: Json }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

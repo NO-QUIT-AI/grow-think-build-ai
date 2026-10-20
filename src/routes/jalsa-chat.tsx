@@ -26,7 +26,7 @@ export const Route = createFileRoute('/jalsa-chat')({
 function JalsaChat() {
   const { user, loading } = useAuth();
   // Local chat remains available without a hosted login, including offline sessions.
-  return loading ? <main className="flex min-h-screen items-center justify-center"><Loader2 className="animate-spin text-primary" /></main> : <LocalChat ownerId={user?.id} />;
+  return loading ? <main className="flex min-h-screen items-center justify-center"><Loader2 className="animate-spin text-primary" /></main> : <LocalChat key={user?.id ?? 'local'} ownerId={user?.id} />;
 }
 function LocalChat({ ownerId }: { ownerId: string | undefined }) {
   const mode = useJalsaMode();

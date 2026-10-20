@@ -35,12 +35,17 @@ export function useJalsaChat(ownerId: string | undefined) {
     syncLock.current = true;
     try {
       setSyncState('Syncing private archive…');
-      const { data, error } = await supabase.from('jalsa_messages').select('id,peer_id,sender_id,text,delivery,created_at').eq('owner_id', ownerId);
-      if (error) throw error;
-      const merged = mergeJalsaMessages(archive.current.messages, (data ?? []) as JalsaMessage[]);
+      const remote: JalsaMessage[] = [];
+      for (let start = 0; ; start += 500) {
+        const { data, error } = await supabase.from('jalsa_messages').select('id,peer_id,sender_id,text,delivery,created_at').eq('owner_id', ownerId).order('id').range(start, start + 499);
+        if (error) throw error;
+        remote.push(...(data ?? []) as JalsaMessage[]);
+        if ((data?.length ?? 0) < 500) break;
+      }
+      const merged = mergeJalsaMessages(archive.current.messages, remote);
       if (JSON.stringify(merged) !== JSON.stringify(archive.current.messages)) commit({ ...archive.current, messages: merged });
-      if (merged.length) {
-        const { error: writeError } = await supabase.from('jalsa_messages').upsert(merged.map(m => ({ ...m, owner_id: ownerId })), { onConflict: 'owner_id,id' });
+      for (let start = 0; start < merged.length; start += 200) {
+        const { error: writeError } = await supabase.rpc('sync_jalsa_messages', { items: merged.slice(start,start+200) });
         if (writeError) throw writeError;
       }
       setSyncState('Private archive synced');
@@ -91,6 +96,16 @@ export function useJalsaChat(ownerId: string | undefined) {
     const next = { ...identity, name: name.trim().slice(0,50) || 'Builder' };
     saveJalsaIdentity(next); setIdentity(next);
   }
+  useEffect(() => {
+    const retry = setInterval(() => {
+      if (!identity) return;
+      for (const peer of sessions.current) {
+        if (!peer.connected) continue;
+        for (const message of archive.current.messages) if (message.peer_id === peer.identity?.id && message.sender_id === identity.id && message.delivery === 'queued') peer.send({ type: 'message', message });
+      }
+    }, 3000);
+    return () => clearInterval(retry);
+  }, [identity]);
   function disconnect(peerId?: string) {
     for (const peer of sessions.current) {
       if (!peerId || peer.identity?.id === peerId) { peer.close(); sessions.current.delete(peer); }

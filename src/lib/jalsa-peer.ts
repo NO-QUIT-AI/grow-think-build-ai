@@ -19,20 +19,22 @@ export class JalsaPeer {
   private channel: RTCDataChannel | null = null;
   identity: JalsaIdentity | null = null;
   private timeout: ReturnType<typeof setTimeout> | null = null;
+  private closed = false;
   constructor(private me: JalsaIdentity, private onStatus: (peer: JalsaIdentity | null, connected: boolean) => void, private onMessage: (peer: JalsaIdentity, packet: JalsaWire) => void) {
     // No remote STUN/TURN or signaling servers: only local network candidates.
     this.pc = new RTCPeerConnection({ iceServers: [] });
     this.pc.ondatachannel = event => this.attach(event.channel);
     this.pc.onconnectionstatechange = () => {
+      if (this.closed) return;
       if (['failed','closed','disconnected'].includes(this.pc.connectionState)) this.onStatus(this.identity, false);
     };
   }
   private attach(channel: RTCDataChannel) {
     this.channel = channel;
-    channel.onopen = () => { if (this.timeout) clearTimeout(this.timeout); this.onStatus(this.identity, true); };
+    channel.onopen = () => { if (this.closed) return; if (this.timeout) clearTimeout(this.timeout); this.onStatus(this.identity, true); };
     channel.onclose = () => this.onStatus(this.identity, false);
     channel.onmessage = event => {
-      if (!this.identity || typeof event.data !== 'string' || event.data.length > 8000) return;
+      if (this.closed || !this.identity || typeof event.data !== 'string' || event.data.length > 8000) return;
       try {
         const packet = JSON.parse(event.data);
         if (packet.type === 'ack' && typeof packet.id === 'string') this.onMessage(this.identity, packet);
@@ -46,6 +48,7 @@ export class JalsaPeer {
       const timer = setTimeout(() => { this.pc.removeEventListener('icegatheringstatechange', check); reject(new Error('Local connection timed out; try again')); }, 10000);
       const check = () => { if (this.pc.iceGatheringState === 'complete') { clearTimeout(timer); this.pc.removeEventListener('icegatheringstatechange', check); resolve(); } };
       this.pc.addEventListener('icegatheringstatechange', check);
+      check();
     });
     const description = this.pc.localDescription;
     if (!description) throw new Error('Pairing unavailable');
@@ -80,5 +83,5 @@ export class JalsaPeer {
     if (!this.channel || !this.connected) return false;
     try { this.channel.send(JSON.stringify(packet)); return true; } catch { return false; }
   }
-  close() { if (this.timeout) clearTimeout(this.timeout); this.channel?.close(); this.pc.close(); }
+  close() { if (this.closed) return; this.closed = true; if (this.timeout) clearTimeout(this.timeout); this.onStatus(this.identity, false); this.channel?.close(); this.pc.close(); }
 }
