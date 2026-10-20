@@ -33,7 +33,7 @@ export const Route = createFileRoute("/api/voice-chat")({
       POST: async ({ request }) => {
         const user = await userFromRequest(request);
         if (!user) return new Response("Unauthorized", { status: 401 });
-        const body = (await request.json().catch(() => ({}))) as { messages?: Msg[]; name?: string };
+        const body = (await request.json().catch(() => ({}))) as { messages?: Msg[]; name?: string; replyLang?: string };
         const messages = (Array.isArray(body.messages) ? body.messages : [])
           .filter((m) => (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
           .slice(-8)
@@ -41,6 +41,10 @@ export const Route = createFileRoute("/api/voice-chat")({
         if (!messages.length) return new Response("messages required", { status: 400 });
         if (body.name) messages.unshift({ role: "user", content: `(Mera naam ${String(body.name).slice(0, 40)} hai)` });
 
+        const langRule = body.replyLang === "en"
+          ? "User is speaking ENGLISH. Reply ONLY in casual English, e.g. \"I'm great bro, what's up?\""
+          : "User is speaking Hindi/Urdu. Reply ONLY in Roman Hindi/Urdu, e.g. \"Ek dum mast bhai!\"";
+        messages.push({ role: "user", content: `(Instruction: ${langRule})` });
         const groq = process.env["GROQ_API_KEY"];
         const deepseek = process.env["DEEPSEEK_API_KEY"];
         const providers: (() => Promise<string>)[] = [];

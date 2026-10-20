@@ -1,5 +1,5 @@
 import { ConversationProvider, useConversation } from "@elevenlabs/react";
-import { cleanTranscript, mergeFinal } from "@/lib/voice-transcript";
+import { cleanTranscript, detectSpeechLang, mergeFinal } from "@/lib/voice-transcript";
 import { useEffect, useRef, useState } from "react";
 import { Mic, MicOff, X } from "lucide-react";
 import { toast } from "sonner";
@@ -71,27 +71,19 @@ function GalaxyScene({
   phase: ScenePhase; ampRef: { current: number }; status: string; text: string;
   muted: boolean; onMute: () => void; onEnd: () => void; onTap?: () => void;
 }) {
-  const imgRef = useRef<HTMLImageElement | null>(null);
+  const imgRef = useRef<HTMLDivElement | null>(null);
   const ringRef = useRef<HTMLDivElement | null>(null);
   const phaseRef = useRef(phase);
   phaseRef.current = phase;
   useEffect(() => {
     let raf = 0;
-    let angle = 0;
     let last = performance.now();
     const loop = (t: number) => {
       const dt = Math.min(0.1, (t - last) / 1000);
       last = t;
       const p = phaseRef.current;
-      const period = p === "speaking" ? 20 : p === "listening" ? 8 : 60;
-      angle = (angle + (dt * 360) / period) % 360;
       const a = ampRef.current;
-      const pulse = p === "speaking" ? 1.025 + Math.sin(t / 400) * 0.025 + a * 0.03 : 1;
-      if (imgRef.current) {
-        imgRef.current.style.transform = `rotate(${angle}deg) scale(${pulse})`;
-        imgRef.current.style.filter = p === "speaking"
-          ? `brightness(${1.2 + a * 0.3}) contrast(1.1)` : "brightness(1.2) contrast(1.1)";
-      }
+      if (imgRef.current) imgRef.current.style.opacity = String(p === "speaking" ? 0.55 + a * 0.3 : 0.45);
       if (ringRef.current) {
         const k = p === "speaking" ? 0.4 + a : p === "listening" ? 0.25 + Math.abs(Math.sin(t / 500)) * 0.2 : 0.1;
         ringRef.current.style.transform = `translate(-50%,-50%) scale(${0.9 + k * 0.4})`;
@@ -108,10 +100,12 @@ function GalaxyScene({
 
   return (
     <div className="fixed inset-0 z-[70] overflow-hidden bg-background" onClick={onTap}>
-      <img ref={imgRef} src={proAvatar.url} alt="" aria-hidden className="galaxy-bg pointer-events-none select-none" draggable={false} />
+      <div aria-hidden className={`galaxy-layer galaxy-far ${phase === "speaking" ? "galaxy-glow" : ""}`} style={{ backgroundImage: `url(${proAvatar.url})` }} />
+      <div ref={imgRef} aria-hidden className="galaxy-layer galaxy-near" style={{ backgroundImage: `url(${proAvatar.url})` }} />
+      <div aria-hidden className="galaxy-stars pointer-events-none" />
       <div className="galaxy-overlay pointer-events-none" />
       <div ref={ringRef} aria-hidden className="pointer-events-none fixed left-1/2 top-[42%] h-64 w-64 rounded-full border-2 border-primary shadow-[0_0_60px_var(--primary)]" />
-      <div className="relative z-10 flex h-full flex-col items-center justify-between px-6 pb-[calc(env(safe-area-inset-bottom)+54px)] pt-6">
+      <div className="relative z-10 flex h-full flex-col items-center justify-between px-6 pb-[calc(env(safe-area-inset-bottom)+90px)] pt-6">
         <div className="flex w-full justify-end">
           <button type="button" aria-label="Close voice chat" onClick={(e) => { e.stopPropagation(); onEnd(); }} className="glass-btn galaxy-text flex h-11 w-11 items-center justify-center rounded-full">
             <X className="h-5 w-5" />
@@ -168,7 +162,7 @@ export function getSpeechRecognition(): (new () => SpeechRecognitionLike) | null
   return w.SpeechRecognition || w.webkitSpeechRecognition || null;
 }
 
-const LOCALES: Record<string, string> = { en: "en-US", ur: "hi-IN", hi: "hi-IN", ar: "ar-SA" };
+const LOCALES: Record<string, string> = { en: "en-IN", ur: "hi-IN", hi: "hi-IN", ar: "ar-SA" };
 
 /** Markdown / code hata ke bolne layak saaf text. */
 export function speakableText(md: string) {
@@ -276,7 +270,9 @@ function LegacyVoiceModal({
       setText("");
       setP("speaking");
       try { recRef.current?.start(); } catch { /* already running */ }
-      void speakHuman(answer, lang, () => {
+      const userLang = detectSpeechLang(value);
+      if (recRef.current) recRef.current.lang = userLang === "en" ? "en-IN" : "hi-IN";
+      void speakHuman(answer, userLang, () => {
         if (aliveRef.current) startListening();
       }, ampRef);
     } catch {
@@ -356,14 +352,8 @@ function LegacyVoiceModal({
         }
       }
     };
-    // Voice khulte hi user se khud baat shuru kare
-    const greet = "Arre bhai, aa gaya tu! Suna, aaj kal kya chal raha hai?";
-    setReply(greet);
-    setP("speaking");
-    try { rec.start(); } catch { /* ignore */ }
-    void speakHuman(greet, lang, () => {
-      if (aliveRef.current) startListening();
-    }, ampRef);
+    // AI pehle nahi bolega — sirf suno
+    startListening();
 
     return () => {
       aliveRef.current = false;
