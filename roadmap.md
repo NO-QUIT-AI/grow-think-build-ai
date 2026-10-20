@@ -1,7 +1,8 @@
 # Pending completion
 - [x] Fix call lifecycle, friend-only permissions, cancelled rings and stale invites; 7 regression tests pass.
 - [x] Verify signed-in invalid-invite rejection and database self-call rejection.
-- [ ] Verify ring, accept, Jitsi join and Missed/Ended bubbles in two browsers using the user's chosen accounts.
+- [x] Two-browser test: accepted the chosen accounts' pending friendship, verified ring, reject→Missed bubble, accept→same call room, hangup→Ended bubble in both browsers. Fixed clipped Jitsi iframe; build OK and 3 call tests pass.
+- [ ] Verify actual two-person media connection (blocked: meet.jit.si requires moderator login; both browsers reached Join and then the moderator-login waiting screen).
 - [x] Add local scene splitting, free voice, stock/local clips, captions and /auto-video editor.
 - [x] Generate and download a real MP4; verify H.264 picture, AAC audio and 6.15s duration. Sandbox Chromium lacks H.264 playback; failed Play now shows download guidance.
 - [x] Replace Pexels with Pixabay; secure key saved, authenticated search returned 3 large clips, captions-only MP4 export verified; 9 regression tests pass and preview build OK.
