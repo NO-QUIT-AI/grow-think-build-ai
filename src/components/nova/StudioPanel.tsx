@@ -408,7 +408,7 @@ export function StudioPanel({
               </Button>
             </div>
             {active && <Suspense fallback={<div className="flex h-[440px] items-center justify-center"><Loader2 className="animate-spin" /></div>}>
-              <StudioCodeEditor key={active.id} memoryId={active.id} code={code} onChange={setCode} canUndo={Array.isArray(active.blueprint?.["studio_history"]) && active.blueprint["studio_history"].length > 0} onSaved={savedCode} />
+              <StudioCodeEditor key={active.id} memoryId={active.id} code={code} baseCode={active.code} onChange={setCode} canUndo={Array.isArray(active.blueprint?.["studio_history"]) && active.blueprint["studio_history"].length > 0} onSaved={savedCode} />
             </Suspense>}
           </Panel>
           <Separator className="mx-1 w-1 rounded-full bg-border transition hover:bg-primary" />

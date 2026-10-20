@@ -21,14 +21,15 @@ import { claudeFrames, editedCode } from "@/lib/studio-edit";
 } };
 loader.config({ monaco });
 
-export default function StudioCodeEditor({ memoryId, code, canUndo, onChange, onSaved }: {
-  memoryId: string; code: string; canUndo: boolean; onChange: (code: string) => void;
+export default function StudioCodeEditor({ memoryId, code, baseCode, canUndo, onChange, onSaved }: {
+  memoryId: string; code: string; baseCode: string; canUndo: boolean; onChange: (code: string) => void;
   onSaved: (code: string, canUndo: boolean) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [instruction, setInstruction] = useState("");
   const [draft, setDraft] = useState<string | null>(null);
   const [original, setOriginal] = useState("");
+  const [originalBase, setOriginalBase] = useState("");
   const [busy, setBusy] = useState(false);
   const [applying, setApplying] = useState(false);
   const [error, setError] = useState("");
@@ -45,7 +46,7 @@ export default function StudioCodeEditor({ memoryId, code, canUndo, onChange, on
   }
   async function generate() {
     if (!instruction.trim() || busy) return;
-    setBusy(true); setError(""); setDraft(null); setOriginal(code);
+    setBusy(true); setError(""); setDraft(null); setOriginal(code); setOriginalBase(baseCode);
     const controller = new AbortController(); abort.current = controller;
     try {
       const response = await call({ action: "generate", code, instruction }, controller.signal);
@@ -78,7 +79,7 @@ export default function StudioCodeEditor({ memoryId, code, canUndo, onChange, on
     if (!undo && code !== original) { setError("Code changed. Generate a fresh comparison."); return; }
     setApplying(true); setError("");
     try {
-      const response = await call({ action: undo ? "file_undo" : "file_edit", code: undo ? code : draft, expected: code });
+      const response = await call({ action: undo ? "file_undo" : "file_edit", code: undo ? code : draft, expected: undo ? baseCode : originalBase });
       const result = await response.json() as { code: string; canUndo: boolean };
       onSaved(result.code, result.canUndo); setDraft(null); setOpen(false); setInstruction("");
       toast.success(undo ? "Previous code restored" : "AI edit applied");
@@ -86,14 +87,14 @@ export default function StudioCodeEditor({ memoryId, code, canUndo, onChange, on
     finally { setApplying(false); }
   }
   return <div className="studio-editor flex min-h-[440px] flex-1 flex-col overflow-hidden rounded-md border border-border">
-    <div className="flex items-center gap-2 border-b border-border p-2">
+    <div className="flex flex-wrap items-center gap-2 border-b border-border p-2">
       <span className="mr-auto font-mono text-xs text-muted-foreground">index.html</span>
       <Button variant="ghost" size="sm" disabled={!canUndo || busy || applying} title="Undo saved file edit" onClick={() => void apply(true)}><Undo2 /> Undo</Button>
       <Button size="sm" variant="outline" onClick={() => setOpen(true)}><Sparkles /> AI Edit</Button>
     </div>
     {open && <form className="flex flex-wrap items-center gap-2 border-b border-primary/40 bg-background p-2" onSubmit={(e) => { e.preventDefault(); void generate(); }}>
       <Sparkles className="h-4 w-4 text-primary" />
-      <input ref={inputRef} aria-label="AI edit instruction" value={instruction} onChange={(e) => setInstruction(e.target.value)} placeholder="Make this black, add NO QUIT brand…" disabled={busy || applying} className="min-w-0 flex-1 bg-transparent text-sm outline-none" />
+      <input ref={inputRef} aria-label="AI edit instruction" value={instruction} onChange={(e) => setInstruction(e.target.value)} placeholder="Make this black, add NO QUIT brand…" disabled={busy || applying} className="min-w-0 basis-full bg-transparent text-sm outline-none" />
       {busy ? <Button type="button" size="sm" variant="outline" onClick={() => abort.current?.abort()}><X /> Stop</Button> : <Button size="sm" disabled={!instruction.trim() || applying}><Sparkles /> Generate</Button>}
       <Button type="button" size="icon" variant="ghost" aria-label="Close AI edit" disabled={busy || applying} onClick={() => { setOpen(false); setDraft(null); setError(""); }}><X /></Button>
     </form>}
