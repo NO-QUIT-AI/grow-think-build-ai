@@ -1,4 +1,5 @@
 # Pending completion
+- [ ] Update ElevenLabs motivational prompt, multilingual voice model and automatic language switching; verify hosted agent settings.
 - [x] Upgrade Build Studio: bundled Monaco Ctrl+K and Claude Sonnet 5 streaming, diff approval, persistent undo and user-scoped Chat-to-Studio files. Signed-in real Claude → Apply → saved code → Undo and Chat → same file → auto-open verified; 12 regression tests pass, build OK. Voice shares Chat submission but microphone recognition was not tested.
 - [x] Add separate /jalsa-chat, QR pairing, local offline queue and private online archive sync. Signed-in offline save → reconnect sync → cloud readback verified; mode OFF disables sending and mobile has no overflow. Calls/Pixabay regression tests pass.
 - [ ] Verify two-device direct Jalsa delivery and QR camera scan (blocked: sandbox WebRTC host candidate gathering never completes; real Wi-Fi/hotspot devices required).

@@ -19,3 +19,4 @@
 - Jalsa uses QR-exchanged compressed WebRTC SDP with local ICE candidates only; local messages persist before send and require peer acknowledgments, while jalsa_messages is an owner-scoped archive, never a Community transport — browsers cannot provide Bluetooth peripheral mesh.
 - Studio's lazily loaded bundled Monaco editor uses /api/studio and memories as the source of truth; persistent history and optimistic version checks prevent stale diff application, while owner writes mirror through the existing Genesis R2 writer.
 - Chat passes the active Studio memory ID and draft code, uses user-scoped file_edit/file_undo tools, and opens successful build results by memoryId; unrelated chat model routing remains unchanged.
+- ElevenLabs call setup synchronizes a shared configuration with language presets and the language_detection system tool; use a valid primary language rather than unsupported "auto", preserving other agent settings.
