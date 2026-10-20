@@ -37,11 +37,14 @@ export function cleanTranscript(text: string): string {
 
 const EN_WORDS = new Set("i you he she it we they me my your is am are was were be have has do does did what how why when where who hello hi hey good great fine thanks thank please the a an and or but to of in on for with this that yes no okay ok bro man doing going today now tell can will would want know like love".split(" "));
 
-/** "en" agar aadhe se zyada lafz English hon, warna "hi" (Roman Hindi/Urdu). */
+const HINDI_ROMAN = new Set("kya hai hain bhai yaar yar mast acha achha accha batao bata suno kahan kaise kaisa haal theek thik nahi nahin haan main mera meri tum tera teri aap kar karo raha rahi hoon ho tha thi aaj kal abhi kuch sab bas chal arre arey dekho matlab samjha".split(" "));
+
+/** "en" jab 60%+ lafz English hon aur koi Roman Hindi lafz na ho, warna "hi". */
 export function detectSpeechLang(text: string): "en" | "hi" {
   if (/[\u0900-\u097F\u0600-\u06FF]/.test(text)) return "hi";
-  const words = text.toLowerCase().match(/[a-z']+/g) ?? [];
-  if (!words.length) return "hi";
-  const en = words.filter((w) => EN_WORDS.has(w)).length;
-  return en / words.length > 0.5 ? "en" : "hi";
+  const tokens = text.trim().split(/\s+/).filter(Boolean);
+  const latin = text.toLowerCase().match(/[a-z']+/g) ?? [];
+  if (!tokens.length || !latin.length) return "hi";
+  const hasHindi = latin.some((w) => HINDI_ROMAN.has(w));
+  return latin.length / tokens.length > 0.6 && !hasHindi ? "en" : "hi";
 }
