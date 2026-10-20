@@ -34,3 +34,14 @@ export function cleanTranscript(text: string): string {
   }
   return words.join(" ").slice(0, MAX_TRANSCRIPT).trim();
 }
+
+const EN_WORDS = new Set("i you he she it we they me my your is am are was were be have has do does did what how why when where who hello hi hey good great fine thanks thank please the a an and or but to of in on for with this that yes no okay ok bro man doing going today now tell can will would want know like love".split(" "));
+
+/** "en" agar aadhe se zyada lafz English hon, warna "hi" (Roman Hindi/Urdu). */
+export function detectSpeechLang(text: string): "en" | "hi" {
+  if (/[\u0900-\u097F\u0600-\u06FF]/.test(text)) return "hi";
+  const words = text.toLowerCase().match(/[a-z']+/g) ?? [];
+  if (!words.length) return "hi";
+  const en = words.filter((w) => EN_WORDS.has(w)).length;
+  return en / words.length > 0.5 ? "en" : "hi";
+}
