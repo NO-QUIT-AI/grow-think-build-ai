@@ -1,5 +1,6 @@
 # Pending completion
-- [ ] Build separate QR-paired local Jalsa chat, persistent offline queue, private online archive sync; preserve Calls and Pixabay.
+- [x] Add separate /jalsa-chat, QR pairing, local offline queue and private online archive sync. Signed-in offline save → reconnect sync → cloud readback verified; mode OFF disables sending and mobile has no overflow. Calls/Pixabay regression tests pass.
+- [ ] Verify two-device direct Jalsa delivery and QR camera scan (blocked: sandbox WebRTC host candidate gathering never completes; real Wi-Fi/hotspot devices required).
 - [x] Fix call lifecycle, friend-only permissions, cancelled rings and stale invites; 7 regression tests pass.
 - [x] Verify signed-in invalid-invite rejection and database self-call rejection.
 - [x] Two-browser test: accepted the chosen accounts' pending friendship, verified ring, reject→Missed bubble, accept→same call room, hangup→Ended bubble in both browsers. Fixed clipped Jitsi iframe; build OK and 3 call tests pass.

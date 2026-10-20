@@ -52,7 +52,13 @@ function LocalChat({ ownerId }: { ownerId: string | undefined }) {
     let active = true;
     const element = qrColors.current;
     const color = element ? getComputedStyle(element) : null;
-    const hex = (value: string) => '#' + (value.match(/\d+/g) ?? []).slice(0,3).map(n => Number(n).toString(16).padStart(2,'0')).join('');
+    const hex = (value: string) => {
+      const canvas = document.createElement('canvas'); canvas.width = 1; canvas.height = 1;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('QR image unavailable');
+      ctx.fillStyle = value; ctx.fillRect(0,0,1,1);
+      return '#' + Array.from(ctx.getImageData(0,0,1,1).data).slice(0,3).map(n => n.toString(16).padStart(2,'0')).join('');
+    };
     void QRCode.toDataURL(code, { width: 440, margin: 3, errorCorrectionLevel: 'L', ...(color ? { color: { dark: hex(color.color), light: hex(color.backgroundColor) } } : {}) }).then(url => { if (active) setQr(url); }).catch(() => { if (active) setError('QR is too large — copy the code instead.'); });
     return () => { active = false; };
   }, [code]);
