@@ -271,3 +271,37 @@
   --border: #263137;
 }
 .studio-editor { background: var(--background); }
+
+@keyframes galaxyRotate {
+  from { transform: rotate(0deg) scale(1); }
+  to { transform: rotate(360deg) scale(1.05); }
+}
+@keyframes galaxyPulse {
+  0%, 100% { filter: brightness(1.2) contrast(1.1); }
+  50% { filter: brightness(1.45) contrast(1.15) drop-shadow(0 0 40px oklch(0.85 0.15 200)); }
+}
+@utility galaxy-bg {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 150vmax;
+  height: 150vmax;
+  margin: -75vmax 0 0 -75vmax;
+  object-fit: cover;
+  filter: brightness(1.2) contrast(1.1);
+  will-change: transform;
+}
+@utility galaxy-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+}
+@utility galaxy-text {
+  color: oklch(1 0 0);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
+}
+@utility glass-btn {
+  background: color-mix(in oklab, var(--background) 25%, transparent);
+  backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid color-mix(in oklab, var(--foreground) 25%, transparent);
+}
