@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { claudeFrames, editedCode } from "@/lib/studio-edit";
 
-globalThis.MonacoEnvironment = { getWorker: (_module, label) => {
+(globalThis as typeof globalThis & { MonacoEnvironment?: { getWorker: (module: string, label: string) => Worker } }).MonacoEnvironment = { getWorker: (_module: string, label: string) => {
   if (["html", "handlebars", "razor"].includes(label)) return new HtmlWorker();
   if (["css", "scss", "less"].includes(label)) return new CssWorker();
   if (["typescript", "javascript"].includes(label)) return new TsWorker();
