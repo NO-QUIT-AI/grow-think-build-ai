@@ -1,5 +1,5 @@
 # Pending completion
-- [ ] Add /my-story with the exact original, English and Urdu, five sections, requested design, header/footer links and page metadata; verify language switching and mobile layout.
+- [x] Add /my-story with exact original Roman Urdu plus English and Urdu-script translations, five icon sections, black/neon-green design, header/footer links and metadata; verified language switching, RTL, mobile layout, CTA and exact original-text match. Build OK; not published.
 - [x] Update ElevenLabs motivational prompt, eleven_multilingual_v2 and language_detection; PATCH 200 and hosted GET readback verified, 6 voice tests pass, build OK. API rejects literal auto; model cannot enable Urdu/Punjabi/Bengali presets. Real spoken call remains untested.
 - [x] Upgrade Build Studio: bundled Monaco Ctrl+K and Claude Sonnet 5 streaming, diff approval, persistent undo and user-scoped Chat-to-Studio files. Signed-in real Claude → Apply → saved code → Undo and Chat → same file → auto-open verified; 12 regression tests pass, build OK. Voice shares Chat submission but microphone recognition was not tested.
 - [x] Add separate /jalsa-chat, QR pairing, local offline queue and private online archive sync. Signed-in offline save → reconnect sync → cloud readback verified; mode OFF disables sending and mobile has no overflow. Calls/Pixabay regression tests pass.
