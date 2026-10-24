@@ -15,10 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { redeemReferral } from "@/lib/referral";
 import { LegalFooter } from "@/components/legal/LegalPage";
 import { LanguageSelector } from "@/components/LanguageSelector";
-import { AdSidebar } from "@/components/ads/AdSidebar";
-import { SmartLinkCta } from "@/components/ads/SmartLinkCta";
 import { useT } from "@/i18n/LanguageContext";
-import { AdSense } from "@/components/AdSense";
 import { useJalsaMode } from "@/hooks/useJalsaMode";
 import type { StudioContext } from "@/lib/studio-edit";
 
@@ -150,8 +147,6 @@ function Home() {
         <LanguageSelector />
       </div>
 
-      <AdSense adSlot="HOME_INFEED_SLOT_ID" />
-
       <InviteDialog userId={user.id} open={inviteOpen} onOpenChange={setInviteOpen} />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col">
@@ -175,8 +170,6 @@ function Home() {
             refreshKey={refreshKey}
             onOpenStudio={openMemoryInStudio}
           />
-          <AdSense adSlot="BUILDS_SLOT_ID" />
-
         </TabsContent>
         <TabsContent value="studio" className="mt-0 flex min-h-0 flex-1 flex-col overflow-hidden">
           <StudioPanel
