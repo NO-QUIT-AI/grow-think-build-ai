@@ -33,6 +33,9 @@ export function LegalFooter({ className }: { className?: string }) {
       <Link to="/about" className="hover:text-primary">
         About
       </Link>
+      <Link to="/my-story" className="hover:text-primary">
+        My Story
+      </Link>
       <Link to="/contact" className="hover:text-primary">
         Contact
       </Link>

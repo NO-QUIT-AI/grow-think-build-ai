@@ -75,7 +75,7 @@ function Home() {
     return (
       <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 pb-4 pt-5">
         <main className="flex w-full min-w-0 flex-col">
-          <header className="mb-4 flex items-center gap-3">
+          <header className="mb-4 flex flex-wrap items-center gap-3">
             <img
               src={logoAsset.url}
               alt="NO QUIT AI logo"
@@ -87,6 +87,7 @@ function Home() {
               </h1>
               <p className="truncate text-xs text-muted-foreground">{t("homeTagline")}</p>
             </div>
+            <Button asChild variant="ghost" size="sm"><Link to="/my-story">My Story</Link></Button>
             <Button asChild size="sm" className="btn-green">
               <Link to="/auth">Sign in</Link>
             </Button>
@@ -120,7 +121,8 @@ function Home() {
             <p className="truncate text-xs text-muted-foreground">{t("homeTagline")}</p>
           </div>
         </div>
-        <div className="flex items-center justify-end gap-0.5 md:gap-1">
+        <div className="flex flex-wrap items-center justify-end gap-0.5 md:gap-1">
+          <Button asChild variant="ghost" size="sm"><Link to="/my-story">My Story</Link></Button>
           <Button
             variant="ghost"
             asChild
