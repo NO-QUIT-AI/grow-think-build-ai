@@ -200,7 +200,7 @@ export const HELP_ENTRIES: HelpEntry[] = [
     id: "guide",
     title: "How to Use Guide",
     icon: "book",
-    keywords: ["guide", "kaise", "how to", "sikhao", "tutorial", "features"],
+    keywords: ["guide", "how to use", "sikhao", "tutorial", "features"],
     route: "/how-to-use",
     what: "Har feature ki detail guide — search ke sath.",
     steps: [
