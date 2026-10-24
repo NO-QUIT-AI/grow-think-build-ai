@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { LegalPage } from "@/components/legal/LegalPage";
+import { AdSlot } from "@/components/ads/AdSlot";
 
 const EMAIL = "ranaimranp2@gmail.com";
 
@@ -109,6 +110,7 @@ function Contact() {
         content you deleted yourself. Thank you for helping us build a friendly, useful place to
         create with AI.
       </p>
+      <AdSlot name="footer" className="mt-6" />
     </LegalPage>
   );
 }

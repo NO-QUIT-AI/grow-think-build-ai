@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { LegalPage } from "@/components/legal/LegalPage";
+import { AdSlot } from "@/components/ads/AdSlot";
 
 export const Route = createFileRoute("/terms")({
   head: () => ({
@@ -74,6 +75,7 @@ function Terms() {
         We may update these terms; continued use means you accept the update. Questions:{" "}
         <a className="underline" href="mailto:ranaimranp2@gmail.com">ranaimranp2@gmail.com</a>.
       </p>
+      <AdSlot name="footer" className="mt-6" />
     </LegalPage>
   );
 }
