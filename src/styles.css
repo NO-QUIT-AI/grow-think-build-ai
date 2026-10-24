@@ -116,6 +116,22 @@
   color-scheme: dark;
 }
 
+.story-page {
+  --background: #000000;
+  --primary: #00FF88;
+  --primary-foreground: #000000;
+  --ring: #00FF88;
+  --border: oklch(0.3 0.012 160);
+  --input: oklch(0.3 0.012 160);
+  --accent: oklch(0.24 0.03 160);
+  --accent-foreground: oklch(0.96 0.008 220);
+}
+.story-page h1, .story-page h2 { letter-spacing: 0; }
+.story-cover { background: linear-gradient(0deg, var(--background), color-mix(in oklab, var(--background) 60%, transparent) 50%, color-mix(in oklab, var(--background) 15%, transparent)); }
+.story-urdu { font-family: "Noto Naskh Arabic", var(--font-sans); }
+.story-urdu h2 { font-family: inherit; }
+.story-urdu p { font-size: 1.25rem; line-height: 2.1; }
+
 @layer base {
   * {
     border-color: var(--color-border);
