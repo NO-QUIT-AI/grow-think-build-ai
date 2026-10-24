@@ -115,6 +115,11 @@ export function ToolsMenu({ onNewChat, onClose, history }: { onNewChat: () => vo
         </div>
       </div>
       <div className="flex-1 overflow-y-auto p-2">
+        <Link to="/how-to-use" onClick={onClose} className="mb-2 flex items-center gap-3 rounded-xl border border-primary/40 px-2 py-2.5 text-sm text-primary hover:bg-secondary/70">
+          <FileSearch className="h-4 w-4" />
+          <span className="flex-1">How to Use Guide</span>
+          <ChevronRight className="h-4 w-4" />
+        </Link>
         {sections.map((s) => (
           <div key={s} className="mb-3">
             <p className="px-2 pb-1 pt-2 text-[10px] font-semibold tracking-widest text-muted-foreground">{s}</p>
