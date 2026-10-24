@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
 import { InstallAppBanner } from "@/components/InstallAppBanner";
 import { IncomingCallListener } from "@/components/calls/IncomingCallListener";
+import { HelpAssistant } from "@/components/HelpAssistant";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { initAdsConfig } from "@/lib/adsense";
 import { LanguageProvider } from "@/i18n/LanguageContext";
@@ -159,6 +160,7 @@ function RootComponent() {
         <Outlet />
         <InstallAppBanner />
         <IncomingCallListener />
+        <HelpAssistant />
         <Toaster position="top-center" richColors />
         <RewardAdHost />
       </LanguageProvider>
