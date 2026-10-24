@@ -53,10 +53,6 @@ function Home() {
   const [inviteOpen, setInviteOpen] = useState(false);
 
   useEffect(() => {
-    if (!loading && !user) navigate({ to: "/auth" });
-  }, [user, loading, navigate]);
-
-  useEffect(() => {
     if (user) void redeemReferral();
   }, [user]);
 
@@ -66,11 +62,40 @@ function Home() {
     return () => window.removeEventListener("nqai-open-tab", h);
   }, []);
 
-  if (loading || !user) {
+  if (loading) {
     return (
       <main className="flex min-h-screen items-center justify-center">
         <Brain className="h-8 w-8 text-primary node-pulse" />
       </main>
+    );
+  }
+
+  // Logged-out visitors (and search engines) see a public landing page with
+  // full informational content instead of being bounced to the sign-in form.
+  if (!user) {
+    return (
+      <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 pb-4 pt-5">
+        <main className="flex w-full min-w-0 flex-col">
+          <header className="mb-4 flex items-center gap-3">
+            <img
+              src={logoAsset.url}
+              alt="NO QUIT AI logo"
+              className="h-10 w-10 shrink-0 rounded-2xl border border-border object-cover"
+            />
+            <div className="min-w-0 flex-1">
+              <h1 className="truncate text-base font-semibold leading-tight md:text-lg">
+                NO QUIT AI <span className="text-gradient">{t("buildStudio")}</span>
+              </h1>
+              <p className="truncate text-xs text-muted-foreground">{t("homeTagline")}</p>
+            </div>
+            <Button asChild size="sm" className="btn-green">
+              <Link to="/auth">Sign in</Link>
+            </Button>
+          </header>
+          <SeoContent />
+          <LegalFooter />
+        </main>
+      </div>
     );
   }
 
