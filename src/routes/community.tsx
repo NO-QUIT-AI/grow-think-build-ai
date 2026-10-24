@@ -15,7 +15,6 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { AdSlot } from "@/components/ads/AdSlot";
 import { CommunityShell } from "@/components/community/CommunityShell";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -381,7 +380,6 @@ function Feed({ userId }: { userId: string }) {
           const isOpen = openComments === post.id;
           return (
             <Fragment key={post.id}>
-            {index > 0 && index % 5 === 0 && <AdSlot name="feed" />}
             <article className="panel p-3">
               <div className="flex items-center gap-2">
                 <Link
@@ -498,7 +496,6 @@ function Feed({ userId }: { userId: string }) {
         })}
       </div>
 
-      <AdSlot name="footer" className="mt-4" />
     </CommunityShell>
   );
 }
