@@ -27,6 +27,9 @@ export function LegalPage({
 export function LegalFooter({ className }: { className?: string }) {
   return (
     <nav className={`mt-10 flex flex-wrap gap-4 border-t border-border pt-4 text-[11px] text-muted-foreground ${className ?? ""}`}>
+      <Link to="/how-to-use" className="hover:text-primary">
+        How to Use Guide
+      </Link>
       <Link to="/about" className="hover:text-primary">
         About
       </Link>
