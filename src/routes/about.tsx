@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { LegalPage } from "@/components/legal/LegalPage";
+import { AdSlot } from "@/components/ads/AdSlot";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -108,6 +109,7 @@ function About() {
         We usually reply within 2 business days. See the full{" "}
         <Link to="/contact" className="underline">Contact page</Link> for tips on getting a faster answer.
       </p>
+      <AdSlot name="footer" className="mt-6" />
     </LegalPage>
   );
 }

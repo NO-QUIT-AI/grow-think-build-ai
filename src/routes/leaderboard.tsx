@@ -3,7 +3,6 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Clock, Loader2, MessageCircle, Trophy, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 
-import { AdSlot } from "@/components/ads/AdSlot";
 import { Button } from "@/components/ui/button";
 import { CommunityShell } from "@/components/community/CommunityShell";
 import { useAuth } from "@/hooks/useAuth";
@@ -172,7 +171,6 @@ function Board({ meId }: { meId: string }) {
         })}
       </div>
 
-      <AdSlot name="footer" className="mt-4" />
     </CommunityShell>
   );
 }

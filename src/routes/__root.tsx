@@ -141,9 +141,15 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   // Load the runtime ad config (publisher ID from env) and inject the
-  // AdSense script exactly once per page load.
+  // AdSense script exactly once per page load — but ONLY on static content
+  // pages. Google policy forbids ads on chat/app screens, so the script
+  // (and Auto Ads) never loads on the main app, community or messaging routes.
   useEffect(() => {
-    void initAdsConfig();
+    const AD_PATHS = ["/about", "/contact", "/privacy", "/terms", "/blog"];
+    const path = window.location.pathname;
+    if (AD_PATHS.some((p) => path === p || path.startsWith(`${p}/`))) {
+      void initAdsConfig();
+    }
   }, []);
 
   return (

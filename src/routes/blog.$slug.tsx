@@ -1,6 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 
 import { LegalFooter } from "@/components/legal/LegalPage";
+import { AdSlot } from "@/components/ads/AdSlot";
 import { getPost } from "@/lib/blog-posts";
 
 export const Route = createFileRoute("/blog/$slug")({
@@ -54,6 +55,7 @@ function BlogPostPage() {
           ))}
         </div>
       </article>
+      <AdSlot name="footer" className="mt-6" />
       <LegalFooter />
     </main>
   );

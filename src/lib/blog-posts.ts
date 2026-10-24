@@ -232,6 +232,132 @@ export const BLOG_POSTS: BlogPost[] = [
       },
     ],
   },
+  {
+    slug: "choose-a-domain-name-for-your-business",
+    title: "How to Choose the Perfect Domain Name for Your Business or Project",
+    description:
+      "A practical guide to picking a domain name that is short, memorable and trustworthy — and how to check availability and connect it to your site.",
+    date: "20 October 2026",
+    readMinutes: 6,
+    sections: [
+      {
+        h: "Why your domain name matters more than you think",
+        p: [
+          "Your domain name is your address on the internet. It appears on your business cards, your WhatsApp status, your invoices and every link you share. A good name builds trust before a visitor even opens your page; a confusing one makes people hesitate. For a small business, a portfolio or a side project, the domain is often the very first impression you make.",
+          "The good news is that choosing a strong name is a skill, not a talent. There are clear rules that professional brands follow, and anyone can apply them in an afternoon. This guide walks through those rules and shows how to check and connect a domain using the Domain Search tool inside NO QUIT AI.",
+        ],
+      },
+      {
+        h: "Rule 1: Keep it short and easy to say",
+        p: [
+          "The best domain names pass the \"phone test\": if you say the name to someone on a call, they should be able to type it correctly without asking you to spell it. That means avoiding hyphens, numbers and unusual spellings. \"sweetcrumbs.com\" passes the test; \"sweet-crumbs-4u.com\" does not.",
+          "Aim for two or three words at most. Every extra word adds a chance for typos, and typos send your visitors to someone else's page — or nowhere at all. If your first choice is taken, shorten it rather than making it longer.",
+        ],
+      },
+      {
+        h: "Rule 2: Match your real name or your main promise",
+        p: [
+          "If you already have a business name that customers know, try to get that exact name first. Consistency between your shop sign, your Instagram handle and your domain makes you easy to find and hard to confuse with competitors.",
+          "If the exact name is taken, add a word that describes what you do or where you are: \"sweetcrumbslahore.com\" or \"sweetcrumbscakes.com\". This keeps the name memorable while making it unique. Avoid adding random words like \"best\" or \"official\" — they look desperate and reduce trust.",
+        ],
+      },
+      {
+        h: "Rule 3: Choose the right extension",
+        p: [
+          "The extension is the part after the dot. For most businesses, .com is still the strongest choice because people type it by habit. If .com is taken and your audience is mostly in one country, a country extension like .pk or .ae can work well and is often cheaper.",
+          "Newer extensions like .store, .tech or .online are acceptable for projects and startups, but be honest with yourself: many visitors will still type .com first. Whatever you choose, use the same extension everywhere so people learn it once.",
+        ],
+      },
+      {
+        h: "Rule 4: Check availability the smart way",
+        p: [
+          "Before you fall in love with a name, check three things: the domain itself, the matching social media handles, and any existing trademark in your country. A name that is free as a domain but taken on Instagram will cause friction later.",
+          "Inside NO QUIT AI, the Domain Search tool lets you check availability without leaving your workspace. Search a few variations, compare them side by side, and write down your top three before deciding. Never search for a name on a random website and then wait days to buy it — some services register searched names and resell them at a higher price.",
+        ],
+      },
+      {
+        h: "Rule 5: Think about the next five years",
+        p: [
+          "A common mistake is choosing a name that is too narrow. \"alisphonerepairgulberg.com\" works today, but what happens when Ali opens a second branch or starts selling accessories? A slightly broader name like \"alismobiles.com\" leaves room to grow.",
+          "Also say the name out loud in every language your customers speak. A word that sounds fine in English can mean something embarrassing in Urdu, Hindi or Arabic. Ask two or three friends before you commit — fresh ears catch problems you cannot see yourself.",
+        ],
+      },
+      {
+        h: "Connecting your domain to your site",
+        p: [
+          "Once you have a name, connecting it to the website you built in NO QUIT AI is straightforward. Publish your build first so it has a live address, then follow the domain connection steps to point your new name at it. Until your custom domain is ready, your free subdomain link keeps working, so you never lose visitors during the switch.",
+          "After connecting, test everything on a phone: open the homepage, click every button, and share the link with one friend before announcing it publicly. Small checks at this stage prevent embarrassing mistakes later.",
+        ],
+      },
+      {
+        h: "Final checklist before you buy",
+        p: [
+          "Before paying, run through this list: Is it under fifteen characters? Can a stranger spell it after hearing it once? Does it avoid hyphens and numbers? Is the .com or your country's extension available? Are the matching social handles free? Does it give you room to grow?",
+          "If the answer to all of these is yes, you have found a strong name. Register it, connect it, and start sharing — a good domain only becomes valuable when people actually visit it.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "start-earning-online-with-ai-tools",
+    title: "From Idea to Income: How Students and Freelancers Can Start Earning Online With AI Tools",
+    description:
+      "A realistic, honest guide to turning AI building tools into your first online income — what works, what to avoid and how to get your first paying client.",
+    date: "22 October 2026",
+    readMinutes: 7,
+    sections: [
+      {
+        h: "The opportunity is real — but so is the work",
+        p: [
+          "Every day, small businesses need websites, CVs, menus, price lists and social media pages. Most of them cannot afford an agency, and most of them do not know that AI tools can now produce these things in hours instead of weeks. That gap between what businesses need and what they can afford is where your opportunity lives.",
+          "Let us be honest from the start: AI tools do not print money. They remove the technical barrier, but you still provide the judgment, the communication and the reliability that clients actually pay for. Think of AI as a power tool — a drill does not build furniture by itself, but a person with a drill builds far faster than a person without one.",
+        ],
+      },
+      {
+        h: "Service 1: Simple websites for local businesses",
+        p: [
+          "The most reliable first service is building one-page websites for local shops, tutors, home bakers, barbers and small service providers. These clients need something simple: their name, their services, their prices, their location and a WhatsApp button. With an AI builder like NO QUIT AI, you can produce a clean, mobile-friendly page in a single sitting.",
+          "Charge a modest, honest price for your time — your fee covers understanding the client's needs, collecting their real photos and information, reviewing the AI output carefully, and making revisions. A fair starter price in many markets is the equivalent of a nice dinner, not a month's salary. Your first three clients are for building a portfolio and references, not for getting rich.",
+        ],
+      },
+      {
+        h: "Service 2: CVs and job application documents",
+        p: [
+          "Job seekers constantly need professional CVs, and many struggle with formatting and wording. Using a CV maker, you can offer a same-day CV service: the client sends you their details, you produce a polished PDF, and you deliver it with one free revision.",
+          "The key to quality here is honesty. Never invent qualifications or exaggerate experience for a client — a CV that lies can cost someone a job and destroy your reputation. Your value is presentation and clarity, not fiction.",
+        ],
+      },
+      {
+        h: "Service 3: Content and product descriptions",
+        p: [
+          "Online sellers need product descriptions, menu text and social media captions. AI can draft these quickly, but raw AI text often sounds generic. Your job is to add the specific, real details that make copy sell: actual sizes, real delivery areas, honest materials, genuine customer questions.",
+          "This service pairs naturally with website building. A client who buys a page from you will often pay a little extra for well-written text to fill it.",
+        ],
+      },
+      {
+        h: "Finding your first clients",
+        p: [
+          "Your first clients are almost never strangers from the internet. They are people who already know you: a relative with a shop, a neighbour who tutors students, a friend starting a food business. Make a list of ten people you know who could use an online page, and offer the first two or three at a heavy discount in exchange for an honest review and permission to show the work.",
+          "After that, word of mouth does the work. Ask every happy client one question: \"Who else do you know that needs something like this?\" One good referral is worth more than a hundred social media posts when you are starting out.",
+        ],
+      },
+      {
+        h: "Mistakes that destroy trust",
+        p: [
+          "The fastest way to fail is overpromising. Do not claim you can get a client \"to the top of Google\" or guarantee sales. Promise what you control: a clean page, delivered on time, with their real information presented well.",
+          "The second mistake is delivering unchecked AI output. Read every sentence before the client sees it. Wrong phone numbers, invented opening hours and broken links make you look careless, and carelessness is the one thing a small freelancer cannot afford.",
+          "Finally, never disappear after delivery. Send a short message a week later asking if everything works. That single habit generates more repeat business than any advertising.",
+        ],
+      },
+      {
+        h: "A realistic 30-day plan",
+        p: [
+          "Week one: learn the tools by building three practice projects — a page for an imaginary shop, a CV for a fictional person, and a menu for a made-up restaurant. Week two: offer two discounted projects to people you know. Week three: deliver them carefully, collect feedback and fix your process. Week four: raise your price to a fair level and ask for referrals.",
+          "Thirty days will not make you wealthy, but it will give you something more valuable: proof that you can deliver. From there, income grows with your reputation. The name of this platform carries the whole philosophy — do not quit after the first difficult client or the first rejected offer. Improve, deliver, repeat.",
+        ],
+      },
+    ],
+  },
 ];
 
 export function getPost(slug: string) {
