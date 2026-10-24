@@ -4,8 +4,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Coins, Loader2, Pickaxe, Share2, Sparkles, Timer, Zap } from "lucide-react";
 import { toast } from "sonner";
 
-import { AdSlot } from "@/components/ads/AdSlot";
-import { SmartLinkCta } from "@/components/ads/SmartLinkCta";
 import { CommunityShell } from "@/components/community/CommunityShell";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -242,7 +240,6 @@ function Earn({ userId }: { userId: string }) {
           <Share2 className="mr-2 h-4 w-4" /> {t("shareInvite")}
         </Button>
 
-        <SmartLinkCta className="mt-2" />
       </section>
 
       <section className="mt-4 rounded-2xl border border-border bg-card p-4">
@@ -261,8 +258,6 @@ function Earn({ userId }: { userId: string }) {
         </ul>
         <p className="mt-2 text-[11px] text-muted-foreground">{t("earn_serverNote")}</p>
       </section>
-
-      <AdSlot name="footer" className="mt-4" />
 
       <section className="mt-2 rounded-2xl border border-border bg-card p-4">
         <h2 className="text-sm font-semibold">{t("earn_recent")}</h2>
