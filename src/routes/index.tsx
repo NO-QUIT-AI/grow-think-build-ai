@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Brain, Coins, FileText, LogOut, Users, UserPlus, Radio } from "lucide-react";
 import logoAsset from "@/assets/logo.jpg.asset.json";
@@ -42,7 +42,6 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const navigate = useNavigate();
   const t = useT();
   const { user, loading, signOut } = useAuth();
   const { enabled: jalsa } = useJalsaMode();
