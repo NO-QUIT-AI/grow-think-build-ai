@@ -74,6 +74,10 @@ function MyStory() {
             <div className="py-12 text-center md:py-16">
               <p className="font-display text-3xl font-bold leading-relaxed text-primary md:text-4xl">{story.quote}</p>
               {language !== "roman" && <p lang="en" dir="ltr" className="mt-4 text-sm text-muted-foreground">Degree nahi, himmat chahiye.</p>}
+              <section key={language} className="story-invitation mt-10 border-y border-primary/60 bg-primary/5 px-5 py-8 md:px-8 md:py-10" aria-label={language === "ur" ? "اب تمہاری باری ہے" : language === "roman" ? "Ab teri baari hai" : "Now it's your turn"}>
+                <Lightbulb aria-hidden="true" className="mx-auto mb-5 h-7 w-7 text-primary" />
+                <h2 className="text-2xl font-bold leading-relaxed text-foreground md:text-3xl">{story.invitation}</h2>
+              </section>
               <Button asChild size="lg" className="mt-8 h-auto max-w-full whitespace-normal py-3"><Link to="/">Try NO QUIT AI - Free Forever <ArrowUpRight /></Link></Button>
             </div>
           </article>

@@ -131,6 +131,14 @@
 .story-urdu { font-family: "Noto Naskh Arabic", var(--font-sans); }
 .story-urdu h2 { font-family: inherit; }
 .story-urdu p { font-size: 1.25rem; line-height: 2.1; }
+.story-invitation { animation: story-invitation-reveal 900ms ease-out both; }
+@keyframes story-invitation-reveal {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .story-invitation { animation: none; }
+}
 
 @layer base {
   * {

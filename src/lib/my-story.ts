@@ -12,6 +12,7 @@ export const storyVersions = {
       ["Look today: that same bike rider, who knew nothing about AI, has built his own AI.", "Its name is - NO QUIT AI.", "This app is free for everyone, rich or poor. Because it was built not for money, but for courage.", "If I, a 10th-grade-educated bike rider, can do it, why can't you?", "Remember - You don't need a degree. You need courage."],
     ],
     quote: "You don't need a degree. You need courage.",
+    invitation: "Now it's your turn. Whatever positive idea is in your mind, just tell it to NO QUIT AI. The rest will be done.",
   },
   ur: {
     title: "میری سچی کہانی - NO QUIT AI",
@@ -24,6 +25,7 @@ export const storyVersions = {
       ["آج دیکھو، اسی بائیک رائیڈر لڑکے نے، جس کو اے آئی کا کچھ نہیں پتا تھا، اپنا اے آئی بنا لیا ہے۔", "اس کا نام ہے - NO QUIT AI۔", "یہ ایپ امیر غریب سب کے لیے مفت ہے۔ کیونکہ یہ پیسوں کے لیے نہیں، ہمت کے لیے بنی ہے۔", "اگر میں دسویں پاس بائیک رائیڈر کر کے دکھا سکتا ہوں، تو تم کیوں نہیں؟", "یاد رکھو - ڈگری نہیں، ہمت چاہیے۔"],
     ],
     quote: "ڈگری نہیں، ہمت چاہیے۔",
+    invitation: "اب تمہاری باری ہے۔ تمہارے ذہن میں جو بھی اچھا آئیڈیا ہے، بس NO QUIT AI کو بتا دو۔ باقی کام ہو جائے گا۔",
   },
   roman: {
     title: "MY REAL STORY - NO QUIT AI",
@@ -36,5 +38,6 @@ export const storyVersions = {
       ["Aaj dekho, usi bike rider ladke ne, jis ko AI ka kuch nahi pata tha, usne apna AI bana liya hai.", "Uska naam hai - NO QUIT AI.", "Ye app ameer gareeb sab ke liye free hai. Kyunki ye paiso ke liye nahi, himmat ke liye bana hai.", "Agar main 10th pass bike rider karke dikha sakta hun, toh tum kyun nahi?", "Yaad rakho - Degree nahi, himmat chahiye."],
     ],
     quote: "Degree nahi, himmat chahiye.",
+    invitation: "Ab teri baari hai. Tere mind me jo bhi positive idea hai, bas NO QUIT AI ko bata de, baaki kaam ho jayega.",
   },
 };
