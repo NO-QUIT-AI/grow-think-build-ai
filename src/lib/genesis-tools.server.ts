@@ -11,6 +11,8 @@ import { vaultGet, vaultList } from "@/lib/vault.server";
 const MAX_FILE = 400_000;
 
 const cleanProject = (p: string) => p.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "").slice(0, 48) || "app";
+/** Shared with genesis-autonomy. */
+export const cleanProjectName = cleanProject;
 function cleanPath(p: string) {
   const parts = p.replace(/\\/g, "/").split("/").filter((s) => s && s !== "." && s !== "..");
   if (!parts.length) throw new Error("Invalid path");
