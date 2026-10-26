@@ -13,3 +13,23 @@
 - [x] Replace Pexels with Pixabay; secure key saved, authenticated search returned 3 large clips, captions-only MP4 export verified; 9 regression tests pass and preview build OK.
 - [ ] Publish completed features (waiting for explicit publish request).
 - [ ] External setup: wildcard domain, Worker deployment and provider keys (requires account access/setup).
+
+# Lovable-clone autonomy (15 updates)
+Phase 1:
+- [ ] 1. Auto agent loop: tool errors auto-read + self-fix retry up to 5 (prompt rules + maxRetries).
+- [ ] 2. db_write tool (insert/update/delete on profiles, nqai_wallets, community_posts, user_plans, referrals) + save referral code JYKXBWSA for owner.
+- [ ] 3. Free video fallback chain: FAL → HuggingFace → Google Veo → Pollinations poster.
+Phase 2:
+- [ ] 4. read_project tool (all files at once).
+- [ ] 5. Cost guard: paid tools ask "cost OK?" before running.
+- [ ] 6. Background jobs: video/voice run in background, agent keeps chatting.
+- [ ] 7. write_files multi-file write (5-6 files in one call).
+Phase 3:
+- [ ] 8. preview_url tool: instant live preview without full deploy.
+- [ ] 9. design_review tool: agent checks its own site for design flaws (heuristics; real screenshots not possible in worker).
+- [ ] 10. Cron job: daily mining report (/api/public/jobs/daily-report + managed schedule).
+- [ ] 11. Error telemetry: client errors auto-reported to owner (/api/public/error-report).
+- [ ] 12. Team/roles: list_users owner tool on top of existing user_roles + admin panel.
+- [ ] 13. Voice input: already exists in ChatPanel (verify only).
+- [ ] 14. persona_save tool: owner tone/style saved as permanent system prompt.
+- [ ] 15. Tool chaining: "banao + deploy + test + report" single-command chain (prompt rules).
