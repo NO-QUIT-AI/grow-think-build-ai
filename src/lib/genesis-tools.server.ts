@@ -18,7 +18,8 @@ function cleanPath(p: string) {
 }
 const fileKey = (project: string, path: string) => `project/${cleanProject(project)}/${cleanPath(path)}`;
 
-async function getText(key: string) {
+/** Shared with genesis-autonomy (read_project, preview_url). */
+export async function getText(key: string) {
   const { client, base } = r2();
   const res = await client.fetch(`${base}/${encodeURI(key)}`);
   return res.ok ? await res.text() : null;
@@ -32,7 +33,8 @@ async function del(key: string) {
   const { client, base } = r2();
   await client.fetch(`${base}/${encodeURI(key)}`, { method: "DELETE" });
 }
-async function list(prefix: string) {
+/** Shared with genesis-autonomy (read_project, preview_url). */
+export async function list(prefix: string) {
   const { client, base } = r2();
   const keys: string[] = [];
   let token = "";
