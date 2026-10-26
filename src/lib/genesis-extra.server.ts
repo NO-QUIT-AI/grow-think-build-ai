@@ -53,9 +53,11 @@ export function genesisExtraTools(opts: { lovableKey: string | undefined; deploy
       },
     }),
     generate_image: tool({
-      description: "Prompt se image banao aur link do.",
-      inputSchema: z.object({ prompt: z.string() }),
-      execute: async ({ prompt }) => {
+      description: "Prompt se image banao aur link do. (Paid — pehli baar cost confirm maangega.)",
+      inputSchema: z.object({ prompt: z.string(), confirm: z.boolean().nullable() }),
+      execute: async ({ prompt, confirm }) => {
+        const gate = costGate("AI image", "~$0.04", confirm);
+        if (gate) return gate;
         if (!opts.lovableKey) return { error: "Image AI configured nahi" };
         const res = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
           method: "POST",
@@ -73,9 +75,11 @@ export function genesisExtraTools(opts: { lovableKey: string | undefined; deploy
       },
     }),
     voiceover: tool({
-      description: "Text ka ElevenLabs voiceover (mp3) banao aur link do.",
-      inputSchema: z.object({ text: z.string(), voiceId: z.string().nullable() }),
-      execute: async ({ text, voiceId }) => {
+      description: "Text ka ElevenLabs voiceover (mp3) banao aur link do. (Paid — pehli baar cost confirm maangega.)",
+      inputSchema: z.object({ text: z.string(), voiceId: z.string().nullable(), confirm: z.boolean().nullable() }),
+      execute: async ({ text, voiceId, confirm }) => {
+        const gate = costGate("ElevenLabs voiceover", "~$0.10", confirm);
+        if (gate) return gate;
         const key = process.env["ELEVENLABS_API_KEY"];
         if (!key) return { error: "ElevenLabs key nahi" };
         const voice = /^[A-Za-z0-9]{10,40}$/.test(voiceId ?? "") ? voiceId! : "pFZP5JQG7iQjIQuC4Bku";
@@ -90,32 +94,32 @@ export function genesisExtraTools(opts: { lovableKey: string | undefined; deploy
       },
     }),
     generate_video: tool({
-      description: "fal.ai se chhota video clip shuru karo (text ya image se). Phir video_status se check karo.",
-      inputSchema: z.object({ prompt: z.string(), image_url: z.string().nullable() }),
-      execute: async ({ prompt, image_url }) => {
-        const key = (await vaultGet("FAL_KEY")) ?? "";
-        if (!key) return { error: "FAL_KEY nahi" };
-        const model = image_url ? "fal-ai/wan/v2.2-a14b/image-to-video" : "fal-ai/wan/v2.2-a14b/text-to-video";
-        const res = await fetch(`https://queue.fal.run/${model}`, {
-          method: "POST",
-          headers: { authorization: `Key ${key}`, "content-type": "application/json" },
-          body: JSON.stringify({ prompt, resolution: "480p", ...(image_url ? { image_url } : {}) }),
-        });
-        const j = (await res.json().catch(() => ({}))) as { request_id?: string; detail?: unknown };
-        if (!res.ok) return { error: res.status === 403 || res.status === 402 ? "fal.ai balance khatam — fal.ai/dashboard/billing par top up karo" : `fal ${res.status}: ${JSON.stringify(j.detail ?? j).slice(0, 200)}` };
-        return { id: j.request_id, model, next: "video_status chalao" };
+      description:
+        "Video clip shuru karo — FREE-FIRST chain: FAL (paid, confirm chahiye) → HuggingFace (free) → Google Veo (free quota) → Pollinations poster. Phir video_status se check karo.",
+      inputSchema: z.object({ prompt: z.string(), image_url: z.string().nullable(), confirm: z.boolean().nullable() }),
+      execute: async ({ prompt, image_url, confirm }) => {
+        // Paid FAL sirf tab jab key ho — aur tab cost guard pehle poochta hai.
+        const falKey = (await vaultGet("FAL_KEY")) ?? "";
+        if (falKey) {
+          const gate = costGate("fal.ai video", "~$0.10", confirm);
+          if (gate) return gate;
+        }
+        const { startVideoGeneration } = await import("@/lib/video-providers.server");
+        const started = await startVideoGeneration(prompt.slice(0, 500), image_url ?? null);
+        if ("error" in started) return { error: started.error };
+        if ("done" in started) return { status: "COMPLETED", url: started.url, provider: started.provider, note: (started as { note?: string }).note };
+        return { id: started.requestId, model: started.model, provider: started.provider, next: "video_status chalao (provider bhi do)" };
       },
     }),
     video_status: tool({
-      description: "fal.ai video ka status / final link.",
-      inputSchema: z.object({ id: z.string(), model: z.string() }),
-      execute: async ({ id, model }) => {
-        const key = (await vaultGet("FAL_KEY")) ?? "";
-        const base = `https://queue.fal.run/${model.split("/").slice(0, 2).join("/")}/requests/${encodeURIComponent(id)}`;
-        const s = (await (await fetch(`${base}/status`, { headers: { authorization: `Key ${key}` } })).json()) as { status?: string };
-        if (s.status !== "COMPLETED") return { status: s.status ?? "UNKNOWN" };
-        const r = (await (await fetch(base, { headers: { authorization: `Key ${key}` } })).json()) as { video?: { url?: string } };
-        return { status: "COMPLETED", url: r.video?.url };
+      description: "Video ka status / final link (fal ya veo — provider batana zaruri).",
+      inputSchema: z.object({ id: z.string(), model: z.string(), provider: z.string().nullable() }),
+      execute: async ({ id, model, provider }) => {
+        const { checkVideoGeneration } = await import("@/lib/video-providers.server");
+        const res = await checkVideoGeneration({ provider: provider ?? "fal", requestId: id, model });
+        if (res.status === "done") return { status: "COMPLETED", url: res.url };
+        if (res.status === "error") return { error: res.error ?? "Video failed" };
+        return { status: "RUNNING" };
       },
     }),
     export_doc: tool({
