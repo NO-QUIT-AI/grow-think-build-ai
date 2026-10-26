@@ -14,22 +14,22 @@
 - [ ] Publish completed features (waiting for explicit publish request).
 - [ ] External setup: wildcard domain, Worker deployment and provider keys (requires account access/setup).
 
-# Lovable-clone autonomy (15 updates)
+# Lovable-clone autonomy (15 updates) — ALL DONE (build OK, 30 tests pass)
 Phase 1:
-- [ ] 1. Auto agent loop: tool errors auto-read + self-fix retry up to 5 (prompt rules + maxRetries).
-- [ ] 2. db_write tool (insert/update/delete on profiles, nqai_wallets, community_posts, user_plans, referrals) + save referral code JYKXBWSA for owner.
-- [ ] 3. Free video fallback chain: FAL → HuggingFace → Google Veo → Pollinations poster.
+- [x] 1. Auto agent loop: AUTONOMY_PROMPT self-fix rules (max 5 retries) + maxRetries 3 + stepCountIs 40 in chat.ts.
+- [x] 2. db_write tool (insert/update/delete on users/wallet/posts/plans/invites, column allowlist, match required for update/delete) + referral code JYKXBWSA saved on owner profile (verified).
+- [x] 3. Free video chain in video-providers.server.ts: FAL → HuggingFace (HF_TOKEN) → Google Veo (GOOGLE_AI_KEY) → Pollinations poster; generate_video/video_status rewired.
 Phase 2:
-- [ ] 4. read_project tool (all files at once).
-- [ ] 5. Cost guard: paid tools ask "cost OK?" before running.
-- [ ] 6. Background jobs: video/voice run in background, agent keeps chatting.
-- [ ] 7. write_files multi-file write (5-6 files in one call).
+- [x] 4. read_project tool (all files at once, 150KB cap).
+- [x] 5. Cost guard: costGate on generate_image (~$0.04), voiceover (~$0.10), FAL video (~$0.10) — confirm:true required.
+- [x] 6. Background jobs: start_job/job_status with R2 job store; chat continues while video renders.
+- [x] 7. write_files multi-file write (up to 8 files per call).
 Phase 3:
-- [ ] 8. preview_url tool: instant live preview without full deploy.
-- [ ] 9. design_review tool: agent checks its own site for design flaws (heuristics; real screenshots not possible in worker).
-- [ ] 10. Cron job: daily mining report (/api/public/jobs/daily-report + managed schedule).
-- [ ] 11. Error telemetry: client errors auto-reported to owner (/api/public/error-report).
-- [ ] 12. Team/roles: list_users owner tool on top of existing user_roles + admin panel.
-- [ ] 13. Voice input: already exists in ChatPanel (verify only).
-- [ ] 14. persona_save tool: owner tone/style saved as permanent system prompt.
-- [ ] 15. Tool chaining: "banao + deploy + test + report" single-command chain (prompt rules).
+- [x] 8. preview_url tool: instant R2 live preview without Vercel deploy.
+- [x] 9. design_review tool: fetches own site HTML, flags viewport/alt/contrast/overflow/responsive flaws (real screenshots impossible in worker runtime — heuristic review is the honest subset).
+- [x] 10. Cron: /api/public/jobs/daily-report + managed schedule nqai-daily-report at 06:00 UTC (10:00 Dubai); unauth POST correctly rejected.
+- [x] 11. Error telemetry: __root.tsx window error/rejection listeners → /api/public/error-report → R2 telemetry/*.jsonl (sanitized, size-capped, no PII); endpoint verified ok:true.
+- [x] 12. Team/roles: list_users owner tool (profiles + plans + roles) on top of existing user_roles/admin panel.
+- [x] 13. Voice input: already in ChatPanel (SpeechRecognition, verified).
+- [x] 14. persona_save tool: owner style stored in R2, injected into every owner chat system prompt.
+- [x] 15. Tool chaining: AUTONOMY_PROMPT rules — "banao+deploy+test+report" runs write_files → vercel_deploy → deploy_status → design_review → report without interruption.
