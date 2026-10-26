@@ -65,7 +65,7 @@ async function tryVeo(prompt: string): Promise<VideoStart | null> {
   return { provider: "veo", requestId: j.name, model: "veo-2.0-generate-001" };
 }
 
-async function pollinationsPoster(prompt: string): Promise<VideoStart> {
+async function pollinationsPoster(prompt: string): Promise<{ provider: "pollinations"; url: string; done: true; note?: string }> {
   const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt.slice(0, 300))}?width=1280&height=720&nologo=true`;
   return {
     provider: "pollinations",
