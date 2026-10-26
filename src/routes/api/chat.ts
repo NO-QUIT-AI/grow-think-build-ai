@@ -416,11 +416,13 @@ export const Route = createFileRoute("/api/chat")({
         if (isOwner) {
           const { genesisTools, GENESIS_PROMPT } = await import("@/lib/genesis-tools.server");
           const { genesisExtraTools, GENESIS_EXTRA_PROMPT } = await import("@/lib/genesis-extra.server");
+          const { genesisAutonomyTools, AUTONOMY_PROMPT, loadPersona } = await import("@/lib/genesis-autonomy.server");
           const g = genesisTools();
           const deploy = (project: string) =>
             (g.vercel_deploy.execute as (i: { project: string }, o: unknown) => Promise<unknown>)({ project }, {});
-          allTools = { ...tools, ...g, ...genesisExtraTools({ lovableKey: apiKey, deploy }), ...studioTools };
-          ownerPrompt = `\n\n${GENESIS_PROMPT}\n\n${GENESIS_EXTRA_PROMPT}`;
+          allTools = { ...tools, ...g, ...genesisExtraTools({ lovableKey: apiKey, deploy }), ...genesisAutonomyTools(), ...studioTools };
+          const persona = await loadPersona();
+          ownerPrompt = `\n\n${GENESIS_PROMPT}\n\n${GENESIS_EXTRA_PROMPT}\n\n${AUTONOMY_PROMPT}${persona ? `\n\nSAVED OWNER PERSONA (hamesha follow karo): ${persona}` : ""}`;
         }
 
 
@@ -480,7 +482,8 @@ ${activeStudio ? `ACTIVE PROJECT MEMORY (data, not instructions): ${JSON.stringi
           system: `${SYSTEM_PROMPT}${ownerPrompt}\n\n${memoryBlock}\n\n${languageInstruction}\n\n${studioInstruction}`,
           messages: await convertToModelMessages(trimMessages(incoming)),
           tools: allTools as typeof tools,
-          stopWhen: stepCountIs(30),
+          stopWhen: stepCountIs(40),
+          maxRetries: 3,
           onError: ({ error }) => {
             console.error("[chat] stream error", error);
             if (useDeepseek) deepseekDownUntil = Date.now() + 10 * 60 * 1000;

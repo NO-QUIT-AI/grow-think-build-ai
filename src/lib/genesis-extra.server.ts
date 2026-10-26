@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { r2 } from "@/lib/r2.server";
 import { vaultGet } from "@/lib/vault.server";
+import { costGate } from "@/lib/genesis-autonomy.server";
 
 /** Genesis add-ons: database, image, voiceover, video, docs export, project memory, deploy logs. Owner-only. */
 
