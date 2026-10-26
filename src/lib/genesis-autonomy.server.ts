@@ -1,7 +1,14 @@
 import { tool } from "ai";
 import { z } from "zod";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { r2 } from "@/lib/r2.server";
 import { getText, list, writeGenesisFile, cleanProjectName } from "@/lib/genesis-tools.server";
+
+/** Generated types in tables ko over-restrict karti hain; owner tools ke liye untyped admin client. */
+async function adminClient(): Promise<SupabaseClient> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  return supabaseAdmin as unknown as SupabaseClient;
+}
 
 /**
  * Genesis autonomy pack (owner-only): db_write, read_project, write_files,
@@ -228,10 +235,10 @@ export function genesisAutonomyTools() {
           const res = await checkVideoGeneration(job.payload as { provider: string; requestId: string; model?: string });
           if (res.status === "done") {
             job.status = "done";
-            job.result = { url: res.url };
+            job.result = { url: res.url ?? "" };
           } else if (res.status === "error") {
             job.status = "error";
-            job.error = res.error;
+            job.error = res.error ?? "unknown error";
           }
           await saveJob(job);
         }
