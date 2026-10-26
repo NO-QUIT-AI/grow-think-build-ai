@@ -153,6 +153,27 @@ function RootComponent() {
     }
   }, []);
 
+  // Error telemetry: client errors owner ko auto-report hote hain (fire-and-forget,
+  // sirf sanitized message/stack — koi PII nahi). App ko kabhi block nahi karta.
+  useEffect(() => {
+    const send = (message: string, stack?: string) => {
+      fetch("/api/public/error-report", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ message, stack, route: window.location.pathname }),
+      }).catch(() => {});
+    };
+    const onError = (e: ErrorEvent) => send(e.message || "window error", e.error instanceof Error ? e.error.stack : undefined);
+    const onRejection = (e: PromiseRejectionEvent) =>
+      send(e.reason instanceof Error ? e.reason.message : String(e.reason), e.reason instanceof Error ? e.reason.stack : undefined);
+    window.addEventListener("error", onError);
+    window.addEventListener("unhandledrejection", onRejection);
+    return () => {
+      window.removeEventListener("error", onError);
+      window.removeEventListener("unhandledrejection", onRejection);
+    };
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>

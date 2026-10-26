@@ -58,7 +58,9 @@ import { Route as CallRoomIdRouteImport } from './routes/call.$roomId'
 import { Route as SSubdomainRouteImport } from './routes/s.$subdomain'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as ApiMindThinkRouteImport } from './routes/api/mind/think'
+import { Route as ApiPublicErrorReportRouteImport } from './routes/api/public/error-report'
 import { Route as ApiPublicR2VideoRouteImport } from './routes/api/public/r2-video'
+import { Route as ApiPublicJobsDailyReportRouteImport } from './routes/api/public/jobs/daily-report'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -305,11 +307,22 @@ const ApiMindThinkRoute = ApiMindThinkRouteImport.update({
   path: '/think',
   getParentRoute: () => ApiMindRoute,
 } as any)
+const ApiPublicErrorReportRoute = ApiPublicErrorReportRouteImport.update({
+  id: '/api/public/error-report',
+  path: '/api/public/error-report',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicR2VideoRoute = ApiPublicR2VideoRouteImport.update({
   id: '/api/public/r2-video',
   path: '/api/public/r2-video',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicJobsDailyReportRoute =
+  ApiPublicJobsDailyReportRouteImport.update({
+    id: '/api/public/jobs/daily-report',
+    path: '/api/public/jobs/daily-report',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -361,7 +374,9 @@ export interface FileRoutesByFullPath {
   '/u/$username': typeof UUsernameRoute
   '/blog/': typeof BlogIndexRoute
   '/api/mind/think': typeof ApiMindThinkRoute
+  '/api/public/error-report': typeof ApiPublicErrorReportRoute
   '/api/public/r2-video': typeof ApiPublicR2VideoRoute
+  '/api/public/jobs/daily-report': typeof ApiPublicJobsDailyReportRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -413,7 +428,9 @@ export interface FileRoutesByTo {
   '/u/$username': typeof UUsernameRoute
   '/blog': typeof BlogIndexRoute
   '/api/mind/think': typeof ApiMindThinkRoute
+  '/api/public/error-report': typeof ApiPublicErrorReportRoute
   '/api/public/r2-video': typeof ApiPublicR2VideoRoute
+  '/api/public/jobs/daily-report': typeof ApiPublicJobsDailyReportRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -466,7 +483,9 @@ export interface FileRoutesById {
   '/u/$username': typeof UUsernameRoute
   '/blog/': typeof BlogIndexRoute
   '/api/mind/think': typeof ApiMindThinkRoute
+  '/api/public/error-report': typeof ApiPublicErrorReportRoute
   '/api/public/r2-video': typeof ApiPublicR2VideoRoute
+  '/api/public/jobs/daily-report': typeof ApiPublicJobsDailyReportRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -520,7 +539,9 @@ export interface FileRouteTypes {
     | '/u/$username'
     | '/blog/'
     | '/api/mind/think'
+    | '/api/public/error-report'
     | '/api/public/r2-video'
+    | '/api/public/jobs/daily-report'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -572,7 +593,9 @@ export interface FileRouteTypes {
     | '/u/$username'
     | '/blog'
     | '/api/mind/think'
+    | '/api/public/error-report'
     | '/api/public/r2-video'
+    | '/api/public/jobs/daily-report'
   id:
     | '__root__'
     | '/'
@@ -624,7 +647,9 @@ export interface FileRouteTypes {
     | '/u/$username'
     | '/blog/'
     | '/api/mind/think'
+    | '/api/public/error-report'
     | '/api/public/r2-video'
+    | '/api/public/jobs/daily-report'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -676,7 +701,9 @@ export interface RootRouteChildren {
   SSubdomainRoute: typeof SSubdomainRoute
   UUsernameRoute: typeof UUsernameRoute
   BlogIndexRoute: typeof BlogIndexRoute
+  ApiPublicErrorReportRoute: typeof ApiPublicErrorReportRoute
   ApiPublicR2VideoRoute: typeof ApiPublicR2VideoRoute
+  ApiPublicJobsDailyReportRoute: typeof ApiPublicJobsDailyReportRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1024,11 +1051,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiMindThinkRouteImport
       parentRoute: typeof ApiMindRoute
     }
+    '/api/public/error-report': {
+      id: '/api/public/error-report'
+      path: '/api/public/error-report'
+      fullPath: '/api/public/error-report'
+      preLoaderRoute: typeof ApiPublicErrorReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/r2-video': {
       id: '/api/public/r2-video'
       path: '/api/public/r2-video'
       fullPath: '/api/public/r2-video'
       preLoaderRoute: typeof ApiPublicR2VideoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/jobs/daily-report': {
+      id: '/api/public/jobs/daily-report'
+      path: '/api/public/jobs/daily-report'
+      fullPath: '/api/public/jobs/daily-report'
+      preLoaderRoute: typeof ApiPublicJobsDailyReportRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -1094,7 +1135,9 @@ const rootRouteChildren: RootRouteChildren = {
   SSubdomainRoute: SSubdomainRoute,
   UUsernameRoute: UUsernameRoute,
   BlogIndexRoute: BlogIndexRoute,
+  ApiPublicErrorReportRoute: ApiPublicErrorReportRoute,
   ApiPublicR2VideoRoute: ApiPublicR2VideoRoute,
+  ApiPublicJobsDailyReportRoute: ApiPublicJobsDailyReportRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

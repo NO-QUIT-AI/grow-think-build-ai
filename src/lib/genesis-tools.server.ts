@@ -11,6 +11,8 @@ import { vaultGet, vaultList } from "@/lib/vault.server";
 const MAX_FILE = 400_000;
 
 const cleanProject = (p: string) => p.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "").slice(0, 48) || "app";
+/** Shared with genesis-autonomy. */
+export const cleanProjectName = cleanProject;
 function cleanPath(p: string) {
   const parts = p.replace(/\\/g, "/").split("/").filter((s) => s && s !== "." && s !== "..");
   if (!parts.length) throw new Error("Invalid path");
@@ -18,7 +20,8 @@ function cleanPath(p: string) {
 }
 const fileKey = (project: string, path: string) => `project/${cleanProject(project)}/${cleanPath(path)}`;
 
-async function getText(key: string) {
+/** Shared with genesis-autonomy (read_project, preview_url). */
+export async function getText(key: string) {
   const { client, base } = r2();
   const res = await client.fetch(`${base}/${encodeURI(key)}`);
   return res.ok ? await res.text() : null;
@@ -32,7 +35,8 @@ async function del(key: string) {
   const { client, base } = r2();
   await client.fetch(`${base}/${encodeURI(key)}`, { method: "DELETE" });
 }
-async function list(prefix: string) {
+/** Shared with genesis-autonomy (read_project, preview_url). */
+export async function list(prefix: string) {
   const { client, base } = r2();
   const keys: string[] = [];
   let token = "";
