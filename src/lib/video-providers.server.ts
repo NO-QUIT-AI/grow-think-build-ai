@@ -12,7 +12,7 @@ import { r2 } from "@/lib/r2.server";
 
 export type VideoStart =
   | { provider: "fal" | "veo"; requestId: string; model: string }
-  | { provider: "huggingface" | "pollinations"; url: string; done: true }
+  | { provider: "huggingface" | "pollinations"; url: string; done: true; note?: string }
   | { error: string };
 
 async function tryFal(prompt: string, imageUrl: string | null): Promise<VideoStart | null> {
@@ -89,7 +89,7 @@ export async function startVideoGeneration(prompt: string, imageUrl: string | nu
     tried.push("veo");
   }
   const poster = await pollinationsPoster(prompt);
-  return { ...poster, note: `Video providers (${tried.join(", ")}) unavailable — free poster image di hai. HF_TOKEN ya GOOGLE_AI_KEY vault me daalo to unlimited free videos.` } as VideoStart;
+  return { ...poster, note: `Video providers (${tried.join(", ")}) unavailable — free poster image di hai. HF_TOKEN ya GOOGLE_AI_KEY vault me daalo to unlimited free videos.` };
 }
 
 export async function checkVideoGeneration(payload: {
@@ -101,7 +101,9 @@ export async function checkVideoGeneration(payload: {
     const key = (await vaultGet("FAL_KEY")) ?? "";
     const base = `https://queue.fal.run/${(payload.model ?? "").split("/").slice(0, 2).join("/")}/requests/${encodeURIComponent(payload.requestId)}`;
     const s = (await (await fetch(`${base}/status`, { headers: { authorization: `Key ${key}` } })).json().catch(() => ({}))) as { status?: string };
-    if (s.status !== "COMPLETED") return { status: s.status === "FAILED" ? "error" : "running", error: s.status === "FAILED" ? "fal failed" : undefined };
+    if (s.status !== "COMPLETED") {
+      return s.status === "FAILED" ? { status: "error", error: "fal failed" } : { status: "running" };
+    }
     const r = (await (await fetch(base, { headers: { authorization: `Key ${key}` } })).json().catch(() => ({}))) as { video?: { url?: string } };
     return r.video?.url ? { status: "done", url: r.video.url } : { status: "error", error: "fal result empty" };
   }

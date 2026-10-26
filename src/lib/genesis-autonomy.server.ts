@@ -128,7 +128,7 @@ export function genesisAutonomyTools() {
       }),
       execute: async ({ table, op, data, match }) => {
         const real = WRITE_TABLES[table];
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const sb = await adminClient();
         const cleanData = data ? pickAllowed(real, data) : {};
         const cleanMatch = match ? pickAllowed(real, match) : {};
         if (op !== "insert" && Object.keys(cleanMatch).length === 0) {
@@ -136,12 +136,10 @@ export function genesisAutonomyTools() {
         }
         if (op === "insert") {
           if (Object.keys(cleanData).length === 0) return { error: "insert ke liye data do (allowed columns dekho)." };
-          const { data: row, error } = await supabaseAdmin.from(real).insert(cleanData).select().single();
+          const { data: row, error } = await sb.from(real).insert(cleanData).select().single();
           return error ? { error: error.message } : { inserted: true, row };
         }
-        let q = supabaseAdmin.from(real)[op === "update" ? "update" : "delete"](
-          op === "update" ? cleanData : undefined as never,
-        );
+        let q = op === "update" ? sb.from(real).update(cleanData) : sb.from(real).delete();
         for (const [k, v] of Object.entries(cleanMatch)) q = q.eq(k, v as string);
         const { data: rows, error } = await q.select();
         return error ? { error: error.message } : { ok: true, affected: rows?.length ?? 0 };
@@ -285,11 +283,11 @@ export function genesisAutonomyTools() {
       description: "Team/admin view: users, unke plans aur builds count dekho (owner-only).",
       inputSchema: z.object({ limit: z.number().nullable() }),
       execute: async ({ limit }) => {
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const sb = await adminClient();
         const [{ data: profiles }, { data: plans }, { data: roles }] = await Promise.all([
-          supabaseAdmin.from("profiles").select("id, username, display_name, total_apps_built, reputation_points, created_at").order("created_at", { ascending: false }).limit(Math.min(limit ?? 20, 100)),
-          supabaseAdmin.from("user_plans").select("user_id, plan"),
-          supabaseAdmin.from("user_roles").select("user_id, role"),
+          sb.from("profiles").select("id, username, display_name, total_apps_built, reputation_points, created_at").order("created_at", { ascending: false }).limit(Math.min(limit ?? 20, 100)),
+          sb.from("user_plans").select("user_id, plan"),
+          sb.from("user_roles").select("user_id, role"),
         ]);
         const planMap = new Map((plans ?? []).map((p) => [p.user_id, p.plan]));
         const roleMap = new Map((roles ?? []).map((r) => [r.user_id, r.role]));
