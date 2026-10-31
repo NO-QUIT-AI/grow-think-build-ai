@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as AndroidAppRouteImport } from './routes/android-app'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AutoVideoRouteImport } from './routes/auto-video'
 import { Route as CallbackRouteImport } from './routes/callback'
@@ -70,6 +71,11 @@ const IndexRoute = IndexRouteImport.update({
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AndroidAppRoute = AndroidAppRouteImport.update({
+  id: '/android-app',
+  path: '/android-app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -327,6 +333,7 @@ const ApiPublicJobsDailyReportRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/android-app': typeof AndroidAppRoute
   '/auth': typeof AuthRoute
   '/auto-video': typeof AutoVideoRoute
   '/callback': typeof CallbackRoute
@@ -381,6 +388,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/android-app': typeof AndroidAppRoute
   '/auth': typeof AuthRoute
   '/auto-video': typeof AutoVideoRoute
   '/callback': typeof CallbackRoute
@@ -436,6 +444,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/android-app': typeof AndroidAppRoute
   '/auth': typeof AuthRoute
   '/auto-video': typeof AutoVideoRoute
   '/callback': typeof CallbackRoute
@@ -492,6 +501,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/android-app'
     | '/auth'
     | '/auto-video'
     | '/callback'
@@ -546,6 +556,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/android-app'
     | '/auth'
     | '/auto-video'
     | '/callback'
@@ -600,6 +611,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/android-app'
     | '/auth'
     | '/auto-video'
     | '/callback'
@@ -655,6 +667,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AndroidAppRoute: typeof AndroidAppRoute
   AuthRoute: typeof AuthRoute
   AutoVideoRoute: typeof AutoVideoRoute
   CallbackRoute: typeof CallbackRoute
@@ -720,6 +733,13 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/android-app': {
+      id: '/android-app'
+      path: '/android-app'
+      fullPath: '/android-app'
+      preLoaderRoute: typeof AndroidAppRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -1089,6 +1109,7 @@ const ApiMindRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AndroidAppRoute: AndroidAppRoute,
   AuthRoute: AuthRoute,
   AutoVideoRoute: AutoVideoRoute,
   CallbackRoute: CallbackRoute,
