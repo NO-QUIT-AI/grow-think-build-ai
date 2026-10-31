@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { refuseAndroidFinancialRequest } from "@/lib/android-v1";
 
 export const Route = createFileRoute("/android-app")({
   head: () => ({
@@ -44,7 +45,7 @@ function AndroidWorkspace() {
   const busy = status === "submitted" || status === "streaming";
   useEffect(() => {
     if (!user || busy) return;
-    void supabase.from("memories").select("id,prompt,code").eq("user_id", user.id).eq("project_type", "website").order("created_at", { ascending: false }).limit(30).then(({ data }) => { setBuilds(data ?? []); });
+    void supabase.from("memories").select("id,prompt,code").eq("user_id", user.id).eq("project_type", "website").order("created_at", { ascending: false }).limit(30).then(({ data }) => { setBuilds((data ?? []).filter((build) => !refuseAndroidFinancialRequest(`${build.prompt} ${build.code}`))); });
   }, [user?.id, busy]);
   async function login() {
     setAuthBusy(true); setAuthError("");
