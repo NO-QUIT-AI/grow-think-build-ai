@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/android-app")({
   head: () => ({
@@ -51,8 +52,18 @@ function AndroidWorkspace() {
     catch { setAuthError("Unable to connect. Please try again."); }
     finally { setAuthBusy(false); }
   }
-  function downloadBuild() {
+  async function downloadBuild() {
     if (!selected) return;
+    try {
+      const { Capacitor } = await import("@capacitor/core");
+      if (Capacitor.isNativePlatform()) {
+        const { Filesystem, Directory, Encoding } = await import("@capacitor/filesystem");
+        const { Share } = await import("@capacitor/share");
+        const file = await Filesystem.writeFile({ path: "noquit-website.html", data: selected.code, directory: Directory.Cache, encoding: Encoding.UTF8 });
+        await Share.share({ title: "NO QUIT AI website", files: [file.uri] });
+        return;
+      }
+    } catch { toast.error("Could not export the website. Please try again."); return; }
     const url = URL.createObjectURL(new Blob([selected.code], { type: "text/html" }));
     const link = document.createElement("a"); link.href = url; link.download = "noquit-website.html"; link.click(); setTimeout(() => URL.revokeObjectURL(url), 10000);
   }
@@ -62,14 +73,14 @@ function AndroidWorkspace() {
       <div className="min-w-0"><h1 className="text-lg font-bold">NO QUIT AI</h1><p className="text-xs text-muted-foreground">Build Studio</p></div>
       {user && <Button className="ml-auto" variant="ghost" size="icon" title="Sign out" onClick={() => void signOut()}><LogOut className="h-4 w-4" /></Button>}
     </header>
-    {loading ? <div className="flex flex-1 items-center justify-center"><Loader2 className="animate-spin" aria-label="Loading" /></div> : !user ?
+    {loading ? <div className="flex flex-1 items-center justify-center"><Loader2 className="animate-spin" aria-label="Loading" /></div> : !user && tab !== "tools" ?
       <section className="mx-auto w-full max-w-md space-y-5 px-6 py-12"><h2 className="text-2xl font-bold">Your next website starts here.</h2><form className="space-y-4" onSubmit={(event) => { event.preventDefault(); void login(); }}>
         <Input type="email" aria-label="Email" placeholder="Email" required autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} />
         <Input type="password" aria-label="Password" placeholder="Password" required autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} />
         {authError && <p role="alert" className="text-sm text-destructive">{authError}</p>}
         <Button disabled={authBusy} className="w-full">{authBusy ? "Signing in…" : "Sign in"}</Button>
       </form><p className="text-sm text-muted-foreground">Use your existing NO QUIT AI account.</p><Button variant="outline" className="w-full" onClick={() => setTab("tools")}><Wrench className="mr-2 h-4 w-4" />Open text tools</Button></section> :
-      <nav aria-label="Workspace" className="flex gap-2 border-b border-border p-3">{(["builder", "builds", "tools"] as const).map((item) => <Button key={item} variant={tab === item ? "default" : "ghost"} onClick={() => setTab(item)}>{item === "builder" ? "Builder" : item === "builds" ? "My Websites" : "Tools"}</Button>)}</nav>}
+      <nav aria-label="Workspace" className="flex gap-2 border-b border-border p-3">{(user ? ["builder", "builds", "tools"] as const : ["builder", "tools"] as const).map((item) => <Button key={item} variant={tab === item ? "default" : "ghost"} onClick={() => setTab(item)}>{item === "builder" ? user ? "Builder" : "Sign in" : item === "builds" ? "My Websites" : "Tools"}</Button>)}</nav>}
     {tab === "tools" ? <section className="mx-auto w-full max-w-3xl space-y-4 p-5"><h2 className="text-xl font-bold">Text tools</h2><Textarea aria-label="Tool text" rows={8} value={toolText} onChange={(event) => setToolText(event.target.value)} /><p className="text-sm text-muted-foreground">{toolText.trim() ? toolText.trim().split(/\s+/).length : 0} words · {toolText.length} characters</p><div className="flex flex-wrap gap-2"><Button variant="outline" onClick={() => setToolText(toolText.toUpperCase())}>UPPERCASE</Button><Button variant="outline" onClick={() => setToolText(toolText.toLowerCase())}>lowercase</Button><Button variant="outline" onClick={() => setToolText(toolText.replace(/\s+/g, " ").trim())}>Clean spaces</Button></div></section> : user && tab === "builder" ?
       <section className="mx-auto flex w-full max-w-3xl flex-1 flex-col p-4"><div className="flex-1 space-y-5 py-5">{messages.length === 0 && <div className="py-8"><Code2 className="mb-5 h-9 w-9 text-primary" /><h2 className="text-2xl font-bold">What shall we build?</h2><div className="mt-5 flex flex-wrap gap-2">{["Build a cafe website", "Create my portfolio", "Suggest a domain name"].map((text) => <Button key={text} variant="outline" onClick={() => setPrompt(text)}>{text}</Button>)}</div></div>}
       {messages.map((message) => <div key={message.id} className="space-y-2"><p className="text-xs font-semibold text-primary">{message.role === "user" ? "You" : "NO QUIT AI"}</p>{message.parts.map((part, index) => part.type === "text" ? <p key={index} className="whitespace-pre-wrap break-words text-sm leading-7">{part.text}</p> : part.type.startsWith("tool-") ? <p key={index} className="text-sm text-muted-foreground">{part.type.replace("tool-", "").replaceAll("_", " ")}</p> : null)}</div>)}
