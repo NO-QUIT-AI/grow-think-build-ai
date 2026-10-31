@@ -1,0 +1,25 @@
+{
+  "name": "NO QUIT AI - Build Studio",
+  "short_name": "NO QUIT AI",
+  "id": "/android-app",
+  "start_url": "/android-app",
+  "scope": "/android-app",
+  "display": "fullscreen",
+  "background_color": "#050706",
+  "theme_color": "#050706",
+  "description": "Website Builder and practical nonfinancial tools.",
+  "icons": [
+    {
+      "src": "/android/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/android/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

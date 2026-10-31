@@ -127,6 +127,8 @@
   --accent-foreground: oklch(0.96 0.008 220);
 }
 .story-page h1, .story-page h2 { letter-spacing: 0; }
+.android-page { --background: #050706; --card: #101512; --primary: #00ff88; --primary-foreground: #050706; --border: #24372b; --input: #24372b; --ring: #00ff88; --muted: #18231c; --muted-foreground: #a5b9ad; --accent: #18231c; --accent-foreground: #f4fff7; --secondary: #18231c; --secondary-foreground: #f4fff7; color-scheme: dark; }
+.android-page h1, .android-page h2 { letter-spacing: 0; }
 .story-cover { background: linear-gradient(0deg, var(--background), color-mix(in oklab, var(--background) 60%, transparent) 50%, color-mix(in oklab, var(--background) 15%, transparent)); }
 .story-urdu { font-family: "Noto Naskh Arabic", var(--font-sans); }
 .story-urdu h2 { font-family: inherit; }

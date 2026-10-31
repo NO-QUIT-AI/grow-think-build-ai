@@ -21,3 +21,5 @@
 - Studio's lazily loaded bundled Monaco editor uses /api/studio and memories as the source of truth; persistent history and optimistic version checks prevent stale diff application, while owner writes mirror through the existing Genesis R2 writer.
 - Chat passes the active Studio memory ID and draft code, uses user-scoped file_edit/file_undo tools, and opens successful build results by memoryId; unrelated chat model routing remains unchanged.
 - ElevenLabs call setup synchronizes a shared configuration with language presets and the language_detection system tool; use a valid primary language rather than unsupported "auto", preserving other agent settings.
+- Android uses a separate builder-only entry and explicit server-side chat tool allowlist; keep the full web product unchanged and omit global reward/navigation widgets on that entry.
+- App-shell offline support uses generated Workbox with one preview-guarded registration module; never cache API/auth traffic or register in editor previews.
