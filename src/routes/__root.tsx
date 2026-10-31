@@ -18,6 +18,7 @@ import { HelpAssistant } from "@/components/HelpAssistant";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { initAdsConfig } from "@/lib/adsense";
 import { LanguageProvider } from "@/i18n/LanguageContext";
+import { registerAppOfflineScreen } from "@/lib/pwa-registration";
 
 function NotFoundComponent() {
   return (
@@ -140,6 +141,9 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+  const androidPage = router.state.location.pathname === "/android-app";
+  useEffect(() => { void registerAppOfflineScreen().catch(() => {}); }, [androidPage]);
 
   // Load the runtime ad config (publisher ID from env) and inject the
   // AdSense script exactly once per page load — but ONLY on static content
@@ -179,11 +183,11 @@ function RootComponent() {
       <LanguageProvider>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
-        <InstallAppBanner />
-        <IncomingCallListener />
-        <HelpAssistant />
+        {!androidPage && <InstallAppBanner />}
+        {!androidPage && <IncomingCallListener />}
+        {!androidPage && <HelpAssistant />}
         <Toaster position="top-center" richColors />
-        <RewardAdHost />
+        {!androidPage && <RewardAdHost />}
       </LanguageProvider>
     </QueryClientProvider>
   );
