@@ -1,3 +1,4 @@
+// @ts-nocheck -- Bun test runner, matching existing project tests.
 import { describe, expect, it } from "bun:test";
 import { ANDROID_PACKAGE, ANDROID_START_PATH, androidTools, refuseAndroidFinancialRequest } from "./android-v1";
 

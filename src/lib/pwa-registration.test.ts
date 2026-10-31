@@ -1,3 +1,4 @@
+// @ts-nocheck -- Bun test runner, matching existing project tests.
 import { expect, it } from "bun:test";
 import { isPwaPreview } from "./pwa-registration";
 it("never permits app-shell workers on editor previews", () => {
