@@ -753,7 +753,7 @@ function ChatThread({
             <div className="mt-4 flex flex-wrap gap-2">
                {SUGGESTION_KEYS.map((key) => {
                  const suggestion = t(key);
-                 return (
+                  return (
                 <button
                    key={key}
                   onClick={() => submit(suggestion)}
@@ -763,6 +763,17 @@ function ChatThread({
                 </button>
                  );
                })}
+             </div>
+            <div className="mt-3 flex flex-wrap gap-2 border-t border-border pt-3">
+              {GUIDE_ACTIONS.map((action) => (
+                <ButtonWithGuide
+                  key={action.label}
+                  label={action.label}
+                  tooltipText={action.tooltipText}
+                  guideMessage={action.guideMessage}
+                  onClickAction={() => setInput(action.prefill)}
+                />
+              ))}
             </div>
           </div>
         )}
