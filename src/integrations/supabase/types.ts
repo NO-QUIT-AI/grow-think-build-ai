@@ -1054,6 +1054,15 @@ export type Database = {
         Args: { p_tool: string; p_usd: number; p_user: string }
         Returns: string
       }
+      genesis_save_summary: {
+        Args: {
+          p_content: string
+          p_source: string
+          p_tags: string[]
+          p_topic: string
+        }
+        Returns: Json
+      }
       get_site_by_subdomain: { Args: { _subdomain: string }; Returns: string }
       is_owner: { Args: { _uid: string }; Returns: boolean }
       nqai_award: {
