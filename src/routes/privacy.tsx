@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { LegalPage } from "@/components/legal/LegalPage";
 import { AdSlot } from "@/components/ads/AdSlot";
@@ -122,8 +122,20 @@ function Privacy() {
       <h2>Data retention and deletion</h2>
       <p>
         We keep your content while your account is active. You can delete individual posts, chats
-        and messages at any time. To delete your whole account and its data, email us and we will
-        action it within 30 days.
+        and messages at any time. To delete your whole account and its data, use our{" "}
+        <Link to="/account-deletion" className="underline">
+          account deletion page
+        </Link>{" "}
+        or email us, and we will action it within 30 days.
+      </p>
+
+      <h2>NO QUIT AI Android App (v1)</h2>
+      <p>
+        The NO QUIT AI Build Studio Android app (package com.noquit.aibuildstudio) is a builder
+        and tools app. In v1 the app contains <strong>no advertisements, no in-app purchases, and
+        no wallet, coin or mining interface</strong>. It collects only the account and content data
+        described above (sign-in email, your prompts and the websites you save). Advertising shown
+        on some pages of the noquitai.com website does not appear inside the Android app.
       </p>
 
       <h2>Children</h2>

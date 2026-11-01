@@ -48,6 +48,9 @@ export function LegalFooter({ className }: { className?: string }) {
       <Link to="/terms" className="hover:text-primary">
         Terms of Service
       </Link>
+      <Link to="/account-deletion" className="hover:text-primary">
+        Account Deletion
+      </Link>
     </nav>
   );
 }
