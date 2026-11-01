@@ -118,6 +118,58 @@ export function BuildDomain({
         </div>
       )}
       {editing && <p className="mt-1 text-[10px] text-muted-foreground">Sirf ek baar change ho sakta hai.</p>}
+      <p className="mt-2 text-[10px] text-muted-foreground">✅ Public hai — link wala koi bhi dekh sakta hai.</p>
+      <CustomDomainHelp target={urls.working} />
+    </div>
+  );
+}
+
+function CustomDomainHelp({ target }: { target: string }) {
+  const [open, setOpen] = useState<null | "buy" | "own">(null);
+  const [name, setName] = useState("");
+  const clean = name.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/[^a-z0-9.-]/g, "");
+  const q = encodeURIComponent(clean);
+  const shops = [
+    { label: "Namecheap", url: `https://www.namecheap.com/domains/registration/results/?domain=${q}` },
+    { label: "Porkbun", url: `https://porkbun.com/checkout/search?q=${q}` },
+    { label: "GoDaddy", url: `https://www.godaddy.com/domainsearch/find?domainToCheck=${q}` },
+  ];
+  return (
+    <div className="mt-3 border-t border-primary/20 pt-2">
+      <div className="flex flex-wrap gap-2">
+        <Button variant={open === "buy" ? "default" : "outline"} size="sm" className="h-7 text-xs" onClick={() => setOpen(open === "buy" ? null : "buy")}>Domain kharido</Button>
+        <Button variant={open === "own" ? "default" : "outline"} size="sm" className="h-7 text-xs" onClick={() => setOpen(open === "own" ? null : "own")}>Apna domain lagao</Button>
+      </div>
+      {open && (
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="myshop.com"
+          aria-label="Domain name"
+          className="mt-2 w-full rounded-lg border border-border bg-background px-2 py-1.5 font-mono text-xs outline-none"
+        />
+      )}
+      {open === "buy" && (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {shops.map((s) => (
+            <Button key={s.label} variant="secondary" size="sm" className="h-7 gap-1 text-xs" disabled={clean.length < 3} onClick={() => window.open(s.url, "_blank", "noopener")}>
+              <ExternalLink className="h-3.5 w-3.5" /> {s.label}
+            </Button>
+          ))}
+          <p className="w-full text-[10px] text-muted-foreground">Kharidne ke baad "Apna domain lagao" se usay is app par laga do.</p>
+        </div>
+      )}
+      {open === "own" && (
+        <ol className="mt-2 list-decimal space-y-1 pl-4 text-[11px] text-muted-foreground">
+          <li>Apne domain provider (Namecheap, GoDaddy, waghera) mein login karo{clean ? <> aur <b className="text-foreground">{clean}</b> kholo</> : null}.</li>
+          <li><b className="text-foreground">Domain / URL Forwarding</b> (Redirect) setting kholo.</li>
+          <li>
+            Forward to yeh link do:{" "}
+            <button type="button" className="font-mono text-primary underline" onClick={() => { void navigator.clipboard.writeText(target); toast.success("Link copy ho gaya"); }}>{target}</button>
+          </li>
+          <li>Type "Permanent (301)" chuno, save karo. 10 min – 24 ghante mein domain chal jayega.</li>
+        </ol>
+      )}
     </div>
   );
 }
