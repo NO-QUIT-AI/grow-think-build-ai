@@ -115,6 +115,7 @@
 .dark {
   color-scheme: dark;
 }
+.genesis-chat { --background:#000000; --primary:#00E5FF; --primary-foreground:#000000; --ring:#00E5FF; }
 
 .story-page {
   --background: #000000;

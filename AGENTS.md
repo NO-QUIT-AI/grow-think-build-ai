@@ -23,3 +23,5 @@
 - ElevenLabs call setup synchronizes a shared configuration with language presets and the language_detection system tool; use a valid primary language rather than unsupported "auto", preserving other agent settings.
 - Android uses a separate builder-only entry and explicit server-side chat tool allowlist; keep the full web product unchanged and omit global reward/navigation widgets on that entry.
 - App-shell offline support uses generated Workbox with one preview-guarded registration module; never cache API/auth traffic or register in editor previews.
+- Genesis self-patches affect allowlisted persisted runtime configuration only; authenticated user clicks apply version-checked backups, never model-provided confirmation or compiled security code.
+- Genesis multi-step approvals, tool usage reservations and summaries persist in Cloud; budget reservations and topic consolidation use database locks to prevent concurrent bypasses.
