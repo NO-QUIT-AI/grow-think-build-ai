@@ -8,6 +8,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowUp,
   Brain,
+  Copy,
+  ThumbsUp,
+  ThumbsDown,
   Download,
   ImagePlus,
   Loader2,
@@ -38,6 +41,8 @@ import { VoiceModal, getSpeechRecognition } from "@/components/nova/VoiceModal";
 import { useLanguage } from "@/i18n/LanguageContext";
 import type { TranslationKey } from "@/i18n/translations";
 import { connectPollinations, generateWithUserKey, getUserPollinationsKey } from "@/lib/pollinations";
+import { ButtonWithGuide } from "@/components/nova/ButtonWithGuide";
+import { GUIDE_EVT, GUIDE_ID_PREFIX, isGuideMessageId, saveGuideFeedback } from "@/lib/guide-agent";
 
 const VOICE_CACHE_KEY = "nqai_voice_cache";
 function voiceKey(q: string, lang: string) {
@@ -76,6 +81,25 @@ const TOOL_LABELS: Record<string, TranslationKey> = {
 };
 
 const SUGGESTION_KEYS: TranslationKey[] = ["chatSuggestionDomain", "chatSuggestionApp", "chatSuggestionCv"];
+
+// Guide Agent quick actions: hover tooltip + click par Genesis guide message.
+// Naya guided button = bas yahan ek entry add karo.
+const GUIDE_ACTIONS = [
+  {
+    label: "Real domain add karo",
+    tooltipText: "Apna asal domain Vercel project se jodo - DNS records milenge",
+    guideMessage:
+      "Bhai apna asal domain naam bhejo jaise noquitai.com aur project ka naam bhejo. Main Vercel pe add karke tumhe DNS records (A record 76.76.21.21, CNAME cname.vercel-dns.com) de dunga jo tumhe domain provider pe lagane hain.",
+    prefill: "Mera domain [domain-name] project [project-name] par add karo",
+  },
+  {
+    label: "User domain add chain",
+    tooltipText: "Pura chain: project check → domain add → DNS live check",
+    guideMessage:
+      "Bhai ye pura chain hai - Pehle project check karunga, phir domain add karunga, phir DNS check karke bataunga live hai ya nahi. Chalo shuru karte hain, domain naam bhejo?",
+    prefill: "Domain add chain shuru karo, mera domain hai: ",
+  },
+];
 
 type Thread = { id: string; title: string; updated_at: string };
 
