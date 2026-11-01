@@ -134,6 +134,13 @@
       "when": 1793559121023,
       "tag": "0018_tool_audit_and_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1793562567343,
+      "tag": "0019_genesis_super_upgrade",
+      "breakpoints": true
     }
   ]
 }

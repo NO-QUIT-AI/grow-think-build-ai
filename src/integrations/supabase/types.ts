@@ -339,6 +339,84 @@ export type Database = {
         }
         Relationships: []
       }
+      genesis_budgets: {
+        Row: {
+          monthly_usd: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          monthly_usd?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          monthly_usd?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      genesis_patches: {
+        Row: {
+          applied_at: string | null
+          created_at: string
+          id: string
+          new_content: string
+          patch_description: string
+          previous_content: string
+          status: string
+          target_file: string
+          user_id: string
+        }
+        Insert: {
+          applied_at?: string | null
+          created_at?: string
+          id?: string
+          new_content: string
+          patch_description?: string
+          previous_content?: string
+          status?: string
+          target_file: string
+          user_id: string
+        }
+        Update: {
+          applied_at?: string | null
+          created_at?: string
+          id?: string
+          new_content?: string
+          patch_description?: string
+          previous_content?: string
+          status?: string
+          target_file?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      genesis_plans: {
+        Row: {
+          created_at: string
+          id: string
+          status: string
+          steps: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          status?: string
+          steps: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          status?: string
+          steps?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
       hd_redirect_clicks: {
         Row: {
           created_at: string
@@ -869,6 +947,39 @@ export type Database = {
         }
         Relationships: []
       }
+      usage: {
+        Row: {
+          cost_kind: string
+          created_at: string
+          id: string
+          status: string
+          tokens: number | null
+          tool: string
+          usd: number
+          user_id: string
+        }
+        Insert: {
+          cost_kind?: string
+          created_at?: string
+          id?: string
+          status?: string
+          tokens?: number | null
+          tool: string
+          usd?: number
+          user_id: string
+        }
+        Update: {
+          cost_kind?: string
+          created_at?: string
+          id?: string
+          status?: string
+          tokens?: number | null
+          tool?: string
+          usd?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_plans: {
         Row: {
           plan: string
@@ -938,6 +1049,11 @@ export type Database = {
         Returns: boolean
       }
       gen_invite_code: { Args: never; Returns: string }
+      genesis_confirm_patch: { Args: { p_id: string }; Returns: Json }
+      genesis_reserve_usage: {
+        Args: { p_tool: string; p_usd: number; p_user: string }
+        Returns: string
+      }
       get_site_by_subdomain: { Args: { _subdomain: string }; Returns: string }
       is_owner: { Args: { _uid: string }; Returns: boolean }
       nqai_award: {
