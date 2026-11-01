@@ -8,6 +8,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowUp,
   Brain,
+  Copy,
+  ThumbsUp,
+  ThumbsDown,
   Download,
   ImagePlus,
   Loader2,
@@ -38,6 +41,8 @@ import { VoiceModal, getSpeechRecognition } from "@/components/nova/VoiceModal";
 import { useLanguage } from "@/i18n/LanguageContext";
 import type { TranslationKey } from "@/i18n/translations";
 import { connectPollinations, generateWithUserKey, getUserPollinationsKey } from "@/lib/pollinations";
+import { ButtonWithGuide } from "@/components/nova/ButtonWithGuide";
+import { GUIDE_EVT, GUIDE_ID_PREFIX, isGuideMessageId, saveGuideFeedback } from "@/lib/guide-agent";
 
 const VOICE_CACHE_KEY = "nqai_voice_cache";
 function voiceKey(q: string, lang: string) {
@@ -76,6 +81,25 @@ const TOOL_LABELS: Record<string, TranslationKey> = {
 };
 
 const SUGGESTION_KEYS: TranslationKey[] = ["chatSuggestionDomain", "chatSuggestionApp", "chatSuggestionCv"];
+
+// Guide Agent quick actions: hover tooltip + click par Genesis guide message.
+// Naya guided button = bas yahan ek entry add karo.
+const GUIDE_ACTIONS = [
+  {
+    label: "Real domain add karo",
+    tooltipText: "Apna asal domain Vercel project se jodo - DNS records milenge",
+    guideMessage:
+      "Bhai apna asal domain naam bhejo jaise noquitai.com aur project ka naam bhejo. Main Vercel pe add karke tumhe DNS records (A record 76.76.21.21, CNAME cname.vercel-dns.com) de dunga jo tumhe domain provider pe lagane hain.",
+    prefill: "Mera domain [domain-name] project [project-name] par add karo",
+  },
+  {
+    label: "User domain add chain",
+    tooltipText: "Pura chain: project check → domain add → DNS live check",
+    guideMessage:
+      "Bhai ye pura chain hai - Pehle project check karunga, phir domain add karunga, phir DNS check karke bataunga live hai ya nahi. Chalo shuru karte hain, domain naam bhejo?",
+    prefill: "Domain add chain shuru karo, mera domain hai: ",
+  },
+];
 
 type Thread = { id: string; title: string; updated_at: string };
 
@@ -593,6 +617,28 @@ function ChatThread({
 
   const busy = status === "submitted" || status === "streaming";
 
+  // Guide Agent: button click par guide message chat me inject karo (local only).
+  const [guideVotes, setGuideVotes] = useState<Record<string, "up" | "down">>({});
+  useEffect(() => {
+    const h = (e: Event) => {
+      const d = (e as CustomEvent<{ guideMessage?: string }>).detail;
+      if (!d?.guideMessage) return;
+      const stamp = Date.now();
+      setMessages((prev) => [
+        ...prev,
+        { id: `${GUIDE_ID_PREFIX}${stamp}`, role: "assistant", parts: [{ type: "text", text: d.guideMessage! }] },
+      ]);
+    };
+    window.addEventListener(GUIDE_EVT, h);
+    return () => window.removeEventListener(GUIDE_EVT, h);
+  }, [setMessages]);
+
+  function voteGuide(id: string, vote: "up" | "down", message: string) {
+    setGuideVotes((prev) => ({ ...prev, [id]: vote }));
+    saveGuideFeedback(id, vote, message);
+    toast.success(vote === "up" ? "Shukriya bhai! 👍" : "Feedback mil gaya, improve karenge");
+  }
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, busy]);
@@ -707,7 +753,7 @@ function ChatThread({
             <div className="mt-4 flex flex-wrap gap-2">
                {SUGGESTION_KEYS.map((key) => {
                  const suggestion = t(key);
-                 return (
+                  return (
                 <button
                    key={key}
                   onClick={() => submit(suggestion)}
@@ -717,6 +763,17 @@ function ChatThread({
                 </button>
                  );
                })}
+             </div>
+            <div className="mt-3 flex flex-wrap gap-2 border-t border-border pt-3">
+              {GUIDE_ACTIONS.map((action) => (
+                <ButtonWithGuide
+                  key={action.label}
+                  label={action.label}
+                  tooltipText={action.tooltipText}
+                  guideMessage={action.guideMessage}
+                  onClickAction={() => setInput(action.prefill)}
+                />
+              ))}
             </div>
           </div>
         )}
@@ -785,6 +842,47 @@ function ChatThread({
                         />
                         {speakingId === message.id ? "Speaking..." : "Listen"}
                       </button>
+                      {isGuideMessageId(message.id) && (
+                        <span className="inline-flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            aria-label="Copy guide"
+                            onClick={() => {
+                              void navigator.clipboard
+                                ?.writeText(text)
+                                .then(() => toast.success("Guide copy ho gaya"))
+                                .catch(() => toast.error("Copy nahi hua"));
+                            }}
+                            className="inline-flex items-center gap-1 rounded-full border border-border bg-secondary px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:border-primary"
+                          >
+                            <Copy className="h-3.5 w-3.5" /> Copy
+                          </button>
+                          <button
+                            type="button"
+                            aria-label="Guide helpful"
+                            onClick={() => voteGuide(message.id, "up", text)}
+                            className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                              guideVotes[message.id] === "up"
+                                ? "border-primary bg-primary/15 text-primary"
+                                : "border-border bg-secondary text-muted-foreground hover:border-primary"
+                            }`}
+                          >
+                            <ThumbsUp className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            aria-label="Guide not good"
+                            onClick={() => voteGuide(message.id, "down", text)}
+                            className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                              guideVotes[message.id] === "down"
+                                ? "border-destructive bg-destructive/15 text-destructive"
+                                : "border-border bg-secondary text-muted-foreground hover:border-primary"
+                            }`}
+                          >
+                            <ThumbsDown className="h-3.5 w-3.5" />
+                          </button>
+                        </span>
+                      )}
                     </div>
                   )
                 ) : (
