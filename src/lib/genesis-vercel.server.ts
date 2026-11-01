@@ -28,7 +28,7 @@ async function vq(path: string, init?: RequestInit) {
   const url = new URL(`https://api.vercel.com${path}`);
   if (team) url.searchParams.set("teamId", team);
   const res = await fetch(url, { ...init, headers: { authorization: `Bearer ${token}`, "content-type": "application/json" } });
-  const json = (await res.json().catch(() => ({}))) as Record<string, any>;
+  const json: any = await res.json().catch(() => ({}));
   return { ok: res.ok, status: res.status, json };
 }
 
