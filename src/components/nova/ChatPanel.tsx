@@ -43,6 +43,7 @@ import type { TranslationKey } from "@/i18n/translations";
 import { connectPollinations, generateWithUserKey, getUserPollinationsKey } from "@/lib/pollinations";
 import { ButtonWithGuide } from "@/components/nova/ButtonWithGuide";
 import { GUIDE_EVT, GUIDE_ID_PREFIX, isGuideMessageId, saveGuideFeedback } from "@/lib/guide-agent";
+import { GenesisUsage, GenesisToolApproval } from "@/components/nova/GenesisUpgrade";
 
 const VOICE_CACHE_KEY = "nqai_voice_cache";
 function voiceKey(q: string, lang: string) {
@@ -455,6 +456,9 @@ function ChatThread({
   const { lang, t } = useLanguage();
   const [input, setInput] = useState("");
   const [attached, setAttached] = useState<string | null>(null);
+  const [imageMode,setImageMode]=useState<"analyze"|"edit">("analyze");
+  const planRef=useRef<string|null>(null);
+  const [usageRevision,setUsageRevision]=useState(0);
   const [editing, setEditing] = useState(false);
   const [edits, setEdits] = useState<{ id: string; before: string; after: string; prompt: string }[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -567,7 +571,7 @@ function ChatThread({
     () =>
       new DefaultChatTransport({
         api: "/api/chat",
-        body: { lang, studioContext },
+        body: () => ({ lang, studioContext,conversationId:convRef.current,approvedPlanId:planRef.current,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone }),
         headers: async () => {
           const { data } = await supabase.auth.getSession();
           return { Authorization: `Bearer ${data.session?.access_token ?? ""}` };
@@ -580,6 +584,7 @@ function ChatThread({
     messages: initialMessages,
     transport,
     onFinish: async ({ message }) => {
+      setUsageRevision(value=>value+1);
       const text = messageText(message);
       const cacheQ = voiceQuestionRef.current;
       const usedTool = (message.parts ?? []).some((p) => String(p.type).startsWith("tool-"));
@@ -645,12 +650,12 @@ function ChatThread({
 
   async function submit(text: string) {
     const value = text.trim();
-    if (attached) {
+    if (attached && imageMode==="edit") {
       await runImageEdit(value || t("imageInstruction"));
       return;
     }
-    if (!value || busy) return;
-    if (!studioContext && readVoiceCache(value, lang)) {
+    if ((!value && !attached) || busy) return;
+    if (!attached && !studioContext && readVoiceCache(value, lang)) {
       void askByVoice(value);
       return;
     }
@@ -671,7 +676,9 @@ function ChatThread({
     };
       backupToWorker("message", __rows);
       await supabase.from("messages").insert(__rows);
-    void sendMessage({ text: value });
+    const photo=attached;
+    setAttached(null);
+    void sendMessage({ text: value || "Analyze this screenshot and identify visible bugs.",...(photo?{files:[{type:"file" as const,mediaType:"image/jpeg",url:photo}]}:{}) });
   }
 
   // Voice agent: cache (device par save) me ho to AI call nahi, warna AI se poocho.
@@ -740,7 +747,8 @@ function ChatThread({
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className="genesis-chat flex min-h-0 flex-1 flex-col bg-background">
+      <GenesisUsage revision={usageRevision}/>
       <div className="flex-1 space-y-4 overflow-y-auto px-1 pb-4">
         {messages.length === 0 && (
           <div className="panel p-5">
@@ -801,12 +809,14 @@ function ChatThread({
                         className="inline-flex items-center gap-1 rounded-full border border-border bg-secondary px-2 py-0.5 text-[11px] text-muted-foreground"
                       >
                         <Wrench className="h-3 w-3 text-accent" />
-                          {label ? t(label) : part.type.replace("tool-", "")}
+                          Step {index+1}/{tools.length} · {label ? t(label) : part.type.replace("tool-", "")} · {("state" in part && part.state==="output-available")?"done":("state" in part && part.state==="output-error")?"error":"running"}
                       </span>
                       );
                     })}
                   </div>
                 )}
+                {!isUser && tools.map((part,index)=> <GenesisToolApproval key={`approval-${index}`} output={(part as {output?:Record<string,unknown>}).output??{}} onPlanApproved={id=>{planRef.current=id;void submit("Approved plan — shuru karo, steps ke mutabiq kaam karo.");}}/>)}
+                {message.parts.filter(part=>part.type==="file").map((part,index)=>part.type==="file"?<img key={`attachment-${index}`} src={part.url} alt="Attached screenshot" className="mb-2 max-h-64 rounded-md object-contain"/>:null)}
                 {!isUser &&
                   tools
                     .filter((p) => p.type === "tool-generate_image_free")
@@ -938,6 +948,7 @@ function ChatThread({
           void submit(input);
         }}
         className="panel sticky bottom-0 flex flex-col gap-2 p-2"
+        onPaste={event=>{const item=Array.from(event.clipboardData.items).find(item=>item.type.startsWith("image/"));if(item){event.preventDefault();void pickImage(item.getAsFile()??undefined);}}}
       >
         {attached && (
           <div className="flex items-center gap-2 rounded-lg border border-border bg-secondary/60 p-2">
@@ -945,6 +956,8 @@ function ChatThread({
             <p className="flex-1 text-xs text-muted-foreground">
                {t("imageAttached")}
             </p>
+            <Button type="button" variant={imageMode==="analyze"?"secondary":"ghost"} size="sm" onClick={()=>setImageMode("analyze")}>Analyze</Button>
+            <Button type="button" variant={imageMode==="edit"?"secondary":"ghost"} size="sm" onClick={()=>setImageMode("edit")}>Edit</Button>
             <Button
               type="button"
               size="icon"

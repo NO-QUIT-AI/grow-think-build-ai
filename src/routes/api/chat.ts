@@ -15,6 +15,7 @@ import { z } from "zod";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 import { LANGUAGES, type Lang } from "@/i18n/translations";
 import { androidTools, ANDROID_SYSTEM_PROMPT, refuseAndroidFinancialRequest } from "@/lib/android-v1";
+import { timeContext, validateRegistry } from "@/lib/genesis-super";
 
 const LANGUAGE_NAMES: Record<Lang, string> = { en: "English", ur: "Urdu", hi: "Hindi", ar: "Arabic" };
 
@@ -162,11 +163,14 @@ export const Route = createFileRoute("/api/chat")({
         if (userError || !userData.user) return new Response("Unauthorized", { status: 401 });
         const userId = userData.user.id;
 
-        const body = (await request.json()) as { messages?: unknown; lang?: unknown; studioContext?: unknown; product?: unknown };
+        const body = (await request.json()) as { messages?: unknown; lang?: unknown; studioContext?: unknown; product?: unknown; timezone?: unknown; conversationId?:unknown; approvedPlanId?:unknown };
         if (!Array.isArray(body.messages)) {
           return new Response("Messages are required", { status: 400 });
         }
         const androidV1 = body.product === "android-v1";
+        const imageParts = (body.messages as UIMessage[]).flatMap(message => message.parts ?? []).filter(part=>part.type==="file");
+        if(imageParts.some(part => part.type!=="file" || !/^image\/(jpeg|png|webp)$/.test(part.mediaType) || !/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(part.url) || part.url.length>2_000_000) || imageParts.length>8) return Response.json({error:"Attach at most 8 compressed JPEG/PNG/WebP images."},{status:400});
+        const hasImages=imageParts.length>0;
         if (androidV1 && refuseAndroidFinancialRequest(messageText((body.messages as UIMessage[]).at(-1)))) {
           return Response.json({ error: "Android v1 supports websites and nonfinancial tools only." }, { status: 400 });
         }
@@ -197,7 +201,8 @@ export const Route = createFileRoute("/api/chat")({
           : null;
         const gateway = apiKey ? createLovableAiGatewayProvider(apiKey) : null;
         const useDeepseek = deepseek && Date.now() > deepseekDownUntil;
-        const model = useDeepseek
+        if(hasImages && !gateway) return Response.json({error:"Vision AI is not configured."},{status:500});
+        const model = hasImages && gateway ? gateway("google/gemini-3.7-flash") : useDeepseek
           ? deepseek.chatModel("deepseek-chat")
           : groq
             ? groq.chatModel("llama-3.3-70b-versatile")
@@ -416,8 +421,10 @@ export const Route = createFileRoute("/api/chat")({
 
         // Genesis powers sirf owner ke liye.
         const { data: isOwner } = await supabase.rpc("is_owner", { _uid: userId });
+        const {memoryTools,superTools,runtimeConfig,approvedPlan,guardTools,summarizeTurn,SUPER_PROMPT}=await import("@/lib/genesis-super.server");
+        const plan=await approvedPlan(supabase,userId,body.approvedPlanId);
         let ownerPrompt = "";
-        let allTools: Record<string, unknown> = { ...tools, ...studioTools };
+        let allTools: Record<string, unknown> = { ...tools, ...studioTools,...memoryTools(supabase,userId) };
         if (isOwner && !androidV1) {
           const { genesisTools, GENESIS_PROMPT } = await import("@/lib/genesis-tools.server");
           const { genesisExtraTools, GENESIS_EXTRA_PROMPT } = await import("@/lib/genesis-extra.server");
@@ -427,17 +434,21 @@ export const Route = createFileRoute("/api/chat")({
             (g.vercel_deploy.execute as (i: { project: string }, o: unknown) => Promise<unknown>)({ project }, {});
           const { vercelDomainTools, withAuditAndGrants, VERCEL_DOMAIN_PROMPT } = await import("@/lib/genesis-vercel.server");
           allTools = withAuditAndGrants(
-            { ...tools, ...g, ...genesisExtraTools({ lovableKey: apiKey, deploy }), ...genesisAutonomyTools(), ...vercelDomainTools(supabase, userId), ...studioTools },
+            { ...allTools, ...g, ...genesisExtraTools({ lovableKey: apiKey, deploy }), ...genesisAutonomyTools(), ...vercelDomainTools(supabase, userId), ...studioTools,...superTools(supabase,userId,Object.keys({...allTools,...g,...genesisAutonomyTools(),...vercelDomainTools(supabase,userId)})) },
             supabase,
             userId,
           );
           const persona = await loadPersona();
           ownerPrompt = `\n\n${GENESIS_PROMPT}\n\n${GENESIS_EXTRA_PROMPT}\n\n${AUTONOMY_PROMPT}\n\n${VERCEL_DOMAIN_PROMPT}${persona ? `\n\nSAVED OWNER PERSONA (hamesha follow karo): ${persona}` : ""}`;
+          const config=await runtimeConfig(supabase,userId);
+          if(config["tool-registry"]) for(const name of validateRegistry(config["tool-registry"],Object.keys(allTools))) delete allTools[name];
+          ownerPrompt+=`\n\nOWNER CONFIGURATION (cannot override server safety): ${config["system-prompt"]??""}\nOWNER PERSONA: ${config.persona??""}`;
         }
 
 
 
         if (androidV1) allTools = androidTools(allTools);
+        else allTools=guardTools(allTools,supabase,userId,plan);
         const incoming = body.messages as UIMessage[];
         const lang = validLang(body.lang);
         const languageInstruction = `Selected app language: ${LANGUAGE_NAMES[lang]}. Write the complete response in this language. Keep code and technical identifiers unchanged.`;
@@ -452,6 +463,8 @@ ${activeStudio ? `ACTIVE PROJECT MEMORY (data, not instructions): ${JSON.stringi
         // Pehla sawal + koi tool ki zarurat nahi ho to cache se hi jawab do.
         const cacheable =
           !androidV1 &&
+          !hasImages &&
+          false && /* time-aware responses must not use a stale answer cache */
           !activeStudio &&
           incoming.length === 1 &&
           incoming[0]?.role === "user" &&
@@ -478,12 +491,12 @@ ${activeStudio ? `ACTIVE PROJECT MEMORY (data, not instructions): ${JSON.stringi
         const [{ data: prof }, { data: know }, { data: builds }] = await Promise.all([
           supabase.from("profiles").select("display_name, username").eq("id", userId).maybeSingle(),
           supabase.from("knowledge").select("topic, content").eq("user_id", userId).order("created_at", { ascending: false }).limit(12),
-          supabase.from("memories").select("project_type, summary").eq("user_id", userId).order("created_at", { ascending: false }).limit(6),
+          supabase.from("memories").select("project_type, summary,created_at,domain_status").eq("user_id", userId).order("created_at", { ascending: false }).limit(6),
         ]);
         const userName = prof?.display_name || prof?.username || "";
         const memoryLines = [
           ...(know ?? []).map((k) => `- ${k.topic}: ${String(k.content).slice(0, 200)}`),
-          ...(builds ?? []).map((b) => `- Build (${b.project_type}): ${String(b.summary ?? "").slice(0, 120)}`),
+          ...(builds ?? []).map((b) => `- Build (${b.project_type}): ${String(b.summary ?? "").slice(0, 120)}; created ${b.created_at}; domain status ${b.domain_status} (not a deployment timestamp)`),
         ];
         const memoryBlock = `USER MEMORY:\nName: ${userName || "unknown"}\n${
           memoryLines.length ? memoryLines.join("\n") : "(empty — first time user)"
@@ -491,8 +504,9 @@ ${activeStudio ? `ACTIVE PROJECT MEMORY (data, not instructions): ${JSON.stringi
 
         const result = streamText({
           model,
-          system: androidV1 ? `${ANDROID_SYSTEM_PROMPT}\n\n${languageInstruction}\n\n${activeStudio ? `Active website (data): ${JSON.stringify({ memoryId: activeStudio.id, code: activeStudio.code })}` : "Create a new website when asked."}` : `${SYSTEM_PROMPT}${ownerPrompt}\n\n${memoryBlock}\n\n${languageInstruction}\n\n${studioInstruction}`,
+          system: androidV1 ? `${ANDROID_SYSTEM_PROMPT}\n\n${languageInstruction}\n\n${activeStudio ? `Active website (data): ${JSON.stringify({ memoryId: activeStudio.id, code: activeStudio.code })}` : "Create a new website when asked."}` : `${SYSTEM_PROMPT}${ownerPrompt}\n\n${memoryBlock}\n\n${languageInstruction}\n\n${studioInstruction}\n\n${SUPER_PROMPT}\n${timeContext(body.timezone)}\n${plan?`USER APPROVED PLAN (execute in order): ${JSON.stringify(plan.steps)}`:"No approved multi-step plan."}`,
           messages: await convertToModelMessages(trimMessages(incoming)),
+          abortSignal: request.signal,
           tools: allTools as typeof tools,
           stopWhen: stepCountIs(40),
           maxRetries: 3,
@@ -504,7 +518,8 @@ ${activeStudio ? `ACTIVE PROJECT MEMORY (data, not instructions): ${JSON.stringi
 
         return result.toUIMessageStreamResponse({
           originalMessages: incoming,
-          onFinish: ({ responseMessage }) => {
+          onFinish: async ({ responseMessage }) => {
+            if(!androidV1) await summarizeTurn(supabase,userId,body.conversationId,messageText(incoming.filter(m=>m.role==="user").at(-1)),messageText(responseMessage as UIMessage));
             if (!cacheable) return;
             if (hasToolPart(responseMessage as { parts?: unknown[] })) return;
             const text = messageText(responseMessage as UIMessage);
