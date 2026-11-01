@@ -821,6 +821,54 @@ export type Database = {
         }
         Relationships: []
       }
+      tool_audit_log: {
+        Row: {
+          args: Json | null
+          created_at: string
+          id: string
+          ok: boolean
+          result: Json | null
+          tool: string
+          user_id: string
+        }
+        Insert: {
+          args?: Json | null
+          created_at?: string
+          id?: string
+          ok?: boolean
+          result?: Json | null
+          tool: string
+          user_id: string
+        }
+        Update: {
+          args?: Json | null
+          created_at?: string
+          id?: string
+          ok?: boolean
+          result?: Json | null
+          tool?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      tool_permission_grants: {
+        Row: {
+          created_at: string
+          scope: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          scope: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          scope?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_plans: {
         Row: {
           plan: string

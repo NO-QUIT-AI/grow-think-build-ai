@@ -425,9 +425,14 @@ export const Route = createFileRoute("/api/chat")({
           const g = genesisTools();
           const deploy = (project: string) =>
             (g.vercel_deploy.execute as (i: { project: string }, o: unknown) => Promise<unknown>)({ project }, {});
-          allTools = { ...tools, ...g, ...genesisExtraTools({ lovableKey: apiKey, deploy }), ...genesisAutonomyTools(), ...studioTools };
+          const { vercelDomainTools, withAuditAndGrants, VERCEL_DOMAIN_PROMPT } = await import("@/lib/genesis-vercel.server");
+          allTools = withAuditAndGrants(
+            { ...tools, ...g, ...genesisExtraTools({ lovableKey: apiKey, deploy }), ...genesisAutonomyTools(), ...vercelDomainTools(supabase, userId), ...studioTools },
+            supabase,
+            userId,
+          );
           const persona = await loadPersona();
-          ownerPrompt = `\n\n${GENESIS_PROMPT}\n\n${GENESIS_EXTRA_PROMPT}\n\n${AUTONOMY_PROMPT}${persona ? `\n\nSAVED OWNER PERSONA (hamesha follow karo): ${persona}` : ""}`;
+          ownerPrompt = `\n\n${GENESIS_PROMPT}\n\n${GENESIS_EXTRA_PROMPT}\n\n${AUTONOMY_PROMPT}\n\n${VERCEL_DOMAIN_PROMPT}${persona ? `\n\nSAVED OWNER PERSONA (hamesha follow karo): ${persona}` : ""}`;
         }
 
 
