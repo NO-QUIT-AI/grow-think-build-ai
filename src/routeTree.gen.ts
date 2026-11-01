@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as AccountDeletionRouteImport } from './routes/account-deletion'
 import { Route as AndroidAppRouteImport } from './routes/android-app'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AutoVideoRouteImport } from './routes/auto-video'
@@ -59,6 +60,7 @@ import { Route as CallRoomIdRouteImport } from './routes/call.$roomId'
 import { Route as SSubdomainRouteImport } from './routes/s.$subdomain'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as ApiMindThinkRouteImport } from './routes/api/mind/think'
+import { Route as ApiPublicAccountDeletionRouteImport } from './routes/api/public/account-deletion'
 import { Route as ApiPublicErrorReportRouteImport } from './routes/api/public/error-report'
 import { Route as ApiPublicR2VideoRouteImport } from './routes/api/public/r2-video'
 import { Route as ApiPublicJobsDailyReportRouteImport } from './routes/api/public/jobs/daily-report'
@@ -71,6 +73,11 @@ const IndexRoute = IndexRouteImport.update({
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountDeletionRoute = AccountDeletionRouteImport.update({
+  id: '/account-deletion',
+  path: '/account-deletion',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AndroidAppRoute = AndroidAppRouteImport.update({
@@ -313,6 +320,12 @@ const ApiMindThinkRoute = ApiMindThinkRouteImport.update({
   path: '/think',
   getParentRoute: () => ApiMindRoute,
 } as any)
+const ApiPublicAccountDeletionRoute =
+  ApiPublicAccountDeletionRouteImport.update({
+    id: '/api/public/account-deletion',
+    path: '/api/public/account-deletion',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicErrorReportRoute = ApiPublicErrorReportRouteImport.update({
   id: '/api/public/error-report',
   path: '/api/public/error-report',
@@ -333,6 +346,7 @@ const ApiPublicJobsDailyReportRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/account-deletion': typeof AccountDeletionRoute
   '/android-app': typeof AndroidAppRoute
   '/auth': typeof AuthRoute
   '/auto-video': typeof AutoVideoRoute
@@ -381,6 +395,7 @@ export interface FileRoutesByFullPath {
   '/u/$username': typeof UUsernameRoute
   '/blog/': typeof BlogIndexRoute
   '/api/mind/think': typeof ApiMindThinkRoute
+  '/api/public/account-deletion': typeof ApiPublicAccountDeletionRoute
   '/api/public/error-report': typeof ApiPublicErrorReportRoute
   '/api/public/r2-video': typeof ApiPublicR2VideoRoute
   '/api/public/jobs/daily-report': typeof ApiPublicJobsDailyReportRoute
@@ -388,6 +403,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/account-deletion': typeof AccountDeletionRoute
   '/android-app': typeof AndroidAppRoute
   '/auth': typeof AuthRoute
   '/auto-video': typeof AutoVideoRoute
@@ -436,6 +452,7 @@ export interface FileRoutesByTo {
   '/u/$username': typeof UUsernameRoute
   '/blog': typeof BlogIndexRoute
   '/api/mind/think': typeof ApiMindThinkRoute
+  '/api/public/account-deletion': typeof ApiPublicAccountDeletionRoute
   '/api/public/error-report': typeof ApiPublicErrorReportRoute
   '/api/public/r2-video': typeof ApiPublicR2VideoRoute
   '/api/public/jobs/daily-report': typeof ApiPublicJobsDailyReportRoute
@@ -444,6 +461,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/account-deletion': typeof AccountDeletionRoute
   '/android-app': typeof AndroidAppRoute
   '/auth': typeof AuthRoute
   '/auto-video': typeof AutoVideoRoute
@@ -492,6 +510,7 @@ export interface FileRoutesById {
   '/u/$username': typeof UUsernameRoute
   '/blog/': typeof BlogIndexRoute
   '/api/mind/think': typeof ApiMindThinkRoute
+  '/api/public/account-deletion': typeof ApiPublicAccountDeletionRoute
   '/api/public/error-report': typeof ApiPublicErrorReportRoute
   '/api/public/r2-video': typeof ApiPublicR2VideoRoute
   '/api/public/jobs/daily-report': typeof ApiPublicJobsDailyReportRoute
@@ -501,6 +520,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/account-deletion'
     | '/android-app'
     | '/auth'
     | '/auto-video'
@@ -549,6 +569,7 @@ export interface FileRouteTypes {
     | '/u/$username'
     | '/blog/'
     | '/api/mind/think'
+    | '/api/public/account-deletion'
     | '/api/public/error-report'
     | '/api/public/r2-video'
     | '/api/public/jobs/daily-report'
@@ -556,6 +577,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/account-deletion'
     | '/android-app'
     | '/auth'
     | '/auto-video'
@@ -604,6 +626,7 @@ export interface FileRouteTypes {
     | '/u/$username'
     | '/blog'
     | '/api/mind/think'
+    | '/api/public/account-deletion'
     | '/api/public/error-report'
     | '/api/public/r2-video'
     | '/api/public/jobs/daily-report'
@@ -611,6 +634,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/account-deletion'
     | '/android-app'
     | '/auth'
     | '/auto-video'
@@ -659,6 +683,7 @@ export interface FileRouteTypes {
     | '/u/$username'
     | '/blog/'
     | '/api/mind/think'
+    | '/api/public/account-deletion'
     | '/api/public/error-report'
     | '/api/public/r2-video'
     | '/api/public/jobs/daily-report'
@@ -667,6 +692,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AccountDeletionRoute: typeof AccountDeletionRoute
   AndroidAppRoute: typeof AndroidAppRoute
   AuthRoute: typeof AuthRoute
   AutoVideoRoute: typeof AutoVideoRoute
@@ -714,6 +740,7 @@ export interface RootRouteChildren {
   SSubdomainRoute: typeof SSubdomainRoute
   UUsernameRoute: typeof UUsernameRoute
   BlogIndexRoute: typeof BlogIndexRoute
+  ApiPublicAccountDeletionRoute: typeof ApiPublicAccountDeletionRoute
   ApiPublicErrorReportRoute: typeof ApiPublicErrorReportRoute
   ApiPublicR2VideoRoute: typeof ApiPublicR2VideoRoute
   ApiPublicJobsDailyReportRoute: typeof ApiPublicJobsDailyReportRoute
@@ -733,6 +760,13 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account-deletion': {
+      id: '/account-deletion'
+      path: '/account-deletion'
+      fullPath: '/account-deletion'
+      preLoaderRoute: typeof AccountDeletionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/android-app': {
@@ -1071,6 +1105,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiMindThinkRouteImport
       parentRoute: typeof ApiMindRoute
     }
+    '/api/public/account-deletion': {
+      id: '/api/public/account-deletion'
+      path: '/api/public/account-deletion'
+      fullPath: '/api/public/account-deletion'
+      preLoaderRoute: typeof ApiPublicAccountDeletionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/error-report': {
       id: '/api/public/error-report'
       path: '/api/public/error-report'
@@ -1109,6 +1150,7 @@ const ApiMindRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AccountDeletionRoute: AccountDeletionRoute,
   AndroidAppRoute: AndroidAppRoute,
   AuthRoute: AuthRoute,
   AutoVideoRoute: AutoVideoRoute,
@@ -1156,6 +1198,7 @@ const rootRouteChildren: RootRouteChildren = {
   SSubdomainRoute: SSubdomainRoute,
   UUsernameRoute: UUsernameRoute,
   BlogIndexRoute: BlogIndexRoute,
+  ApiPublicAccountDeletionRoute: ApiPublicAccountDeletionRoute,
   ApiPublicErrorReportRoute: ApiPublicErrorReportRoute,
   ApiPublicR2VideoRoute: ApiPublicR2VideoRoute,
   ApiPublicJobsDailyReportRoute: ApiPublicJobsDailyReportRoute,
