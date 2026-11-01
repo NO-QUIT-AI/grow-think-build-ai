@@ -617,6 +617,28 @@ function ChatThread({
 
   const busy = status === "submitted" || status === "streaming";
 
+  // Guide Agent: button click par guide message chat me inject karo (local only).
+  const [guideVotes, setGuideVotes] = useState<Record<string, "up" | "down">>({});
+  useEffect(() => {
+    const h = (e: Event) => {
+      const d = (e as CustomEvent<{ guideMessage?: string }>).detail;
+      if (!d?.guideMessage) return;
+      const stamp = Date.now();
+      setMessages((prev) => [
+        ...prev,
+        { id: `${GUIDE_ID_PREFIX}${stamp}`, role: "assistant", parts: [{ type: "text", text: d.guideMessage! }] },
+      ]);
+    };
+    window.addEventListener(GUIDE_EVT, h);
+    return () => window.removeEventListener(GUIDE_EVT, h);
+  }, [setMessages]);
+
+  function voteGuide(id: string, vote: "up" | "down", message: string) {
+    setGuideVotes((prev) => ({ ...prev, [id]: vote }));
+    saveGuideFeedback(id, vote, message);
+    toast.success(vote === "up" ? "Shukriya bhai! 👍" : "Feedback mil gaya, improve karenge");
+  }
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, busy]);
