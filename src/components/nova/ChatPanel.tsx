@@ -842,6 +842,47 @@ function ChatThread({
                         />
                         {speakingId === message.id ? "Speaking..." : "Listen"}
                       </button>
+                      {isGuideMessageId(message.id) && (
+                        <span className="inline-flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            aria-label="Copy guide"
+                            onClick={() => {
+                              void navigator.clipboard
+                                ?.writeText(text)
+                                .then(() => toast.success("Guide copy ho gaya"))
+                                .catch(() => toast.error("Copy nahi hua"));
+                            }}
+                            className="inline-flex items-center gap-1 rounded-full border border-border bg-secondary px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:border-primary"
+                          >
+                            <Copy className="h-3.5 w-3.5" /> Copy
+                          </button>
+                          <button
+                            type="button"
+                            aria-label="Guide helpful"
+                            onClick={() => voteGuide(message.id, "up", text)}
+                            className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                              guideVotes[message.id] === "up"
+                                ? "border-primary bg-primary/15 text-primary"
+                                : "border-border bg-secondary text-muted-foreground hover:border-primary"
+                            }`}
+                          >
+                            <ThumbsUp className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            aria-label="Guide not good"
+                            onClick={() => voteGuide(message.id, "down", text)}
+                            className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                              guideVotes[message.id] === "down"
+                                ? "border-destructive bg-destructive/15 text-destructive"
+                                : "border-border bg-secondary text-muted-foreground hover:border-primary"
+                            }`}
+                          >
+                            <ThumbsDown className="h-3.5 w-3.5" />
+                          </button>
+                        </span>
+                      )}
                     </div>
                   )
                 ) : (
