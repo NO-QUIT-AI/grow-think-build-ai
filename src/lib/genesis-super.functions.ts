@@ -19,6 +19,11 @@ export const confirmGenesisCost=createServerFn({method:"POST"}).middleware([requ
   if(error) throw new Error(error.message);
   return {approved:true,id:data.id};
 });
+export const genesisPlanStatus=createServerFn({method:"GET"}).middleware([requireSupabaseAuth]).inputValidator((input:unknown)=>z.object({id:z.string().uuid()}).parse(input)).handler(async({data,context})=>{
+  const {data:plan,error}=await context.supabase.from("genesis_plans").select("status,completed_steps,steps").eq("id",data.id).eq("user_id",context.userId).single();
+  if(error || !plan)throw new Error("Plan unavailable");
+  return {status:plan.status,completed:plan.completed_steps};
+});
 export const genesisBudget=createServerFn({method:"GET"}).middleware([requireSupabaseAuth]).handler(async({context})=>{
   const month=new Date();month.setUTCDate(1);month.setUTCHours(0,0,0,0);
   const [{data:budget,error:budgetError},{data:usage,error:usageError}]=await Promise.all([

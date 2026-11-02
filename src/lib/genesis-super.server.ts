@@ -132,7 +132,7 @@ export async function summarizeTurn(sb:SupabaseClient,userId:string,conversation
   if(typeof conversationId!=="string" || !z.string().uuid().safeParse(conversationId).success) return;
   const {data:conv}=await sb.from("conversations").select("id,title").eq("id",conversationId).eq("user_id",userId).maybeSingle();
   if(!conv) return;
-  const topic=`Conversation: ${conv.title.slice(0,100)}`;
+  const topic=`Conversation: ${conv.id}`;
   const {error}=await sb.rpc("genesis_save_summary",{p_topic:topic,p_content:summaryLines(question,answer),p_tags:["conversation","auto-summary"],p_source:`conversation:${conv.id}`});
   if(error) console.warn("[genesis] Summary persistence failed");
 }

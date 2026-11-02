@@ -25,3 +25,4 @@
 - App-shell offline support uses generated Workbox with one preview-guarded registration module; never cache API/auth traffic or register in editor previews.
 - Genesis self-patches affect allowlisted persisted runtime configuration only; authenticated user clicks apply version-checked backups, never model-provided confirmation or compiled security code.
 - Genesis multi-step approvals, tool usage reservations and summaries persist in Cloud; budget reservations and topic consolidation use database locks to prevent concurrent bypasses.
+- Genesis plan and paid-action approvals are conversation-bound, atomically single-use and user-click authorized; model confirmation flags never authorize spending, and stable conversation IDs prevent unrelated summaries merging.
