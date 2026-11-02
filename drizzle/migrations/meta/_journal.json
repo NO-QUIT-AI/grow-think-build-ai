@@ -148,6 +148,13 @@
       "when": 1793562683152,
       "tag": "0020_genesis_atomic_summary",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1793593597815,
+      "tag": "0021_genesis_scoped_approvals",
+      "breakpoints": true
     }
   ]
 }

@@ -357,6 +357,39 @@ export type Database = {
         }
         Relationships: []
       }
+      genesis_cost_approvals: {
+        Row: {
+          args: Json
+          conversation_id: string
+          created_at: string
+          id: string
+          status: string
+          tool: string
+          usd: number
+          user_id: string
+        }
+        Insert: {
+          args: Json
+          conversation_id: string
+          created_at?: string
+          id?: string
+          status?: string
+          tool: string
+          usd: number
+          user_id: string
+        }
+        Update: {
+          args?: Json
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          status?: string
+          tool?: string
+          usd?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       genesis_patches: {
         Row: {
           applied_at: string | null
@@ -395,6 +428,8 @@ export type Database = {
       }
       genesis_plans: {
         Row: {
+          completed_steps: number
+          conversation_id: string | null
           created_at: string
           id: string
           status: string
@@ -402,6 +437,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          completed_steps?: number
+          conversation_id?: string | null
           created_at?: string
           id?: string
           status?: string
@@ -409,6 +446,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          completed_steps?: number
+          conversation_id?: string | null
           created_at?: string
           id?: string
           status?: string
@@ -1049,7 +1088,25 @@ export type Database = {
         Returns: boolean
       }
       gen_invite_code: { Args: never; Returns: string }
+      genesis_approve_action: {
+        Args: { p_id: string; p_kind: string }
+        Returns: Json
+      }
+      genesis_claim_plan: {
+        Args: { p_conversation: string; p_id: string; p_user: string }
+        Returns: Json
+      }
       genesis_confirm_patch: { Args: { p_id: string }; Returns: Json }
+      genesis_consume_cost: {
+        Args: {
+          p_args: Json
+          p_conversation: string
+          p_id: string
+          p_tool: string
+          p_user: string
+        }
+        Returns: boolean
+      }
       genesis_reserve_usage: {
         Args: { p_tool: string; p_usd: number; p_user: string }
         Returns: string

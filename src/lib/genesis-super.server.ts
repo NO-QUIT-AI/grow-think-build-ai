@@ -1,7 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { PATCH_TARGETS, ESTIMATED_TOOL_USD, rankMemories, summaryLines, validateRegistry } from "./genesis-super";
+import { PATCH_TARGETS, ESTIMATED_TOOL_USD, rankMemories, summaryLines, validateRegistry, approvalInput, planNeedsApproval } from "./genesis-super";
 
 async function admin() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -49,7 +49,7 @@ export function superTools(sb: SupabaseClient, userId: string, available: string
     }),
   };
 }
-export function memoryTools(sb:SupabaseClient,userId:string) {
+export function memoryTools(sb:SupabaseClient,userId:string,conversationId:string|null) {
   return {
     memory_search:tool({description:"Rank saved user knowledge by topic, tags and text relevance.",inputSchema:z.object({query:z.string().max(1000)}),execute:async ({query})=>{
       const {data,error}=await sb.from("knowledge").select("id,topic,content,tags,updated_at").eq("user_id",userId).order("updated_at",{ascending:false}).limit(200);
@@ -57,19 +57,24 @@ export function memoryTools(sb:SupabaseClient,userId:string) {
       return {memories:rankMemories(data??[],query)};
     }}),
     prepare_plan:tool({description:"FIRST tool for any task requiring 3+ tool calls. Save a numbered plan and wait for user approval; do not execute its steps yet.",inputSchema:z.object({steps:z.array(z.string().max(300)).min(3).max(20)}),execute:async ({steps})=>{
+      if(!conversationId) return {error:"Start a saved conversation before preparing a plan."};
       const db=await admin();
-      const {data,error}=await db.from("genesis_plans").insert({user_id:userId,steps}).select("id").single();
+      const {data,error}=await db.from("genesis_plans").insert({user_id:userId,conversation_id:conversationId,steps}).select("id").single();
       if(error || !data) throw new Error("Could not save plan");
       return {planId:data.id,steps,needsConfirm:true};
     }}),
   };
 }
-export async function approvedPlan(sb:SupabaseClient,userId:string,id:unknown) {
-  if(typeof id!=="string" || !z.string().uuid().safeParse(id).success) return null;
-  const {data}=await sb.from("genesis_plans").select("id,steps,status").eq("id",id).eq("user_id",userId).eq("status","approved").maybeSingle();
-  return data;
+export type ApprovedPlan={id:string;steps:string[]};
+export async function approvedPlan(userId:string,id:unknown,conversationId:string|null):Promise<ApprovedPlan|null> {
+  if(!conversationId || typeof id!=="string" || !z.string().uuid().safeParse(id).success) return null;
+  const db=await admin();
+  const {data,error}=await db.rpc("genesis_claim_plan",{p_user:userId,p_id:id,p_conversation:conversationId});
+  if(error) throw new Error("Plan approval could not be checked");
+  const parsed=z.object({id:z.string().uuid(),steps:z.array(z.string())}).safeParse(data);
+  return parsed.success?parsed.data:null;
 }
-export function guardTools<T extends Record<string,unknown>>(tools:T,sb:SupabaseClient,userId:string,plan:unknown) {
+export function guardTools<T extends Record<string,unknown>>(tools:T,userId:string,plan:ApprovedPlan|null,conversationId:string|null,costApprovalId:unknown,onWait:()=>void) {
   let calls=0; let waiting=false;
   const out:Record<string,unknown>={};
   for(const [name,value] of Object.entries(tools)) {
@@ -77,19 +82,38 @@ export function guardTools<T extends Record<string,unknown>>(tools:T,sb:Supabase
     if(typeof t.execute!=="function") {out[name]=t;continue;}
     const execute=t.execute;
     out[name]={...t,execute:async(input:unknown,options:unknown)=>{
-      if(name!=="prepare_plan" && (waiting || (!plan && calls>=2))) return {error:"Plan approval required. Call prepare_plan and wait for the user's button click."};
-      if(name!=="prepare_plan") calls++;
+      if(waiting) return {error:"Wait for the user's approval button."};
+      if(name!=="prepare_plan" && planNeedsApproval(calls,!!plan)) return {error:"Plan approval required. Call prepare_plan and wait for the user's button click."};
+      if(plan && calls>=plan.steps.length) {waiting=true;onWait();return {error:"Approved plan exhausted. Prepare a new plan for additional work."};}
       const estimate=ESTIMATED_TOOL_USD[name]??0;
-      const obj=input as {confirm?:boolean};
-      if(estimate>0 && obj?.confirm!==true) return {needsConfirm:true,cost:`~$${estimate.toFixed(2)}`,message:"Paid tool: pehle user se approval lo aur monthly budget set karo."};
       const db=await admin();
+      let approvedInput=input;
+      if(estimate>0) {
+        if(!conversationId) return {error:"Save a conversation before paid tools."};
+        const args=approvalInput(input);
+        let authorized=false;
+        if(typeof costApprovalId==="string" && z.string().uuid().safeParse(costApprovalId).success){
+          const {data,error}=await db.rpc("genesis_consume_cost",{p_user:userId,p_id:costApprovalId,p_conversation:conversationId,p_tool:name,p_args:args});
+          if(error) throw new Error("Cost approval check failed");
+          authorized=data===true;
+        }
+        if(!authorized){
+          const {data,error}=await db.from("genesis_cost_approvals").insert({user_id:userId,conversation_id:conversationId,tool:name,args,usd:estimate}).select("id").single();
+          if(error || !data) throw new Error("Cost preview could not be saved");
+          waiting=true;onWait();
+          return {costApprovalId:data.id,needsConfirm:true,cost:`~$${estimate.toFixed(2)}`,tool:name,message:"Paid call — approve this estimated cost first."};
+        }
+        approvedInput={...args,confirm:true};
+      }
       const {data:id,error}=await db.rpc("genesis_reserve_usage",{p_user:userId,p_tool:name,p_usd:estimate});
-      if(error) return {error:error.message,budgetBlocked:true};
+      if(error) {waiting=true;onWait();return {error:error.message,budgetBlocked:true};}
+      if(name!=="prepare_plan") calls++;
       try {
-        const result=await execute(input,options);
-        if(name==="prepare_plan") waiting=true;
+        const result=await execute(approvedInput,options);
+        if(name==="prepare_plan") {waiting=true;onWait();}
         const failed=!!(result && typeof result==="object" && "error" in result);
         await db.from("usage").update({status:failed?"uncertain":"completed"}).eq("id",id);
+        if(plan) await db.from("genesis_plans").update({completed_steps:calls}).eq("id",plan.id).eq("user_id",userId);
         return result;
       } catch(error) {
         await db.from("usage").update({status:"uncertain"}).eq("id",id);
@@ -98,6 +122,11 @@ export function guardTools<T extends Record<string,unknown>>(tools:T,sb:Supabase
     }};
   }
   return out as T;
+}
+export async function finishPlan(userId:string,plan:ApprovedPlan|null,waiting:boolean) {
+  if(!plan)return;
+  const db=await admin();
+  await db.from("genesis_plans").update({status:waiting?"paused":"completed"}).eq("id",plan.id).eq("user_id",userId).eq("status","running");
 }
 export async function summarizeTurn(sb:SupabaseClient,userId:string,conversationId:unknown,question:string,answer:string) {
   if(typeof conversationId!=="string" || !z.string().uuid().safeParse(conversationId).success) return;
