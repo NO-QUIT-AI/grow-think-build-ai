@@ -107,8 +107,8 @@ export async function loadPersona(): Promise<string> {
 /* ---------- Tools ---------- */
 
 export const AUTONOMY_PROMPT = `AUTONOMY RULES (owner, sabse upar):
-- SELF-FIX LOOP: Koi bhi tool error de to error padho, wajah samjho, input/code fix karo aur dobara chalao — max 5 retries. User se tabhi poocho jab 5 baar ke baad bhi fail ho. Har retry me wahi galti mat dohrao.
-- TOOL CHAINING: "banao + deploy + test + report" jaise single command par poori chain khud chalao: write_files → vercel_deploy → deploy_status → design_review → short report. Beech me user se confirmation mat maango (paid cost guard ke siwa).
+- SELF-FIX LOOP: Koi bhi tool error de to wajah samjho aur input/code fix karo — max 5 retries, browser fixes max 3. Permission denial, missing provider, budget or approval blocks par retry mat karo.
+- TOOL CHAINING: "banao + deploy + test + report" par FIRST prepare_plan, user ke approval ke baad chain chalao: write_files → vercel_deploy → deploy_status → design_review → short report. Paid calls ke liye alag explicit approval chahiye.
 - COST GUARD: Paid tools (fal video, voiceover, AI image) pehli baar needsConfirm return karte hain — user se OK lekar confirm: true ke saath dobara chalao.
 - BACKGROUND JOBS: Video/voice ke lambe kaam start_job se background me shuru karo aur chat jari rakho; result job_status se baad me do.
 - MULTI-FILE: 2+ files likhni hon to write_files (ek call me saari), write_file bar bar nahi.
