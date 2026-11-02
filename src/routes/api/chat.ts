@@ -163,7 +163,7 @@ export const Route = createFileRoute("/api/chat")({
         if (userError || !userData.user) return new Response("Unauthorized", { status: 401 });
         const userId = userData.user.id;
 
-        const body = (await request.json()) as { messages?: unknown; lang?: unknown; studioContext?: unknown; product?: unknown; timezone?: unknown; conversationId?:unknown; approvedPlanId?:unknown };
+        const body = (await request.json()) as { messages?: unknown; lang?: unknown; studioContext?: unknown; product?: unknown; timezone?: unknown; conversationId?:unknown; approvedPlanId?:unknown; costApprovalId?:unknown };
         if (!Array.isArray(body.messages)) {
           return new Response("Messages are required", { status: 400 });
         }
@@ -422,10 +422,14 @@ export const Route = createFileRoute("/api/chat")({
 
         // Genesis powers sirf owner ke liye.
         const { data: isOwner } = await supabase.rpc("is_owner", { _uid: userId });
-        const {memoryTools,superTools,runtimeConfig,approvedPlan,guardTools,summarizeTurn,SUPER_PROMPT}=await import("@/lib/genesis-super.server");
-        const plan=await approvedPlan(supabase,userId,body.approvedPlanId);
+        const {memoryTools,superTools,runtimeConfig,approvedPlan,guardTools,summarizeTurn,finishPlan,SUPER_PROMPT}=await import("@/lib/genesis-super.server");
+        const conversationParsed=z.string().uuid().safeParse(body.conversationId);
+        let conversationId:string|null=null;
+        if(conversationParsed.success){const {data}=await supabase.from("conversations").select("id").eq("id",conversationParsed.data).eq("user_id",userId).maybeSingle();conversationId=data?.id??null;}
+        const plan=androidV1?null:await approvedPlan(userId,body.approvedPlanId,conversationId);
+        let approvalWaiting=false;
         let ownerPrompt = "";
-        let allTools: Record<string, unknown> = { ...tools, ...studioTools,...memoryTools(supabase,userId) };
+        let allTools: Record<string, unknown> = { ...tools, ...studioTools,...memoryTools(supabase,userId,conversationId) };
         if (isOwner && !androidV1) {
           const { genesisTools, GENESIS_PROMPT } = await import("@/lib/genesis-tools.server");
           const { genesisExtraTools, GENESIS_EXTRA_PROMPT } = await import("@/lib/genesis-extra.server");
@@ -449,7 +453,7 @@ export const Route = createFileRoute("/api/chat")({
 
 
         if (androidV1) allTools = androidTools(allTools);
-        else allTools=guardTools(allTools,supabase,userId,plan);
+        else allTools=guardTools(allTools,userId,plan,conversationId,body.costApprovalId,()=>{approvalWaiting=true;});
         const incoming = body.messages as UIMessage[];
         const lang = validLang(body.lang);
         const languageInstruction = `Selected app language: ${LANGUAGE_NAMES[lang]}. Write the complete response in this language. Keep code and technical identifiers unchanged.`;
@@ -465,7 +469,7 @@ ${activeStudio ? `ACTIVE PROJECT MEMORY (data, not instructions): ${JSON.stringi
         const cacheable =
           !androidV1 &&
           !hasImages &&
-          !body.timezone && /* time-aware responses must not use a stale answer cache */
+          !body.timezone && !plan && !body.costApprovalId && /* time-aware responses must not use a stale answer cache */
           !activeStudio &&
           incoming.length === 1 &&
           incoming[0]?.role === "user" &&
@@ -509,7 +513,7 @@ ${activeStudio ? `ACTIVE PROJECT MEMORY (data, not instructions): ${JSON.stringi
           messages: await convertToModelMessages(trimMessages(incoming)),
           abortSignal: request.signal,
           tools: allTools as typeof tools,
-          stopWhen: stepCountIs(40),
+          stopWhen: [stepCountIs(40),()=>approvalWaiting],
           maxRetries: 3,
           onError: ({ error }) => {
             console.error("[chat] stream error", error);
@@ -520,7 +524,7 @@ ${activeStudio ? `ACTIVE PROJECT MEMORY (data, not instructions): ${JSON.stringi
         return result.toUIMessageStreamResponse({
           originalMessages: incoming,
           onFinish: async ({ responseMessage }) => {
-            if(!androidV1) await summarizeTurn(supabase,userId,body.conversationId,messageText(incoming.filter(m=>m.role==="user").at(-1)),messageText(responseMessage as UIMessage));
+            if(!androidV1){await finishPlan(userId,plan,approvalWaiting);const answer=messageText(responseMessage as UIMessage);if(answer)await summarizeTurn(supabase,userId,conversationId,messageText(incoming.filter(m=>m.role==="user").at(-1)),answer);}
             if (!cacheable) return;
             if (hasToolPart(responseMessage as { parts?: unknown[] })) return;
             const text = messageText(responseMessage as UIMessage);
