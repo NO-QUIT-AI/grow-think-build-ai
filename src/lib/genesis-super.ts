@@ -6,7 +6,7 @@ export function timeContext(timezone: unknown, now = new Date()) {
   try { new Intl.DateTimeFormat("en", { timeZone: zone }).format(now); } catch { zone = "UTC"; }
   return `CURRENT TIME: ${new Intl.DateTimeFormat("en-GB", { timeZone: zone, dateStyle: "full", timeStyle: "long" }).format(now)}. User timezone: ${zone}. UTC instant: ${now.toISOString()}. Calculate relative dates from stored timestamps; never invent deployment dates.`;
 }
-export function rankMemories<T extends { topic: string; content: string; tags?: string[] }>(rows: T[], query: string) {
+export function rankMemories<T extends { topic: string; content: string; tags?: string[] | null }>(rows: T[], query: string) {
   const words = [...new Set(query.toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? [])];
   return rows.map(row => ({ ...row, score: words.reduce((score, word) => score + (row.topic.toLowerCase().includes(word) ? 3 : 0) + (row.content.toLowerCase().includes(word) ? 1 : 0) + (row.tags?.some(tag => tag.toLowerCase().includes(word)) ? 2 : 0), 0) })).filter(row => row.score > 0).sort((a,b) => b.score-a.score).slice(0,8);
 }
@@ -20,3 +20,11 @@ export function validateRegistry(content: string, available: string[]) {
   return config.disabled as string[];
 }
 export const ESTIMATED_TOOL_USD: Record<string, number> = { generate_image: 0.04, voiceover: 0.10, generate_video: 0.10, start_job: 0.10 };
+export function approvalInput(input: unknown): Record<string, unknown> {
+  if (!input || typeof input !== "object" || Array.isArray(input)) return {};
+  const { confirm: _confirm, ...args } = input as Record<string, unknown>;
+  return args;
+}
+export function planNeedsApproval(calls: number, approved: boolean) {
+  return !approved && calls >= 2;
+}

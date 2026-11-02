@@ -458,6 +458,7 @@ function ChatThread({
   const [attached, setAttached] = useState<string | null>(null);
   const [imageMode,setImageMode]=useState<"analyze"|"edit">("analyze");
   const planRef=useRef<string|null>(null);
+  const costRef=useRef<string|null>(null);
   const [usageRevision,setUsageRevision]=useState(0);
   const [editing, setEditing] = useState(false);
   const [edits, setEdits] = useState<{ id: string; before: string; after: string; prompt: string }[]>([]);
@@ -544,7 +545,7 @@ function ChatThread({
       if (!json.image) throw new Error("Model ne image return nahi ki");
       setEdits((prev) => [
         ...prev,
-        { id: crypto.randomUUID(), before, after: json.image!, prompt: instruction },
+        { id: crypto.randomUUID(), before, after: json.image, prompt: instruction },
       ]);
       setAttached(null);
       toast.success(t("imageEdited"));
@@ -571,7 +572,7 @@ function ChatThread({
     () =>
       new DefaultChatTransport({
         api: "/api/chat",
-        body: () => ({ lang, studioContext,conversationId:convRef.current,approvedPlanId:planRef.current,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone }),
+        body: () => {const approvedPlanId=planRef.current,costApprovalId=costRef.current;planRef.current=null;costRef.current=null;return {lang,studioContext,conversationId:convRef.current,approvedPlanId,costApprovalId,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone};},
         headers: async () => {
           const { data } = await supabase.auth.getSession();
           return { Authorization: `Bearer ${data.session?.access_token ?? ""}` };
@@ -631,7 +632,7 @@ function ChatThread({
       const stamp = Date.now();
       setMessages((prev) => [
         ...prev,
-        { id: `${GUIDE_ID_PREFIX}${stamp}`, role: "assistant", parts: [{ type: "text", text: d.guideMessage! }] },
+        { id: `${GUIDE_ID_PREFIX}${stamp}`, role: "assistant", parts: [{ type: "text", text: d.guideMessage ?? "" }] },
       ]);
     };
     window.addEventListener(GUIDE_EVT, h);
@@ -815,7 +816,7 @@ function ChatThread({
                     })}
                   </div>
                 )}
-                {!isUser && tools.map((part,index)=> <GenesisToolApproval key={`approval-${index}`} output={(part as {output?:Record<string,unknown>}).output??{}} onPlanApproved={id=>{planRef.current=id;void submit("Approved plan — shuru karo, steps ke mutabiq kaam karo.");}}/>)}
+                {!isUser && tools.map((part,index)=> <GenesisToolApproval key={`approval-${index}`} disabled={busy} output={(part as {output?:Record<string,unknown>}).output??{}} onPlanApproved={id=>{planRef.current=id;void submit("Approved plan — shuru karo, steps ke mutabiq kaam karo.");}} onCostApproved={(id,tool)=>{costRef.current=id;void submit(`Approved cost for ${tool}. Retry exactly the saved tool arguments; do not change them.`);}}/>)}
                 {message.parts.filter(part=>part.type==="file").map((part,index)=>part.type==="file"?<img key={`attachment-${index}`} src={part.url} alt="Attached screenshot" className="mb-2 max-h-64 rounded-md object-contain"/>:null)}
                 {!isUser &&
                   tools
