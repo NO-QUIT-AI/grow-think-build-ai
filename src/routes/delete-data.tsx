@@ -8,7 +8,7 @@ export const Route = createFileRoute("/delete-data")({
       {
         name: "description",
         content:
-          "Request deletion of specific NO QUIT AI data without deleting your full account. Email support@noquital.com and data is removed within 7 days.",
+          "Request deletion of specific NO QUIT AI data without deleting your full account. Email noquitai1@gmail.com and data is removed within 7 days.",
       },
       { property: "og:title", content: "Delete My Data — NO QUIT AI" },
       {
@@ -33,8 +33,8 @@ function DeleteData() {
       <ol className="ml-4 list-decimal space-y-1">
         <li>
           Send an email to{" "}
-          <a href="mailto:support@noquital.com" className="text-primary underline">
-            support@noquital.com
+          <a href="mailto:noquitai1@gmail.com" className="text-primary underline">
+            noquitai1@gmail.com
           </a>{" "}
           from your registered email address.
         </li>
@@ -68,13 +68,13 @@ function DeleteData() {
         Developer: NO QUIT AI / NOQUITAL
         <br />
         Contact:{" "}
-        <a href="mailto:support@noquital.com" className="text-primary underline">
-          support@noquital.com
+        <a href="mailto:noquitai1@gmail.com" className="text-primary underline">
+          noquitai1@gmail.com
         </a>
         <br />
         For any questions, visit{" "}
-        <a href="https://noquital.com/contact" className="text-primary underline">
-          https://noquital.com/contact
+        <a href="https://noquitai.com/contact" className="text-primary underline">
+          https://noquitai.com/contact
         </a>
       </p>
     </LegalPage>
