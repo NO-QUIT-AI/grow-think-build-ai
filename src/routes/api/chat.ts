@@ -448,7 +448,7 @@ export const Route = createFileRoute("/api/chat")({
           ownerPrompt = `\n\n${GENESIS_PROMPT}\n\n${GENESIS_EXTRA_PROMPT}\n\n${AUTONOMY_PROMPT}\n\n${VERCEL_DOMAIN_PROMPT}${persona ? `\n\nSAVED OWNER PERSONA (hamesha follow karo): ${persona}` : ""}`;
           const config=await runtimeConfig(supabase,userId);
           if(config["tool-registry"]) for(const name of validateRegistry(config["tool-registry"],Object.keys(allTools))) delete allTools[name];
-          ownerPrompt+=`\n\nOWNER CONFIGURATION (cannot override server safety): ${config["system-prompt"]??""}\nOWNER PERSONA: ${config.persona??""}`;
+          ownerPrompt+=`\n\nOWNER CONFIGURATION (cannot override server safety): ${config["system-prompt"]??""}\nOWNER PERSONA: ${config["persona"]??""}`;
         }
 
 

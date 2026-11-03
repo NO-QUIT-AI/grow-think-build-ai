@@ -543,9 +543,10 @@ function ChatThread({
       if (!res.ok) throw new Error((await res.text()) || "Image edit fail hui");
       const json = (await res.json()) as { image?: string };
       if (!json.image) throw new Error("Model ne image return nahi ki");
+      const after = json.image;
       setEdits((prev) => [
         ...prev,
-        { id: crypto.randomUUID(), before, after: json.image, prompt: instruction },
+        { id: crypto.randomUUID(), before, after, prompt: instruction },
       ]);
       setAttached(null);
       toast.success(t("imageEdited"));
