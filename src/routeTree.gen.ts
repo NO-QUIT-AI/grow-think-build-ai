@@ -19,6 +19,8 @@ import { Route as CallbackRouteImport } from './routes/callback'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CvRouteImport } from './routes/cv'
+import { Route as DeleteAccountRouteImport } from './routes/delete-account'
+import { Route as DeleteDataRouteImport } from './routes/delete-data'
 import { Route as EarnRouteImport } from './routes/earn'
 import { Route as HowToUseRouteImport } from './routes/how-to-use'
 import { Route as InviteRouteImport } from './routes/invite'
@@ -113,6 +115,16 @@ const ContactRoute = ContactRouteImport.update({
 const CvRoute = CvRouteImport.update({
   id: '/cv',
   path: '/cv',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DeleteAccountRoute = DeleteAccountRouteImport.update({
+  id: '/delete-account',
+  path: '/delete-account',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DeleteDataRoute = DeleteDataRouteImport.update({
+  id: '/delete-data',
+  path: '/delete-data',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EarnRoute = EarnRouteImport.update({
@@ -354,6 +366,8 @@ export interface FileRoutesByFullPath {
   '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
   '/cv': typeof CvRoute
+  '/delete-account': typeof DeleteAccountRoute
+  '/delete-data': typeof DeleteDataRoute
   '/earn': typeof EarnRoute
   '/how-to-use': typeof HowToUseRoute
   '/invite': typeof InviteRoute
@@ -411,6 +425,8 @@ export interface FileRoutesByTo {
   '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
   '/cv': typeof CvRoute
+  '/delete-account': typeof DeleteAccountRoute
+  '/delete-data': typeof DeleteDataRoute
   '/earn': typeof EarnRoute
   '/how-to-use': typeof HowToUseRoute
   '/invite': typeof InviteRoute
@@ -469,6 +485,8 @@ export interface FileRoutesById {
   '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
   '/cv': typeof CvRoute
+  '/delete-account': typeof DeleteAccountRoute
+  '/delete-data': typeof DeleteDataRoute
   '/earn': typeof EarnRoute
   '/how-to-use': typeof HowToUseRoute
   '/invite': typeof InviteRoute
@@ -528,6 +546,8 @@ export interface FileRouteTypes {
     | '/community'
     | '/contact'
     | '/cv'
+    | '/delete-account'
+    | '/delete-data'
     | '/earn'
     | '/how-to-use'
     | '/invite'
@@ -585,6 +605,8 @@ export interface FileRouteTypes {
     | '/community'
     | '/contact'
     | '/cv'
+    | '/delete-account'
+    | '/delete-data'
     | '/earn'
     | '/how-to-use'
     | '/invite'
@@ -642,6 +664,8 @@ export interface FileRouteTypes {
     | '/community'
     | '/contact'
     | '/cv'
+    | '/delete-account'
+    | '/delete-data'
     | '/earn'
     | '/how-to-use'
     | '/invite'
@@ -700,6 +724,8 @@ export interface RootRouteChildren {
   CommunityRoute: typeof CommunityRoute
   ContactRoute: typeof ContactRoute
   CvRoute: typeof CvRoute
+  DeleteAccountRoute: typeof DeleteAccountRoute
+  DeleteDataRoute: typeof DeleteDataRoute
   EarnRoute: typeof EarnRoute
   HowToUseRoute: typeof HowToUseRoute
   InviteRoute: typeof InviteRoute
@@ -816,6 +842,20 @@ declare module '@tanstack/react-router' {
       path: '/cv'
       fullPath: '/cv'
       preLoaderRoute: typeof CvRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/delete-account': {
+      id: '/delete-account'
+      path: '/delete-account'
+      fullPath: '/delete-account'
+      preLoaderRoute: typeof DeleteAccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/delete-data': {
+      id: '/delete-data'
+      path: '/delete-data'
+      fullPath: '/delete-data'
+      preLoaderRoute: typeof DeleteDataRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/earn': {
@@ -1158,6 +1198,8 @@ const rootRouteChildren: RootRouteChildren = {
   CommunityRoute: CommunityRoute,
   ContactRoute: ContactRoute,
   CvRoute: CvRoute,
+  DeleteAccountRoute: DeleteAccountRoute,
+  DeleteDataRoute: DeleteDataRoute,
   EarnRoute: EarnRoute,
   HowToUseRoute: HowToUseRoute,
   InviteRoute: InviteRoute,

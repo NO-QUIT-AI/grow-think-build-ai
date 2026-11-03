@@ -51,6 +51,12 @@ export function LegalFooter({ className }: { className?: string }) {
       <Link to="/account-deletion" className="hover:text-primary">
         Account Deletion
       </Link>
+      <Link to="/delete-account" className="hover:text-primary">
+        Delete Account
+      </Link>
+      <Link to="/delete-data" className="hover:text-primary">
+        Delete My Data
+      </Link>
     </nav>
   );
 }
