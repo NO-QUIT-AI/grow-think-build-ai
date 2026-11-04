@@ -432,7 +432,7 @@ function LiveVoiceModal({ onClose, onFallback }: VoiceProps & { onFallback: () =
       cancelled = true;
       closing.current = true;
       if (talkTimer.current) clearTimeout(talkTimer.current);
-      void conversation.endSession();
+      try { conversation.endSession(); } catch { /* no active session */ }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -460,7 +460,10 @@ function LiveVoiceModal({ onClose, onFallback }: VoiceProps & { onFallback: () =
     return () => cancelAnimationFrame(raf);
   }, [speaking, conversation, connected]);
 
-  useEffect(() => { if (!conversation.isSpeaking) conversation.setVolume({ volume: 1 }); }, [conversation.isSpeaking]);
+  useEffect(() => {
+    if (!connected || conversation.isSpeaking) return;
+    try { conversation.setVolume({ volume: 1 }); } catch { /* session ended */ }
+  }, [conversation.isSpeaking, connected]);
   const ready = connected;
   const phase: ScenePhase = !ready ? "connecting" : speaking ? "speaking" : thinking ? "thinking" : "listening";
   const status = !ready ? "Connecting..." : speaking ? "Speaking... (bol kar tok sakte ho)" : muted ? "Muted" : "Bolo, main sun raha hoon";
