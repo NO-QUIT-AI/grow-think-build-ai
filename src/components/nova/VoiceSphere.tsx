@@ -2,7 +2,7 @@
 import { useEffect, useRef } from "react";
 
 /** Three.js sphere: calm breathing glow; mic volume emits particles outward from the center. */
-export function VoiceSphere({ aiAmpRef }: { aiAmpRef: { current: number } }) {
+export function VoiceSphere({ aiAmpRef, micAmpRef }: { aiAmpRef: { current: number }; micAmpRef: { current: number } }) {
   const hostRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -10,26 +10,11 @@ export function VoiceSphere({ aiAmpRef }: { aiAmpRef: { current: number } }) {
     if (!host) return;
     let disposed = false;
     let raf = 0;
-    let stream: MediaStream | null = null;
-    let actx: AudioContext | null = null;
     let cleanup = () => {};
 
     (async () => {
       const THREE = await import("three");
       if (disposed) return;
-      // Mic analyser (separate stream, only for visuals)
-      let analyser: AnalyserNode | null = null;
-      let buf: Uint8Array<ArrayBuffer> | null = null;
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true } });
-        actx = new AudioContext();
-        analyser = actx.createAnalyser();
-        analyser.fftSize = 512;
-        actx.createMediaStreamSource(stream).connect(analyser);
-        buf = new Uint8Array(new ArrayBuffer(analyser.fftSize));
-      } catch { /* visuals still run without mic */ }
-      if (disposed) return;
-
       const w = host.clientWidth, h = host.clientHeight;
       const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
       renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
@@ -42,7 +27,8 @@ export function VoiceSphere({ aiAmpRef }: { aiAmpRef: { current: number } }) {
       // Glow sprite texture
       const c = document.createElement("canvas");
       c.width = c.height = 64;
-      const g = c.getContext("2d")!;
+      const g = c.getContext("2d");
+      if (!g) { renderer.dispose(); renderer.domElement.remove(); return; }
       const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
       grad.addColorStop(0, "rgba(255,255,255,1)");
       grad.addColorStop(0.3, "rgba(120,240,255,0.8)");
@@ -73,13 +59,7 @@ export function VoiceSphere({ aiAmpRef }: { aiAmpRef: { current: number } }) {
       const loop = (t: number) => {
         const dt = Math.min((t - last) / 1000, 0.05);
         last = t;
-        let raw = 0;
-        if (analyser && buf) {
-          analyser.getByteTimeDomainData(buf);
-          let s = 0;
-          for (let i = 0; i < buf.length; i++) { const v = (buf[i] - 128) / 128; s += v * v; }
-          raw = Math.min(1, Math.sqrt(s / buf.length) * 6);
-        }
+        const raw = Math.min(1, micAmpRef.current * 6);
         const target = raw > 0.08 ? raw : 0; // voice gate
         vol += (target - vol) * (1 - Math.exp(-(target > vol ? 12 : 3) * dt));
         const ai = aiAmpRef.current * 0.4;
@@ -140,10 +120,8 @@ export function VoiceSphere({ aiAmpRef }: { aiAmpRef: { current: number } }) {
       disposed = true;
       cancelAnimationFrame(raf);
       cleanup();
-      stream?.getTracks().forEach((tr) => tr.stop());
-      void actx?.close();
     };
-  }, [aiAmpRef]);
+  }, [aiAmpRef, micAmpRef]);
 
   return <div ref={hostRef} aria-hidden className="pointer-events-none fixed inset-0" />;
 }

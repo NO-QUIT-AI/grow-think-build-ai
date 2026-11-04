@@ -1,4 +1,4 @@
-export const ANDROID_PACKAGE = "com.noquit.aibuildstudio";
+export const ANDROID_PACKAGE = "com.noquitai.app";
 export const ANDROID_ORIGIN = "https://noquitai.com";
 export const ANDROID_START_PATH = "/android-app";
 export const ANDROID_TOOLS = ["build_website", "file_edit", "file_undo", "create_domains"] as const;

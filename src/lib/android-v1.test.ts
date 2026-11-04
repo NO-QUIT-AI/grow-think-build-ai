@@ -4,7 +4,7 @@ import { ANDROID_PACKAGE, ANDROID_START_PATH, androidTools, refuseAndroidFinanci
 
 describe("Android v1 product boundary", () => {
   it("uses the requested package identity and separate builder entry", () => {
-    expect(ANDROID_PACKAGE).toBe("com.noquit.aibuildstudio");
+    expect(ANDROID_PACKAGE).toBe("com.noquitai.app");
     expect(ANDROID_START_PATH).toBe("/android-app");
   });
   it("only exposes website and nonfinancial domain tools even for owners", () => {
