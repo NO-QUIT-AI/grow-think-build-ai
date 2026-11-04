@@ -22,6 +22,7 @@
 - Chat passes the active Studio memory ID and draft code, uses user-scoped file_edit/file_undo tools, and opens successful build results by memoryId; unrelated chat model routing remains unchanged.
 - ElevenLabs call setup synchronizes a shared configuration with language presets and the language_detection system tool; use a valid primary language rather than unsupported "auto", preserving other agent settings.
 - Android uses a separate builder-only entry and explicit server-side chat tool allowlist; keep the full web product unchanged and omit global reward/navigation widgets on that entry.
+- Keep Capacitor config and native Android source in the project for reproducible releases; signing credentials stay external and all releases reuse the existing upload certificate.
 - Voice capture and sphere feedback share a phase-gated input volume source; stop recognition during assistant playback and only submit final transcripts, avoiding echo-triggered turns.
 - App-shell offline support uses generated Workbox with one preview-guarded registration module; never cache API/auth traffic or register in editor previews.
 - Genesis self-patches affect allowlisted persisted runtime configuration only; authenticated user clicks apply version-checked backups, never model-provided confirmation or compiled security code.
