@@ -1,4 +1,7 @@
 # Pending completion
+- [ ] Correct Android package to com.noquitai.app and deliver a freshly signed, validated AAB using the existing upload key.
+- [ ] Fix voice turn-taking, final-only transcript/repetition filtering, 1.5-second silence detection and volume-based feedback.
+- [ ] Upgrade hamburger to searchable All Tools drawer without changing home content.
 - [ ] Finish and verify Genesis Super Upgrade: owner patch/revert, summaries/search, one-use plan approval/tracker, screenshot input, explicit paid-tool approval/budget, timezone; preserve Guide/Vercel.
 - [ ] Genesis remote browser tools and three-attempt visual repair (blocked: compatible browser service and credential not configured).
 - [x] Android v1 release candidate: restricted builder/tools entry, guarded generated PWA offline fallback, Capacitor 8 target36/min24 signed com.noquit.aibuildstudio AAB, clean Android source, private upload-key backup and Play guide saved in Files. Gradle release, bundletool, signature validation and 8 tests pass; real signed-in cafe creation/save/preview verified in Chromium.
