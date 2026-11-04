@@ -11,13 +11,18 @@ import { VoiceSphere } from "./VoiceSphere";
 import { finalTranscript, micAllowed, silenceElapsed, VOICE_AUDIO_CONSTRAINTS, VOICE_THRESHOLD } from "@/lib/voice-turn";
 
 let currentAudio: HTMLAudioElement | null = null;
+let currentTtsAbort: AbortController | null = null;
 
 /** ElevenLabs lifelike awaaz; fail ho to browser voice. */
 export async function speakHuman(text: string, lang: string, onEnd: () => void, ampRef: { current: number }) {
+  stopHuman();
+  const controller = new AbortController();
+  currentTtsAbort = controller;
   const clean = speakableText(text);
   try {
     const { data: s } = await supabase.auth.getSession();
     const res = await fetch("/api/tts", {
+      signal: controller.signal,
       method: "POST",
       headers: { "content-type": "application/json", authorization: `Bearer ${s.session?.access_token ?? ""}` },
       body: JSON.stringify({ text: clean }),
@@ -25,6 +30,7 @@ export async function speakHuman(text: string, lang: string, onEnd: () => void, 
     if (!res.ok) throw new Error("tts");
     const url = URL.createObjectURL(await res.blob());
     const audio = new Audio(url);
+    if (controller.signal.aborted) { URL.revokeObjectURL(url); return; }
     currentAudio = audio;
     let raf = 0;
     try {
@@ -54,11 +60,14 @@ export async function speakHuman(text: string, lang: string, onEnd: () => void, 
     audio.onerror = done;
     await audio.play();
   } catch {
+    if (controller.signal.aborted) return;
     speakText(clean, lang, () => { ampRef.current = 0; onEnd(); }, () => { ampRef.current = 1; });
   }
 }
 
 export function stopHuman() {
+  currentTtsAbort?.abort();
+  currentTtsAbort = null;
   currentAudio?.pause();
   currentAudio = null;
   if (typeof window !== "undefined") window.speechSynthesis?.cancel();
@@ -393,7 +402,6 @@ function LiveVoiceModal({ onClose, onFallback }: VoiceProps & { onFallback: () =
     onVadScore: ({ vadScore }: { vadScore: number }) => {
       if (liveState.current.speaking || liveState.current.muted || liveState.current.thinking || vadScore < 0.5) return;
       lastVoice.current = performance.now();
-      setUserTalking(true);
     },
     onMessage: (m: any) => {
       if (m?.source === "user") { setHeard(String(m.message ?? "")); setThinking(true); setUserTalking(false); }
@@ -453,7 +461,7 @@ function LiveVoiceModal({ onClose, onFallback }: VoiceProps & { onFallback: () =
   }, [speaking, conversation, connected]);
 
   useEffect(() => { if (!conversation.isSpeaking) conversation.setVolume({ volume: 1 }); }, [conversation.isSpeaking]);
-  const ready = useFastConnect(connected);
+  const ready = connected;
   const phase: ScenePhase = !ready ? "connecting" : speaking ? "speaking" : thinking ? "thinking" : "listening";
   const status = !ready ? "Connecting..." : speaking ? "Speaking... (bol kar tok sakte ho)" : muted ? "Muted" : "Bolo, main sun raha hoon";
 
