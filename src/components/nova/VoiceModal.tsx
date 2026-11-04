@@ -390,6 +390,7 @@ function LiveVoiceModal({ onClose, onFallback }: VoiceProps & { onFallback: () =
     micMuted: muted || (liveSpeaking && !interrupted) || thinking,
     onModeChange: ({ mode }) => {
       setLiveSpeaking(mode === "speaking"); setThinking(false); setInterrupted(false);
+      lastVoice.current = 0;
       liveState.current.speaking = mode === "speaking";
       liveState.current.thinking = false;
       if (mode === "speaking") { setUserTalking(false); micAmpRef.current = 0; }
@@ -448,6 +449,7 @@ function LiveVoiceModal({ onClose, onFallback }: VoiceProps & { onFallback: () =
         const allowed = connected && !liveState.current.speaking && !liveState.current.muted && !liveState.current.thinking;
         micAmpRef.current = allowed ? conversation.getInputVolume() : 0;
         const active = allowed && micAmpRef.current >= VOICE_THRESHOLD;
+        setUserTalking(active);
         if (active) { lastVoice.current = performance.now(); setUserTalking(true); }
         else if (allowed && silenceElapsed(lastVoice.current, performance.now())) {
           lastVoice.current = 0; setUserTalking(false); setThinking(true);
