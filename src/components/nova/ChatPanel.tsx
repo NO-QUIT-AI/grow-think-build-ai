@@ -363,7 +363,7 @@ export function ChatPanel({
               <Menu className="h-4 w-4" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-[85vw] max-w-sm border-r border-border/50 bg-background/70 p-0 backdrop-blur-xl duration-300">
+          <SheetContent side="left" overlayClassName="bg-background/60 backdrop-blur-sm motion-reduce:animate-none" className="w-[85vw] max-w-sm border-r border-border/50 bg-background/70 p-0 backdrop-blur-xl duration-300 motion-reduce:animate-none">
             <SheetHeader className="sr-only">
               <SheetTitle>All Tools</SheetTitle>
             </SheetHeader>

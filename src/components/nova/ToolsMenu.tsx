@@ -2,7 +2,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Camera, ChevronRight, FileText, Flashlight, Globe, Hammer, History, ImageIcon, Instagram,
-  Link2, MessageCircle, Mic, Music, Phone, Plus, Radio, Search, FileSearch, Clapperboard,
+  Link2, MessageCircle, Mic, Music, Phone, Plus, Radio, Search, FileSearch, Clapperboard, Radar,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -32,6 +32,7 @@ const TOOLS: Tool[] = [
   { id: "auto-video", name: "Auto Story to Video", icon: Clapperboard, section: "AI TOOLS" },
   { id: "pdf", name: "PDF Reader", icon: FileSearch, section: "AI TOOLS" },
   { id: "voice", name: "Voice Tools", icon: Mic, section: "AI TOOLS" },
+  { id: "scout", name: "Master Scout Agent", icon: Radar, section: "AI TOOLS" },
   { id: "space", name: "Space Photo (NASA)", icon: ImageIcon, section: "AI TOOLS" },
 ];
 
@@ -72,12 +73,13 @@ export function ToolsMenu({ onNewChat, onClose, history }: { onNewChat: () => vo
 
   function run(id: string) {
     switch (id) {
-      case "new": onNewChat(); return;
+      case "new": onNewChat(); onClose(); return;
       case "history": setShowHistory((v) => !v); return;
       case "builds": case "websites": case "domains": tab("builds"); return;
       case "cvs": onClose(); void navigate({ to: "/cv" }); return;
       case "space": onClose(); void navigate({ to: "/space" }); return;
       case "auto-video": onClose(); void navigate({ to: "/auto-video" }); return;
+      case "scout": onClose(); void navigate({ to: "/scout" }); return;
       case "whatsapp": case "call": setModal(id); return;
       case "music": open("https://music.youtube.com"); return;
       case "flash": void toggleTorch(); return;
@@ -135,11 +137,11 @@ export function ToolsMenu({ onNewChat, onClose, history }: { onNewChat: () => vo
                     {jalsa && <Button asChild size="sm" variant="outline" className="mt-3 w-full"><Link to="/jalsa-chat" onClick={onClose}>Go to Jalsa Chat</Link></Button>}
                   </div>
                 ) : (
-                <button onClick={() => run(t.id)} className="flex w-full items-center gap-3 rounded-xl px-2 py-2.5 text-left text-sm transition-colors hover:bg-secondary/70">
+                <Button variant="ghost" onClick={() => run(t.id)} className="h-11 w-full justify-start gap-3 rounded-lg px-2 text-left text-sm font-normal transition-colors hover:bg-secondary/70">
                   <t.icon className="h-4 w-4 text-primary" />
                   <span className="flex-1">{t.name}</span>
                     <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform ${t.id === "history" && showHistory ? "rotate-90" : ""}`} />
-                </button>
+                </Button>
                 )}
                 {t.id === "history" && showHistory && <div className="ml-4 border-l border-border/50 pl-1">{history}</div>}
               </div>
@@ -154,7 +156,7 @@ export function ToolsMenu({ onNewChat, onClose, history }: { onNewChat: () => vo
           <DialogHeader><DialogTitle>{modal === "call" ? "Call Dialer" : "WhatsApp Sender"}</DialogTitle></DialogHeader>
           <Input inputMode="tel" placeholder="+92 300 1234567" value={phone} onChange={(e) => setPhone(e.target.value)} />
           {modal === "whatsapp" && <Input placeholder="Message" value={msg} onChange={(e) => setMsg(e.target.value)} />}
-          <button
+          <Button
             disabled={digits.length < 5}
             className="btn-green h-10 rounded-xl text-sm disabled:opacity-50"
             onClick={() => {
@@ -164,7 +166,7 @@ export function ToolsMenu({ onNewChat, onClose, history }: { onNewChat: () => vo
             }}
           >
             {modal === "call" ? "Call karo" : "WhatsApp pe bhejo"}
-          </button>
+          </Button>
         </DialogContent>
       </Dialog>
     </div>
