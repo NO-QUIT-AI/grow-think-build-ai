@@ -411,6 +411,7 @@ function LiveVoiceModal({ onClose, onFallback }: VoiceProps & { onFallback: () =
 
   useEffect(() => {
     let cancelled = false;
+    closing.current = false;
     (async () => {
       try {
         // Mic aur token saath saath — foran pre-connect
