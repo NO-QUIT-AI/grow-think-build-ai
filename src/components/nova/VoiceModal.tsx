@@ -1,5 +1,5 @@
 import { ConversationProvider, useConversation } from "@elevenlabs/react";
-import { cleanTranscript, detectSpeechLang, mergeFinal } from "@/lib/voice-transcript";
+import { detectSpeechLang } from "@/lib/voice-transcript";
 import { useEffect, useRef, useState } from "react";
 import { Mic, MicOff } from "lucide-react";
 import { toast } from "sonner";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import proAvatar from "@/assets/nqai-galaxy-avatar.jpg.asset.json";
 import { VoiceSphere } from "./VoiceSphere";
+import { finalTranscript, micAllowed, silenceElapsed, VOICE_AUDIO_CONSTRAINTS, VOICE_THRESHOLD } from "@/lib/voice-turn";
 
 let currentAudio: HTMLAudioElement | null = null;
 
@@ -67,10 +68,10 @@ type ScenePhase = "connecting" | "listening" | "thinking" | "speaking";
 
 /** Full-screen galaxy: speed changes smoothly with phase (60s idle, 8s listening, 20s speaking). */
 function GalaxyScene({
-  phase, ampRef, status, text, muted, onMute, onEnd, onTap, userTalking = false,
+  phase, ampRef, micAmpRef, status, text, muted, onMute, onEnd, onTap, userTalking = false,
 }: {
   userTalking?: boolean;
-  phase: ScenePhase; ampRef: { current: number }; status: string; text: string;
+  phase: ScenePhase; ampRef: { current: number }; micAmpRef: { current: number }; status: string; text: string;
   muted: boolean; onMute: () => void; onEnd: () => void; onTap?: () => void;
 }) {
   const imgRef = useRef<HTMLDivElement | null>(null);
@@ -95,7 +96,7 @@ function GalaxyScene({
   }, [ampRef]);
 
   void status; void text;
-  useEffect(() => { if (text) console.log("[voice transcript]", text); }, [text]);
+
   const end = () => { try { navigator.vibrate?.(60); } catch { /* ignore */ } onEnd(); };
 
   return (
@@ -104,20 +105,20 @@ function GalaxyScene({
       <div ref={imgRef} aria-hidden className="galaxy-layer galaxy-near" style={{ backgroundImage: `url(${proAvatar.url})` }} />
       <div aria-hidden className="galaxy-stars pointer-events-none" />
       <div className="galaxy-overlay pointer-events-none" />
-      <VoiceSphere aiAmpRef={ampRef} />
+      <VoiceSphere aiAmpRef={ampRef} micAmpRef={micAmpRef} />
       <div className="relative z-10 flex h-full flex-col items-center justify-between px-6 pb-[calc(env(safe-area-inset-bottom)+120px)] pt-6">
         <div aria-hidden />
         <div aria-hidden />
         <div className="flex w-full flex-col items-center gap-6">
           <div aria-live="polite" className={`galaxy-text text-sm font-semibold transition-opacity duration-150 ${userTalking && !muted ? "opacity-100" : "opacity-0"}`}>Listening...</div>
           <div className="flex items-center gap-5">
-            <button type="button" onClick={(e) => { e.stopPropagation(); onMute(); }} className={`glass-btn galaxy-text flex h-16 ${userTalking && !muted ? "animate-pulse ring-2 ring-primary" : ""} items-center gap-2 rounded-full px-7 text-base font-semibold`}>
+            <Button variant="outline" type="button" onClick={(e) => { e.stopPropagation(); onMute(); }} className={`glass-btn galaxy-text flex h-16 ${userTalking && !muted ? "animate-pulse ring-2 ring-primary" : ""} items-center gap-2 rounded-full px-7 text-base font-semibold`}>
               {muted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
               {muted ? "Unmute" : "Mute"}
-            </button>
-            <button type="button" onClick={(e) => { e.stopPropagation(); end(); }} className="btn-green flex h-16 items-center rounded-full px-10 text-base font-bold">
+            </Button>
+            <Button type="button" onClick={(e) => { e.stopPropagation(); end(); }} className="btn-green flex h-16 items-center rounded-full px-10 text-base font-bold">
               End
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -193,193 +194,146 @@ export function speakText(text: string, lang: string, onEnd?: () => void, onWord
 
 type Phase = "listening" | "thinking" | "speaking";
 
-function LegacyVoiceModal({
-  lang,
-  onTranscript,
-  ask,
-  onClose,
-}: {
-  lang: string;
-  onTranscript: (text: string) => void;
-  ask: (text: string) => Promise<string>;
-  onClose: () => void;
+function LegacyVoiceModal({ lang, onTranscript, ask, onClose }: {
+  lang: string; onTranscript: (text: string) => void; ask: (text: string) => Promise<string>; onClose: () => void;
 }) {
   const [text, setText] = useState("");
-  const [reply, setReply] = useState("");
   const [muted, setMuted] = useState(false);
-  const [speaking, setSpeaking] = useState(false);
+  const [talking, setTalking] = useState(false);
   const [phase, setPhase] = useState<Phase>("listening");
   const recRef = useRef<SpeechRecognitionLike | null>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const finalRef = useRef("");
-  const lastSentRef = useRef({ text: "", at: 0 });
   const phaseRef = useRef<Phase>("listening");
   const mutedRef = useRef(false);
   const aliveRef = useRef(true);
+  const finalRef = useRef("");
+  const pendingRef = useRef(false);
+  const lastVoice = useRef(0);
+  const turnRef = useRef(0);
+  const streamRef = useRef<MediaStream | null>(null);
   const ampRef = useRef(0);
+  const micAmpRef = useRef(0);
 
-  useEffect(() => {
-    mutedRef.current = muted;
-  }, [muted]);
-
-  function setP(p: Phase) {
-    phaseRef.current = p;
-    setPhase(p);
+  function setP(next: Phase) {
+    phaseRef.current = next;
+    setPhase(next);
+    const allowed = micAllowed(next, mutedRef.current);
+    streamRef.current?.getAudioTracks().forEach(track => { track.enabled = allowed; });
+    if (!allowed) { micAmpRef.current = 0; setTalking(false); }
   }
-
   function startListening() {
     if (!aliveRef.current) return;
+    pendingRef.current = false;
     finalRef.current = "";
+    lastVoice.current = 0;
     setText("");
     setP("listening");
-    try {
-      recRef.current?.start();
-    } catch {
-      /* already started */
-    }
+    if (!mutedRef.current) { try { recRef.current?.start(); } catch { /* already active */ } }
   }
-
   async function handleQuestion(value: string) {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    if (!value || phaseRef.current !== "listening") return;
+    if (!value || !aliveRef.current) { startListening(); return; }
+    const turn = ++turnRef.current;
+    pendingRef.current = false;
     setP("thinking");
-    try {
-      recRef.current?.abort();
-    } catch {
-      /* ignore */
-    }
+    try { recRef.current?.stop(); } catch { /* already stopped */ }
     finalRef.current = "";
     try {
       const answer = await ask(value);
-      if (!aliveRef.current) return;
-      setReply(answer);
-      // Speaking shuru — purana transcript buffer saaf
-      finalRef.current = "";
-      setText("");
+      if (!aliveRef.current || turn !== turnRef.current) return;
       setP("speaking");
-      try { recRef.current?.start(); } catch { /* already running */ }
-      const userLang = detectSpeechLang(value);
-
-      void speakHuman(answer, userLang, () => {
-        if (aliveRef.current) startListening();
+      void speakHuman(answer, detectSpeechLang(value), () => {
+        if (aliveRef.current && turn === turnRef.current) startListening();
       }, ampRef);
-    } catch {
-      if (aliveRef.current) startListening();
-    }
+    } catch { if (aliveRef.current && turn === turnRef.current) startListening(); }
   }
-
+  function endTurn() {
+    if (!micAllowed(phaseRef.current, mutedRef.current) || pendingRef.current) return;
+    pendingRef.current = true;
+    setP("thinking");
+    // stop(), not abort(): allow the recognizer to deliver its last FINAL result.
+    try { recRef.current?.stop(); } catch { void handleQuestion(finalRef.current); }
+  }
   useEffect(() => {
     aliveRef.current = true;
     const Ctor = getSpeechRecognition();
-    if (!Ctor) {
-      toast.error("Voice not supported in this browser");
-      onClose();
-      return;
-    }
+    if (!Ctor) { toast.error("Voice not supported in this browser"); onClose(); return; }
     const rec = new Ctor();
     recRef.current = rec;
-    rec.lang = "en-IN"; // Latin script: English aur Roman Hindi dono
+    rec.lang = "en-IN";
     rec.continuous = true;
-    rec.interimResults = true;
-
-    rec.onresult = (event: any) => {
-      if (mutedRef.current) return;
-      if (phaseRef.current === "speaking") {
-        // Barge-in: user bola to AI foran chup
-        const said = String(event.results[event.results.length - 1]?.[0]?.transcript ?? "").trim();
-        if (said.split(/\s+/).length < 2) return;
-        stopHuman();
-        ampRef.current = 0;
-        phaseRef.current = "listening";
-        setPhase("listening");
-      } else if (phaseRef.current !== "listening") return;
-      // Sirf FINAL results state me jaate hain; interim sirf dikhane ke liye.
-      let interim = "";
-      let final = finalRef.current;
-      for (let i = event.resultIndex; i < event.results.length; i += 1) {
-        const chunk = String(event.results[i][0].transcript ?? "").trim();
-        if (!chunk) continue;
-        if (event.results[i].isFinal) final = mergeFinal(final, chunk);
-        else interim = chunk;
-      }
-      final = cleanTranscript(final);
-      finalRef.current = final;
-      const shown = cleanTranscript(mergeFinal(final, interim));
-      setText(shown);
-      onTranscript(shown);
-      setSpeaking(true);
-      if (timerRef.current) clearTimeout(timerRef.current);
-      // VAD: 800ms khamoshi ke baad hi final
-      timerRef.current = setTimeout(() => {
-        const value = finalRef.current.trim() || shown;
-        const now = Date.now();
-        const key = value.toLowerCase();
-        if (key === lastSentRef.current.text && now - lastSentRef.current.at < 2000) {
-          finalRef.current = "";
-          setText("");
-          return;
-        }
-        lastSentRef.current = { text: key, at: now };
-        void handleQuestion(value);
-      }, 800);
-    };
-    rec.onerror = (event: any) => {
-      if (event?.error === "not-allowed") {
-        toast.error("Microphone permission blocked");
-        onClose();
-      }
+    rec.interimResults = false;
+    rec.onresult = event => {
+      if (mutedRef.current || (phaseRef.current !== "listening" && !pendingRef.current)) return;
+      finalRef.current = finalTranscript(finalRef.current, event.results, event.resultIndex);
+      setText(finalRef.current);
+      onTranscript(finalRef.current);
     };
     rec.onend = () => {
-      setSpeaking(false);
-      // Mobile browsers band kar dete hain — listening phase me dobara chalu karo
-      if (aliveRef.current && phaseRef.current !== "thinking") {
-        try {
-          rec.start();
-        } catch {
-          /* ignore */
-        }
+      if (!aliveRef.current) return;
+      if (pendingRef.current) { void handleQuestion(finalRef.current); return; }
+      if (micAllowed(phaseRef.current, mutedRef.current)) {
+        try { rec.start(); } catch { /* already active */ }
       }
     };
-    // AI pehle nahi bolega — sirf suno
-    startListening();
-
+    rec.onerror = event => {
+      if (event?.error === "not-allowed") { toast.error("Microphone permission blocked"); onClose(); }
+    };
+    let ctx: AudioContext | null = null;
+    let raf = 0;
+    (async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: VOICE_AUDIO_CONSTRAINTS });
+        if (!aliveRef.current) { stream.getTracks().forEach(track => track.stop()); return; }
+        streamRef.current = stream;
+        ctx = new AudioContext();
+        await ctx.resume();
+        const analyser = ctx.createAnalyser();
+        analyser.fftSize = 512;
+        ctx.createMediaStreamSource(stream).connect(analyser);
+        const bytes = new Uint8Array(analyser.fftSize);
+        const tick = () => {
+          const allowed = micAllowed(phaseRef.current, mutedRef.current);
+          analyser.getByteTimeDomainData(bytes);
+          let energy = 0;
+          for (const byte of bytes) energy += ((byte - 128) / 128) ** 2;
+          const volume = allowed ? Math.sqrt(energy / bytes.length) : 0;
+          micAmpRef.current = volume;
+          const detected = volume >= VOICE_THRESHOLD;
+          setTalking(detected);
+          if (detected) lastVoice.current = performance.now();
+          else if (allowed && silenceElapsed(lastVoice.current, performance.now())) endTurn();
+          raf = requestAnimationFrame(tick);
+        };
+        startListening();
+        tick();
+      } catch { toast.error("Microphone start nahi hua"); onClose(); }
+    })();
     return () => {
       aliveRef.current = false;
-      if (timerRef.current) clearTimeout(timerRef.current);
-      rec.onresult = null;
-      rec.onend = null;
-      rec.onerror = null;
-      try {
-        rec.abort();
-      } catch {
-        /* ignore */
-      }
+      turnRef.current++;
+      cancelAnimationFrame(raf);
+      rec.onresult = null; rec.onend = null; rec.onerror = null;
+      rec.abort();
+      streamRef.current?.getTracks().forEach(track => track.stop());
+      void ctx?.close();
       stopHuman();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang]);
-
-  function stopOrSend() {
-    if (phaseRef.current === "speaking") {
-      stopHuman();
-      startListening();
-      return;
-    }
-    const value = (finalRef.current || text).trim();
-    if (value) void handleQuestion(value);
-    else onClose();
-  }
-
-  const status =
-    phase === "thinking" ? "Soch raha hoon..."
-      : phase === "speaking" ? "Speaking... (bol kar tok sakte ho)"
-        : muted ? "Muted" : speaking ? "Sun raha hoon..." : "Bolo, main sun raha hoon";
-  const shown = phase === "speaking" ? speakableText(reply) : text;
-
-  return (
-    <GalaxyScene phase={phase} ampRef={ampRef} status={status} text={shown} muted={muted} userTalking={speaking && phase === "listening"}
-      onMute={() => setMuted((m) => !m)} onEnd={onClose} onTap={stopOrSend} />
-  );
+  const toggleMute = () => {
+    const next = !mutedRef.current;
+    mutedRef.current = next; setMuted(next);
+    streamRef.current?.getAudioTracks().forEach(track => { track.enabled = micAllowed(phaseRef.current, next); });
+    if (next) {
+      finalRef.current = ""; lastVoice.current = 0; micAmpRef.current = 0; setTalking(false);
+      try { recRef.current?.abort(); } catch { /* already stopped */ }
+    } else if (phaseRef.current === "listening") startListening();
+  };
+  const tap = () => {
+    if (phaseRef.current === "speaking") { turnRef.current++; stopHuman(); ampRef.current = 0; startListening(); }
+    else if (phaseRef.current === "listening" && finalRef.current) endTurn();
+  };
+  return <GalaxyScene phase={phase} ampRef={ampRef} micAmpRef={micAmpRef} status={phase === "speaking" ? "Speaking... (tap to interrupt)" : phase === "thinking" ? "Thinking..." : "Bolo, main sun raha hoon"}
+    text={text} muted={muted} userTalking={talking} onMute={toggleMute} onEnd={onClose} onTap={tap} />;
 }
 
 type VoiceProps = {
@@ -406,6 +360,12 @@ function LiveVoiceModal({ onClose, onFallback }: VoiceProps & { onFallback: () =
   const [muted, setMuted] = useState(false);
   const [connected, setConnected] = useState(false);
   const [userTalking, setUserTalking] = useState(false);
+  const [liveSpeaking, setLiveSpeaking] = useState(false);
+  const [thinking, setThinking] = useState(false);
+  const [interrupted, setInterrupted] = useState(false);
+  const micAmpRef = useRef(0);
+  const lastVoice = useRef(0);
+  const liveState = useRef({ speaking: false, muted: false, thinking: false });
   const talkTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const ampRef = useRef(0);
   const fellBack = useRef(false);
@@ -418,20 +378,25 @@ function LiveVoiceModal({ onClose, onFallback }: VoiceProps & { onFallback: () =
   };
 
   const conversation = useConversation({
-    micMuted: muted,
+    micMuted: muted || (liveSpeaking && !interrupted) || thinking,
+    onModeChange: ({ mode }) => {
+      setLiveSpeaking(mode === "speaking"); setThinking(false); setInterrupted(false);
+      liveState.current.speaking = mode === "speaking";
+      liveState.current.thinking = false;
+      if (mode === "speaking") { setUserTalking(false); micAmpRef.current = 0; }
+    },
     onConnect: () => setConnected(true),
     onDisconnect: () => {
       if (!closing.current) fallback();
     },
     onError: () => fallback(),
     onVadScore: ({ vadScore }: { vadScore: number }) => {
-      if (vadScore < 0.5) return;
+      if (liveState.current.speaking || liveState.current.muted || liveState.current.thinking || vadScore < 0.5) return;
+      lastVoice.current = performance.now();
       setUserTalking(true);
-      if (talkTimer.current) clearTimeout(talkTimer.current);
-      talkTimer.current = setTimeout(() => setUserTalking(false), 600);
     },
     onMessage: (m: any) => {
-      if (m?.source === "user") setHeard(String(m.message ?? ""));
+      if (m?.source === "user") { setHeard(String(m.message ?? "")); setThinking(true); setUserTalking(false); }
       else if (m?.message) setReply(String(m.message));
     },
   });
@@ -445,7 +410,8 @@ function LiveVoiceModal({ onClose, onFallback }: VoiceProps & { onFallback: () =
           method: "POST",
           headers: { authorization: `Bearer ${s.session?.access_token ?? ""}` },
         }));
-        const [, res] = await Promise.all([navigator.mediaDevices.getUserMedia({ audio: true }), tokenReq]);
+        const [permissionStream, res] = await Promise.all([navigator.mediaDevices.getUserMedia({ audio: VOICE_AUDIO_CONSTRAINTS }), tokenReq]);
+        permissionStream.getTracks().forEach(track => track.stop());
         if (!res.ok) throw new Error("token");
         const { token } = (await res.json()) as { token: string };
         if (cancelled) return;
@@ -457,17 +423,26 @@ function LiveVoiceModal({ onClose, onFallback }: VoiceProps & { onFallback: () =
     return () => {
       cancelled = true;
       closing.current = true;
+      if (talkTimer.current) clearTimeout(talkTimer.current);
       void conversation.endSession();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const speaking = conversation.isSpeaking;
+  const speaking = conversation.isSpeaking && !interrupted;
+  liveState.current = { speaking, muted, thinking };
   useEffect(() => {
     let raf = 0;
     const tick = () => {
       try {
         ampRef.current = speaking ? Math.min(1, conversation.getOutputVolume() * 2) : 0;
+        const allowed = connected && !liveState.current.speaking && !liveState.current.muted && !liveState.current.thinking;
+        micAmpRef.current = allowed ? conversation.getInputVolume() : 0;
+        const active = allowed && micAmpRef.current >= VOICE_THRESHOLD;
+        if (active) { lastVoice.current = performance.now(); setUserTalking(true); }
+        else if (allowed && silenceElapsed(lastVoice.current, performance.now())) {
+          lastVoice.current = 0; setUserTalking(false); setThinking(true);
+        } else if (!allowed) setUserTalking(false);
       } catch {
         ampRef.current = speaking ? 0.6 : 0;
       }
@@ -475,14 +450,22 @@ function LiveVoiceModal({ onClose, onFallback }: VoiceProps & { onFallback: () =
     };
     tick();
     return () => cancelAnimationFrame(raf);
-  }, [speaking, conversation]);
+  }, [speaking, conversation, connected]);
 
+  useEffect(() => { if (!conversation.isSpeaking) conversation.setVolume({ volume: 1 }); }, [conversation.isSpeaking]);
   const ready = useFastConnect(connected);
-  const phase: ScenePhase = !ready ? "connecting" : speaking ? "speaking" : "listening";
+  const phase: ScenePhase = !ready ? "connecting" : speaking ? "speaking" : thinking ? "thinking" : "listening";
   const status = !ready ? "Connecting..." : speaking ? "Speaking... (bol kar tok sakte ho)" : muted ? "Muted" : "Bolo, main sun raha hoon";
 
   return (
-    <GalaxyScene phase={phase} ampRef={ampRef} status={status} text={speaking && reply ? reply : heard}
-      muted={muted} userTalking={userTalking && !speaking} onMute={() => setMuted((m) => !m)} onEnd={onClose} />
+    <GalaxyScene phase={phase} ampRef={ampRef} micAmpRef={micAmpRef} status={status} text={speaking && reply ? reply : heard}
+      muted={muted} userTalking={userTalking && !speaking} onMute={() => setMuted((m) => !m)} onEnd={onClose}
+      onTap={() => {
+        if (!speaking) return;
+        conversation.setVolume({ volume: 0 });
+        conversation.sendUserActivity();
+        setInterrupted(true); setThinking(false); setLiveSpeaking(false);
+        lastVoice.current = 0;
+      }} />
   );
 }
