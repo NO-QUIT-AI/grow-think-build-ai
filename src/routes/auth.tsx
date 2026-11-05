@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -43,6 +43,8 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [needsConfirm, setNeedsConfirm] = useState(false);
 
   useEffect(() => {
     if (!loading && user) navigate({ to: "/" });
@@ -63,14 +65,21 @@ function AuthPage() {
         });
         if (error) throw error;
         if (!data.session) {
-           toast.success(t("signup"));
+          toast.success("Confirmation email bhej di hai — inbox (aur spam) check karke link par click karein, phir login karein.", { duration: 10000 });
+          setNeedsConfirm(true);
           setMode("signin");
           return;
         }
          toast.success(t("signup"));
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        if (error) {
+          if (/not confirmed/i.test(error.message)) {
+            setNeedsConfirm(true);
+            throw new Error("Pehle apni email confirm karein — inbox mein link bheja gaya hai.");
+          }
+          throw error;
+        }
       }
       navigate({ to: "/" });
     } catch (error) {
@@ -78,6 +87,20 @@ function AuthPage() {
     } finally {
       setBusy(false);
     }
+  }
+
+  async function resendConfirmation() {
+    if (!email) {
+      toast.error("Pehle email likhein.");
+      return;
+    }
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: window.location.origin },
+    });
+    if (error) toast.error(error.message);
+    else toast.success("Confirmation email dobara bhej di gayi.");
   }
 
   async function google() {
@@ -128,21 +151,41 @@ function AuthPage() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">{t("auth_password")}</Label>
-            <Input
-              id="password"
-              type="password"
-              required
-              minLength={6}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                required
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="pr-11"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? "Password chhupayein" : "Password dikhayein"}
+                className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-muted-foreground hover:text-foreground"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
           <Button type="submit" className="w-full" disabled={busy}>
             {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {mode === "signin" ? t("login") : t("signup")}
           </Button>
         </form>
+
+        {needsConfirm && (
+          <div className="mt-4 rounded-xl border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
+            Account on karne ke liye email confirm karna zaroori hai. Email nahi mili?{" "}
+            <button type="button" onClick={resendConfirmation} className="font-medium text-primary underline-offset-4 hover:underline">
+              Dobara bhejein
+            </button>
+          </div>
+        )}
 
         <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
           <span className="h-px flex-1 bg-border" /> {t("auth_or")}{" "}
