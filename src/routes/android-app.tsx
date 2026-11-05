@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { ArrowUp, Code2, Download, Loader2, LogOut, Wrench } from "lucide-react";
+import { ArrowUp, Code2, Download, Eye, EyeOff, Loader2, LogOut, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,6 +32,10 @@ function AndroidWorkspace() {
   const [password, setPassword] = useState("");
   const [authError, setAuthError] = useState("");
   const [authBusy, setAuthBusy] = useState(false);
+  const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
+  const [showPassword, setShowPassword] = useState(false);
+  const [authInfo, setAuthInfo] = useState("");
+  const [needsConfirm, setNeedsConfirm] = useState(false);
   const [tab, setTab] = useState<"builder" | "builds" | "tools">("builder");
   const [prompt, setPrompt] = useState("");
   const [toolText, setToolText] = useState("");
@@ -49,9 +53,27 @@ function AndroidWorkspace() {
   }, [user?.id, busy]);
   async function login() {
     setAuthBusy(true); setAuthError("");
-    try { const { error } = await supabase.auth.signInWithPassword({ email, password }); if (error) setAuthError(error.message); }
+    setAuthInfo("");
+    try {
+      if (authMode === "signup") {
+        const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: "https://noquitai.com/android-app" } });
+        if (error) { setAuthError(error.message); return; }
+        if (!data.session) { setNeedsConfirm(true); setAuthMode("signin"); setAuthInfo("Confirmation email sent. Open your inbox (and spam), tap the link, then sign in here."); }
+        return;
+      }
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        if (/not confirmed/i.test(error.message)) { setNeedsConfirm(true); setAuthError("Please confirm your email first — check your inbox for the link."); }
+        else setAuthError(error.message);
+      }
+    }
     catch { setAuthError("Unable to connect. Please try again."); }
     finally { setAuthBusy(false); }
+  }
+  async function resendConfirmation() {
+    if (!email) { setAuthError("Enter your email first."); return; }
+    const { error } = await supabase.auth.resend({ type: "signup", email, options: { emailRedirectTo: "https://noquitai.com/android-app" } });
+    if (error) setAuthError(error.message); else { setAuthError(""); setAuthInfo("Confirmation email sent again."); }
   }
   async function downloadBuild() {
     if (!selected) return;
@@ -77,10 +99,14 @@ function AndroidWorkspace() {
     {loading ? <div className="flex flex-1 items-center justify-center"><Loader2 className="animate-spin" aria-label="Loading" /></div> : !user && tab !== "tools" ?
       <section className="mx-auto w-full max-w-md space-y-5 px-6 py-12"><h2 className="text-2xl font-bold">Your next website starts here.</h2><form className="space-y-4" onSubmit={(event) => { event.preventDefault(); void login(); }}>
         <Input type="email" aria-label="Email" placeholder="Email" required autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} />
-        <Input type="password" aria-label="Password" placeholder="Password" required autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} />
+        <div className="relative"><Input type={showPassword ? "text" : "password"} aria-label="Password" placeholder="Password" required minLength={6} autoComplete={authMode === "signup" ? "new-password" : "current-password"} value={password} onChange={(event) => setPassword(event.target.value)} className="pr-11" />
+          <button type="button" onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? "Hide password" : "Show password"} className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-muted-foreground">{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button></div>
         {authError && <p role="alert" className="text-sm text-destructive">{authError}</p>}
-        <Button disabled={authBusy} className="w-full">{authBusy ? "Signing in…" : "Sign in"}</Button>
-      </form><p className="text-sm text-muted-foreground">Use your existing NO QUIT AI account.</p><Button variant="outline" className="w-full" onClick={() => setTab("tools")}><Wrench className="mr-2 h-4 w-4" />Open text tools</Button></section> :
+        {authInfo && <p role="status" className="text-sm text-primary">{authInfo}</p>}
+        <Button disabled={authBusy} className="w-full">{authBusy ? "Please wait…" : authMode === "signup" ? "Create account" : "Sign in"}</Button>
+      </form>
+      {needsConfirm && <p className="text-sm text-muted-foreground">Email not received? <button type="button" className="font-medium text-primary underline" onClick={() => void resendConfirmation()}>Resend</button></p>}
+      <p className="text-sm text-muted-foreground">{authMode === "signin" ? "New here?" : "Already have an account?"} <button type="button" className="font-medium text-primary underline" onClick={() => { setAuthMode(authMode === "signin" ? "signup" : "signin"); setAuthError(""); setAuthInfo(""); }}>{authMode === "signin" ? "Create account" : "Sign in"}</button></p><Button variant="outline" className="w-full" onClick={() => setTab("tools")}><Wrench className="mr-2 h-4 w-4" />Open text tools</Button></section> :
       <nav aria-label="Workspace" className="flex gap-2 border-b border-border p-3">{(user ? ["builder", "builds", "tools"] as const : ["builder", "tools"] as const).map((item) => <Button key={item} variant={tab === item ? "default" : "ghost"} onClick={() => setTab(item)}>{item === "builder" ? user ? "Builder" : "Sign in" : item === "builds" ? "My Websites" : "Tools"}</Button>)}</nav>}
     {tab === "tools" ? <section className="mx-auto w-full max-w-3xl space-y-4 p-5"><h2 className="text-xl font-bold">Text tools</h2><Textarea aria-label="Tool text" rows={8} value={toolText} onChange={(event) => setToolText(event.target.value)} /><p className="text-sm text-muted-foreground">{toolText.trim() ? toolText.trim().split(/\s+/).length : 0} words · {toolText.length} characters</p><div className="flex flex-wrap gap-2"><Button variant="outline" onClick={() => setToolText(toolText.toUpperCase())}>UPPERCASE</Button><Button variant="outline" onClick={() => setToolText(toolText.toLowerCase())}>lowercase</Button><Button variant="outline" onClick={() => setToolText(toolText.replace(/\s+/g, " ").trim())}>Clean spaces</Button></div></section> : user && tab === "builder" ?
       <section className="mx-auto flex w-full max-w-3xl flex-1 flex-col p-4"><div className="flex-1 space-y-5 py-5">{messages.length === 0 && <div className="py-8"><Code2 className="mb-5 h-9 w-9 text-primary" /><h2 className="text-2xl font-bold">What shall we build?</h2><div className="mt-5 flex flex-wrap gap-2">{["Build a cafe website", "Create my portfolio", "Suggest a domain name"].map((text) => <Button key={text} variant="outline" onClick={() => setPrompt(text)}>{text}</Button>)}</div></div>}
