@@ -70,7 +70,7 @@ function AndroidWorkspace() {
   }
   return <main className="android-page flex min-h-dvh flex-col bg-background text-foreground">
     <header className="flex items-center gap-3 border-b border-border px-4 py-4">
-      <img src="/android/icon-192.png" width="40" height="40" alt="NQ" className="rounded-lg" />
+      <img src="/android/icon-192.png" width="40" height="40" alt="NO QUIT AI" className="rounded-lg" />
       <div className="min-w-0"><h1 className="text-lg font-bold">NO QUIT AI</h1><p className="text-xs text-muted-foreground">Build Studio</p></div>
       {user && <Button className="ml-auto" variant="ghost" size="icon" title="Sign out" onClick={() => void signOut()}><LogOut className="h-4 w-4" /></Button>}
     </header>
