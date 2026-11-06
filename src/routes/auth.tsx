@@ -73,7 +73,7 @@ function AuthPage() {
             }
             setMode("signin");
             throw new Error(
-              "Ye email pehle se registered hai. Agar pehle Google se account banaya tha to neeche 'Google se continue' dabayein.",
+              "Ye email pehle se registered hai. Agar pehle Google se account banaya tha to neeche 'Continue with Google' dabayein.",
             );
           }
           throw error;
@@ -94,7 +94,7 @@ function AuthPage() {
           }
           if (/invalid login credentials/i.test(error.message)) {
             throw new Error(
-              "Email ya password ghalat hai. Agar account Google se banaya tha to 'Google se continue' dabayein. Naya ho to 'Sign up' karein.",
+              "Email ya password ghalat hai. Agar account Google se banaya tha to 'Continue with Google' dabayein. Naya ho to 'Sign up' karein.",
             );
           }
           throw error;
