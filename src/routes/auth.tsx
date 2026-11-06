@@ -63,7 +63,21 @@ function AuthPage() {
             data: { display_name: name || email.split("@")[0] },
           },
         });
-        if (error) throw error;
+        if (error) {
+          if (/already registered|already exists/i.test(error.message)) {
+            // Email pehle se hai: seedha login try karo
+            const res = await supabase.auth.signInWithPassword({ email, password });
+            if (!res.error) {
+              navigate({ to: "/" });
+              return;
+            }
+            setMode("signin");
+            throw new Error(
+              "Ye email pehle se registered hai. Agar pehle Google se account banaya tha to neeche 'Google se continue' dabayein.",
+            );
+          }
+          throw error;
+        }
         if (!data.session) {
           toast.success("Confirmation email bhej di hai — inbox (aur spam) check karke link par click karein, phir login karein.", { duration: 10000 });
           setNeedsConfirm(true);
@@ -77,6 +91,11 @@ function AuthPage() {
           if (/not confirmed/i.test(error.message)) {
             setNeedsConfirm(true);
             throw new Error("Pehle apni email confirm karein — inbox mein link bheja gaya hai.");
+          }
+          if (/invalid login credentials/i.test(error.message)) {
+            throw new Error(
+              "Email ya password ghalat hai. Agar account Google se banaya tha to 'Google se continue' dabayein. Naya ho to 'Sign up' karein.",
+            );
           }
           throw error;
         }
@@ -129,6 +148,18 @@ function AuthPage() {
             <p className="text-xs text-muted-foreground">{t("studio")}</p>
           </div>
           <LanguageSelector />
+        </div>
+
+        <Button type="button" size="lg" className="w-full" onClick={google}>
+          {t("auth_google")}
+        </Button>
+        <p className="mt-2 text-center text-xs text-muted-foreground">
+          Sabse aasaan: ek click mein Google se account ban jata hai.
+        </p>
+
+        <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
+          <span className="h-px flex-1 bg-border" /> {t("auth_or")}{" "}
+          <span className="h-px flex-1 bg-border" />
         </div>
 
         <form onSubmit={onSubmit} className="space-y-4">
@@ -187,14 +218,6 @@ function AuthPage() {
           </div>
         )}
 
-        <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
-          <span className="h-px flex-1 bg-border" /> {t("auth_or")}{" "}
-          <span className="h-px flex-1 bg-border" />
-        </div>
-
-        <Button variant="secondary" className="w-full" onClick={google}>
-          {t("auth_google")}
-        </Button>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
           {mode === "signin" ? t("auth_needAccount") : t("auth_haveAccount")}{" "}
