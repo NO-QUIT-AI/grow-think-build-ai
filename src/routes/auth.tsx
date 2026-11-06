@@ -102,7 +102,7 @@ function AuthPage() {
       }
       navigate({ to: "/" });
     } catch (error) {
-       toast.error(error instanceof Error ? error.message : t("requestFailed"));
+       toast.error(error instanceof Error ? error.message : t("requestFailed"), { duration: 9000 });
     } finally {
       setBusy(false);
     }
