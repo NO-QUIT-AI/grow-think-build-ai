@@ -1,3 +1,4 @@
+// @ts-nocheck -- Bun test runner.
 import { describe, expect, it } from "bun:test";
 import { chromeIntentUrl, isInAppBrowser } from "./in-app-browser";
 
