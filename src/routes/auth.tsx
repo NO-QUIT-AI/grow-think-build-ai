@@ -12,6 +12,7 @@ import logoAsset from "@/assets/logo.jpg.asset.json";
 import { useAuth } from "@/hooks/useAuth";
 import { useT } from "@/i18n/LanguageContext";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { chromeIntentUrl, isInAppBrowser } from "@/lib/in-app-browser";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -45,6 +46,26 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [needsConfirm, setNeedsConfirm] = useState(false);
+  const [inApp, setInApp] = useState(false);
+
+  useEffect(() => {
+    setInApp(isInAppBrowser(navigator.userAgent));
+  }, []);
+
+  function openInBrowser() {
+    const url = "https://noquitai.com/auth";
+    if (/Android/i.test(navigator.userAgent)) window.location.href = chromeIntentUrl(url);
+    else window.open(url, "_blank");
+  }
+
+  async function copyLink() {
+    try {
+      await navigator.clipboard.writeText("https://noquitai.com/auth");
+      toast.success("Link copy ho gaya — Chrome ya Safari mein paste karein.");
+    } catch {
+      toast.error("Copy nahi hua. noquitai.com/auth browser mein khud likhein.");
+    }
+  }
 
   useEffect(() => {
     if (!loading && user) navigate({ to: "/" });
@@ -123,11 +144,15 @@ function AuthPage() {
   }
 
   async function google() {
+    if (inApp) {
+      toast.error("Google login is app ke andar wale browser mein band hai. Neeche 'Chrome mein kholein' dabayein.", { duration: 9000 });
+      return;
+    }
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
     });
     if (result.error) {
-       toast.error(t("requestFailed"));
+      toast.error(`Google login nahi hua: ${result.error.message}`, { duration: 9000 });
       return;
     }
     if (result.redirected) return;
@@ -153,9 +178,22 @@ function AuthPage() {
         <Button type="button" size="lg" className="w-full" onClick={google}>
           {t("auth_google")}
         </Button>
-        <p className="mt-2 text-center text-xs text-muted-foreground">
-          Sabse aasaan: ek click mein Google se account ban jata hai.
-        </p>
+        {inApp ? (
+          <div role="alert" className="mt-3 rounded-xl border border-primary/40 bg-primary/10 p-3 text-xs text-foreground">
+            <p className="font-medium">Ye page WhatsApp/Instagram ya kisi app ke andar khula hai.</p>
+            <p className="mt-1 text-muted-foreground">
+              Google yahan login nahi hone deta. Chrome ya Safari mein kholein, ya neeche email aur password se login karein.
+            </p>
+            <div className="mt-3 flex gap-2">
+              <Button type="button" size="sm" onClick={openInBrowser}>Chrome mein kholein</Button>
+              <Button type="button" size="sm" variant="outline" onClick={copyLink}>Link copy karein</Button>
+            </div>
+          </div>
+        ) : (
+          <p className="mt-2 text-center text-xs text-muted-foreground">
+            Sabse aasaan: ek click mein Google se account ban jata hai.
+          </p>
+        )}
 
         <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
           <span className="h-px flex-1 bg-border" /> {t("auth_or")}{" "}
