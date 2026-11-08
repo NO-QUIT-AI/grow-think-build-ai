@@ -31,7 +31,7 @@ export function readBuildStream(messages: UIMessage[]): Pick<BuildActivity, "tex
       const toolPart = part as unknown as { type: string; toolCallId?: string; state?: string; input?: unknown; output?: unknown };
       const input = record(toolPart.input), output = record(toolPart.output);
       const files = Array.isArray(input.files) ? input.files.map(record) : [];
-      const nextCode = string(input.code) || string(input.html) || string(input.newContent) || files.map(f => string(f.content)).filter(Boolean).join("\n\n");
+      const nextCode = string(input.code) || string(input.html) || string(input.content) || string(input.newContent) || files.map(f => string(f.content)).filter(Boolean).join("\n\n");
       if (nextCode) code = nextCode;
       steps.push({
         id: toolPart.toolCallId || `${message.id}-${steps.length}`,
