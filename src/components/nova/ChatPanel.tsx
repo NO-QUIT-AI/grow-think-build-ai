@@ -662,11 +662,16 @@ function ChatThread({
   submitRef.current = submit;
   const stopRef = useRef(stop);
   stopRef.current = stop;
+  const publishedActivityRef = useRef("");
   useEffect(() => {
     if (!buildRequest) return;
+    const stream = readBuildStream(messages.slice(buildRequest.start));
+    const fingerprint = JSON.stringify([buildRequest.id, stream, status, error?.message]);
+    if (publishedActivityRef.current === fingerprint) return;
+    publishedActivityRef.current = fingerprint;
     onBuildActivity?.({
       ...buildRequest,
-      ...readBuildStream(messages.slice(buildRequest.start)),
+      ...stream,
       status,
       error: error?.message,
       approvePlan: id => { planRef.current = id; void submitRef.current("Approved plan — shuru karo, steps ke mutabiq kaam karo."); },
