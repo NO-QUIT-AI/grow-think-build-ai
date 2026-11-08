@@ -1,3 +1,4 @@
+// @ts-nocheck -- Bun test runner, matching adjacent tests.
 import { describe, expect, it } from "bun:test";
 import type { UIMessage } from "ai";
 import { isBuildRequest, readBuildStream } from "./build-activity";

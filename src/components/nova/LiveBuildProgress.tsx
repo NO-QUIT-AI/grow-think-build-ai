@@ -7,12 +7,12 @@ export function LiveBuildProgress({ activity }: { activity: BuildActivity }) {
   const busy = activity.status === "submitted" || activity.status === "streaming";
   return <section aria-label="Live build progress" className="min-w-0 space-y-4 border-b border-border py-4">
     <header className="flex items-start justify-between gap-3">
-      <div className="min-w-0"><h2 className="flex items-center gap-2 font-semibold"><Code2 className="h-5 w-5 text-primary" /> Build in progress</h2><p className="mt-1 break-words text-sm text-muted-foreground">{activity.prompt}</p></div>
+      <div className="min-w-0"><h2 className="flex items-center gap-2 font-semibold"><Code2 className="h-5 w-5 text-primary" /> {busy ? "Build in progress" : "Build activity"}</h2><p className="mt-1 break-words text-sm text-muted-foreground">{activity.prompt}</p></div>
       {busy && <Button size="icon" variant="ghost" aria-label="Stop build" title="Stop build" onClick={activity.cancel}><Square className="h-4 w-4" /></Button>}
     </header>
     <div role="status" className="flex items-center gap-2 text-sm text-primary">
       {busy ? <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" /> : activity.error ? <AlertCircle className="h-4 w-4" /> : <Check className="h-4 w-4" />}
-      {activity.error ? "Build interrupted" : busy ? activity.steps.length ? "Tools aur coding par kaam ho raha hai…" : "Request par kaam shuru ho raha hai…" : activity.steps.some(s => s.output.planId || s.output.costApprovalId) ? "Approval / response" : "Response received"}
+      {activity.error ? "Build interrupted" : busy ? activity.steps.length ? "Tools aur coding par kaam ho raha hai…" : "Request par kaam shuru ho raha hai…" : activity.steps.some(s => s.state === "output-error") ? "Tool failed — details neeche hain" : activity.steps.some(s => s.output["planId"] || s.output["costApprovalId"]) ? "Approval / response" : "Response received"}
     </div>
     {activity.error && <p role="alert" className="break-words text-sm text-destructive">{activity.error}</p>}
     <div className="grid min-w-0 gap-4 md:grid-cols-2">

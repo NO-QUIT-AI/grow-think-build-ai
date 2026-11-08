@@ -3,7 +3,7 @@ import type { UIMessage } from "ai";
 export type BuildStep = { id: string; tool: string; state: string; file?: string; table?: string; output: Record<string, unknown> };
 export type BuildActivity = {
   id: string; prompt: string; status: string; text: string; code: string;
-  steps: BuildStep[]; error?: string;
+  steps: BuildStep[]; error?: string | undefined;
   approvePlan?: (id: string) => void;
   approveCost?: (id: string, tool: string) => void;
   cancel?: () => void;
@@ -30,15 +30,15 @@ export function readBuildStream(messages: UIMessage[]): Pick<BuildActivity, "tex
       if (!part.type.startsWith("tool-")) continue;
       const toolPart = part as unknown as { type: string; toolCallId?: string; state?: string; input?: unknown; output?: unknown };
       const input = record(toolPart.input), output = record(toolPart.output);
-      const files = Array.isArray(input.files) ? input.files.map(record) : [];
-      const nextCode = string(input.code) || string(input.html) || string(input.content) || string(input.newContent) || files.map(f => string(f.content)).filter(Boolean).join("\n\n");
+      const files = Array.isArray(input["files"]) ? input["files"].map(record) : [];
+      const nextCode = string(input["code"]) || string(input["html"]) || string(input["content"]) || string(input["newContent"]) || files.map(f => string(f["content"])).filter(Boolean).join("\n\n");
       if (nextCode) code = nextCode;
       steps.push({
         id: toolPart.toolCallId || `${message.id}-${steps.length}`,
         tool: part.type.slice(5),
-        state: output.error || output.ok === false ? "output-error" : toolPart.state || "input-streaming",
-        file: string(input.path) || string(input.file) || files.map(f => string(f.path)).filter(Boolean).join(", "),
-        table: string(input.table),
+        state: output["error"] || output["ok"] === false || output["saved"] === false ? "output-error" : toolPart.state || "input-streaming",
+        file: string(input["path"]) || string(input["file"]) || files.map(f => string(f["path"])).filter(Boolean).join(", "),
+        table: string(input["table"]),
         // Only approval fields are shared with the progress view, not tool secrets or private results.
         output: Object.fromEntries(Object.entries(output).filter(([key]) => ["planId", "costApprovalId", "steps", "tool", "cost", "error", "budgetBlocked"].includes(key))),
       });

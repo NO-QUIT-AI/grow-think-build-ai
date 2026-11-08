@@ -271,8 +271,8 @@ export function ChatPanel({
   onWorkChanged: () => void;
   studioContext: StudioContext | null;
   onOpenStudio: (id: string) => void;
-  onBuildStart?: () => void;
-  onBuildActivity?: (activity: BuildActivity) => void;
+  onBuildStart?: (() => void) | undefined;
+  onBuildActivity?: ((activity: BuildActivity) => void) | undefined;
 }) {
   const { t } = useLanguage();
   const [threads, setThreads] = useState<Thread[]>([]);
@@ -461,8 +461,8 @@ function ChatThread({
   onTouched: (id: string) => void;
   studioContext: StudioContext | null;
   onOpenStudio: (id: string) => void;
-  onBuildStart?: () => void;
-  onBuildActivity?: (activity: BuildActivity) => void;
+  onBuildStart?: (() => void) | undefined;
+  onBuildActivity?: ((activity: BuildActivity) => void) | undefined;
 }) {
   const { lang, t } = useLanguage();
   const [input, setInput] = useState("");
