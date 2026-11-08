@@ -660,6 +660,8 @@ function ChatThread({
   const busy = status === "submitted" || status === "streaming";
   const submitRef = useRef(submit);
   submitRef.current = submit;
+  const stopRef = useRef(stop);
+  stopRef.current = stop;
   useEffect(() => {
     if (!buildRequest) return;
     onBuildActivity?.({
@@ -669,9 +671,9 @@ function ChatThread({
       error: error?.message,
       approvePlan: id => { planRef.current = id; void submitRef.current("Approved plan — shuru karo, steps ke mutabiq kaam karo."); },
       approveCost: (id, tool) => { costRef.current = id; void submitRef.current(`Approved cost for ${tool}. Retry exactly the saved tool arguments; do not change them.`); },
-      cancel: () => void stop(),
+      cancel: () => void stopRef.current(),
     });
-  }, [buildRequest, messages, status, error, onBuildActivity, stop]);
+  }, [buildRequest, messages, status, error, onBuildActivity]);
 
   // Guide Agent: button click par guide message chat me inject karo (local only).
   const [guideVotes, setGuideVotes] = useState<Record<string, "up" | "down">>({});
