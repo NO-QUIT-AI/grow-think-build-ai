@@ -463,9 +463,32 @@ function ChatThread({
   const [editing, setEditing] = useState(false);
   const [edits, setEdits] = useState<{ id: string; before: string; after: string; prompt: string }[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
+  const composerRef = useRef<HTMLTextAreaElement>(null);
+  const composerPlaceholder = attached ? t("imageInstruction") : t("askNewQuestion");
   const bottomRef = useRef<HTMLDivElement>(null);
   const convRef = useRef<string | null>(conversationId);
   const [voiceOpen, setVoiceOpen] = useState(false);
+  useEffect(() => {
+    const textarea = composerRef.current;
+    if (!textarea) return;
+    const resize = () => {
+      const value = textarea.value;
+      // Measure the wrapped placeholder too, including on narrow phones.
+      if (!value) textarea.value = composerPlaceholder;
+      textarea.style.height = "0px";
+      textarea.style.height = `${Math.min(160, Math.max(44, textarea.scrollHeight + 2))}px`;
+      textarea.value = value;
+    };
+    resize();
+    let width = textarea.clientWidth;
+    const observer = new ResizeObserver(() => {
+      if (textarea.clientWidth === width) return;
+      width = textarea.clientWidth;
+      resize();
+    });
+    observer.observe(textarea);
+    return () => observer.disconnect();
+  }, [input, composerPlaceholder]);
   useEffect(() => {
     const h = (e: Event) => {
       const d = (e as CustomEvent<{ prefill?: string; voice?: boolean }>).detail;
@@ -993,6 +1016,7 @@ function ChatThread({
             <ImagePlus className="h-4 w-4" />
           </Button>
           <Textarea
+            ref={composerRef}
             value={input}
             onChange={(event) => setInput(event.target.value)}
             onKeyDown={(event) => {
@@ -1001,9 +1025,10 @@ function ChatThread({
                 void submit(input);
               }
             }}
-             placeholder={attached ? t("imageInstruction") : t("askNewQuestion")}
-            rows={1}
-            className="max-h-40 min-h-11 resize-none border-0 bg-transparent focus-visible:ring-0"
+            placeholder={composerPlaceholder}
+            aria-label={composerPlaceholder}
+            rows={2}
+            className="max-h-40 min-h-11 min-w-0 flex-1 resize-none border-0 bg-transparent leading-6 focus-visible:ring-0"
           />
           <button
             type="button"
