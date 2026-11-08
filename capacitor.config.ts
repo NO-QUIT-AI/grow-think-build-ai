@@ -4,7 +4,7 @@ const config: CapacitorConfig = {
   "appName": "NO QUIT AI - Build Studio",
   "webDir": "www",
   "server": {
-    "url": "https://noquitai.com/android-app",
+    "url": "https://noquitai.com/",
     "cleartext": false,
     "errorPath": "offline.html"
   },
