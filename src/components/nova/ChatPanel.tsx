@@ -618,6 +618,7 @@ function ChatThread({
   );
 
   const { messages, sendMessage, setMessages, status, error, stop } = useChat({
+    experimental_throttle: 100,
     messages: initialMessages,
     transport,
     onFinish: async ({ message }) => {
@@ -669,7 +670,7 @@ function ChatThread({
     const fingerprint = JSON.stringify([buildRequest.id, stream, status, error?.message]);
     if (publishedActivityRef.current === fingerprint) return;
     publishedActivityRef.current = fingerprint;
-    onBuildActivity?.({
+    const timer = window.setTimeout(() => onBuildActivity?.({
       ...buildRequest,
       ...stream,
       status,
@@ -677,7 +678,8 @@ function ChatThread({
       approvePlan: id => { planRef.current = id; void submitRef.current("Approved plan — shuru karo, steps ke mutabiq kaam karo."); },
       approveCost: (id, tool) => { costRef.current = id; void submitRef.current(`Approved cost for ${tool}. Retry exactly the saved tool arguments; do not change them.`); },
       cancel: () => void stopRef.current(),
-    });
+    }), 0);
+    return () => window.clearTimeout(timer);
   }, [buildRequest, messages, status, error, onBuildActivity]);
 
   // Guide Agent: button click par guide message chat me inject karo (local only).
