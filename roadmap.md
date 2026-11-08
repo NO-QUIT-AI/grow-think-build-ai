@@ -1,4 +1,5 @@
 # Pending completion
+- [ ] Android v4: launch the full https://noquitai.com/ site, versionCode 4/versionName 1.3, build signed AAB with existing upload key and verify packaged settings/signature.
 - [x] Correct Android package to com.noquitai.app; freshly built versionCode 2/versionName 1.1 signed AAB and clean revised source saved in Files. Bundletool and jarsigner pass; existing upload certificate preserved. Play Console acceptance requires owner's upload.
 - [x] Fix voice turn-taking, final-only transcript/repetition filtering, 1.5-second silence detection and volume-based feedback; 15 tests pass. Simulated signed-in browser verifies final-only submit, muted assistant playback, tap interrupt and manual mute; actual microphone/ElevenLabs call remains unverified.
 - [x] Upgrade hamburger to searchable All Tools drawer without changing home content; signed-in Scout navigation and mobile WhatsApp modal verified. Jalsa retains honest Local Chat label, not Bluetooth mesh.
