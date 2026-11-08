@@ -1,4 +1,5 @@
 # Pending completion
+- [ ] Auto-open Studio for build requests and show genuine streaming code/tool/table progress without interrupting Chat; verify signed-in flow and approvals.
 - [x] Android v4: https://noquitai.com/ Start URL, com.noquitai.app, versionCode 4/versionName 1.3; Gradle signed release, bundletool validation, jarsigner verification and certificate match with v3 pass; all 16 Mind icon/splash assets preserved, six release/boundary tests pass. AAB saved in Files; live mobile Start URL HTTP 200 verified. Native device behavior and Play Console acceptance require device/upload access.
 - [x] Correct Android package to com.noquitai.app; freshly built versionCode 2/versionName 1.1 signed AAB and clean revised source saved in Files. Bundletool and jarsigner pass; existing upload certificate preserved. Play Console acceptance requires owner's upload.
 - [x] Fix voice turn-taking, final-only transcript/repetition filtering, 1.5-second silence detection and volume-based feedback; 15 tests pass. Simulated signed-in browser verifies final-only submit, muted assistant playback, tap interrupt and manual mute; actual microphone/ElevenLabs call remains unverified.

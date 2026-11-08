@@ -44,6 +44,7 @@ import { connectPollinations, generateWithUserKey, getUserPollinationsKey } from
 import { ButtonWithGuide } from "@/components/nova/ButtonWithGuide";
 import { GUIDE_EVT, GUIDE_ID_PREFIX, isGuideMessageId, saveGuideFeedback } from "@/lib/guide-agent";
 import { GenesisUsage, GenesisToolApproval } from "@/components/nova/GenesisUpgrade";
+import { isBuildRequest, readBuildStream, type BuildActivity } from "@/lib/build-activity";
 
 const VOICE_CACHE_KEY = "nqai_voice_cache";
 function voiceKey(q: string, lang: string) {
@@ -263,11 +264,15 @@ export function ChatPanel({
   onWorkChanged,
   studioContext,
   onOpenStudio,
+  onBuildStart,
+  onBuildActivity,
 }: {
   userId: string;
   onWorkChanged: () => void;
   studioContext: StudioContext | null;
   onOpenStudio: (id: string) => void;
+  onBuildStart?: (() => void) | undefined;
+  onBuildActivity?: ((activity: BuildActivity) => void) | undefined;
 }) {
   const { t } = useLanguage();
   const [threads, setThreads] = useState<Thread[]>([]);
@@ -423,6 +428,8 @@ export function ChatPanel({
           onWorkChanged={onWorkChanged}
           studioContext={studioContext}
           onOpenStudio={onOpenStudio}
+          onBuildStart={onBuildStart}
+          onBuildActivity={onBuildActivity}
           onTouched={(id) =>
             setThreads((prev) =>
               prev.map((t) => (t.id === id ? { ...t, updated_at: new Date().toISOString() } : t)),
@@ -443,6 +450,8 @@ function ChatThread({
   onTouched,
   studioContext,
   onOpenStudio,
+  onBuildStart,
+  onBuildActivity,
 }: {
   userId: string;
   conversationId: string | null;
@@ -452,9 +461,12 @@ function ChatThread({
   onTouched: (id: string) => void;
   studioContext: StudioContext | null;
   onOpenStudio: (id: string) => void;
+  onBuildStart?: (() => void) | undefined;
+  onBuildActivity?: ((activity: BuildActivity) => void) | undefined;
 }) {
   const { lang, t } = useLanguage();
   const [input, setInput] = useState("");
+  const [buildRequest, setBuildRequest] = useState<{ id: string; prompt: string; start: number } | null>(null);
   const [attached, setAttached] = useState<string | null>(null);
   const [imageMode,setImageMode]=useState<"analyze"|"edit">("analyze");
   const planRef=useRef<string|null>(null);
@@ -605,7 +617,8 @@ function ChatThread({
     [lang, studioContext],
   );
 
-  const { messages, sendMessage, setMessages, status, error } = useChat({
+  const { messages, sendMessage, setMessages, status, error, stop } = useChat({
+    experimental_throttle: 100,
     messages: initialMessages,
     transport,
     onFinish: async ({ message }) => {
@@ -646,6 +659,28 @@ function ChatThread({
   });
 
   const busy = status === "submitted" || status === "streaming";
+  const submitRef = useRef(submit);
+  submitRef.current = submit;
+  const stopRef = useRef(stop);
+  stopRef.current = stop;
+  const publishedActivityRef = useRef("");
+  useEffect(() => {
+    if (!buildRequest) return;
+    const stream = readBuildStream(messages.slice(buildRequest.start));
+    const fingerprint = JSON.stringify([buildRequest.id, stream, status, error?.message]);
+    if (publishedActivityRef.current === fingerprint) return;
+    publishedActivityRef.current = fingerprint;
+    const timer = window.setTimeout(() => onBuildActivity?.({
+      ...buildRequest,
+      ...stream,
+      status,
+      error: error?.message,
+      approvePlan: id => { planRef.current = id; void submitRef.current("Approved plan — shuru karo, steps ke mutabiq kaam karo."); },
+      approveCost: (id, tool) => { costRef.current = id; void submitRef.current(`Approved cost for ${tool}. Retry exactly the saved tool arguments; do not change them.`); },
+      cancel: () => void stopRef.current(),
+    }), 0);
+    return () => window.clearTimeout(timer);
+  }, [buildRequest, messages, status, error, onBuildActivity]);
 
   // Guide Agent: button click par guide message chat me inject karo (local only).
   const [guideVotes, setGuideVotes] = useState<Record<string, "up" | "down">>({});
@@ -670,7 +705,7 @@ function ChatThread({
   }
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (bottomRef.current?.getClientRects().length) bottomRef.current.scrollIntoView({ behavior: "smooth" });
   }, [messages, busy]);
 
   async function submit(text: string) {
@@ -680,6 +715,12 @@ function ChatThread({
       return;
     }
     if ((!value && !attached) || busy) return;
+    if (isBuildRequest(value) || (buildRequest && (planRef.current || costRef.current))) {
+      const request = { id: `build-${Date.now()}`, prompt: value, start: messages.length };
+      setBuildRequest(request);
+      onBuildActivity?.({ ...request, status: "submitted", text: "", code: "", steps: [] });
+      onBuildStart?.();
+    }
     if (!attached && !studioContext && readVoiceCache(value, lang)) {
       void askByVoice(value);
       return;
@@ -690,7 +731,10 @@ function ChatThread({
     let id = convRef.current;
     if (!id) {
       id = await ensureConversation(value);
-      if (!id) return;
+      if (!id) {
+        if (isBuildRequest(value)) onBuildActivity?.({ id: `build-${Date.now()}`, prompt: value, status: "error", text: "", code: "", steps: [], error: "Conversation save nahi hui. Chat se dobara try karein." });
+        return;
+      }
       convRef.current = id;
     }
     const __rows = {

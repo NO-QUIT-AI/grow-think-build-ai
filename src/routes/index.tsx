@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Brain, Coins, FileText, LogOut, Users, UserPlus, Radio } from "lucide-react";
 import logoAsset from "@/assets/logo.jpg.asset.json";
 
@@ -18,6 +18,8 @@ import { LanguageSelector } from "@/components/LanguageSelector";
 import { useT } from "@/i18n/LanguageContext";
 import { useJalsaMode } from "@/hooks/useJalsaMode";
 import type { StudioContext } from "@/lib/studio-edit";
+import type { BuildActivity } from "@/lib/build-activity";
+import { LiveBuildProgress } from "@/components/nova/LiveBuildProgress";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -50,6 +52,9 @@ function Home() {
   const [activeMemoryId, setActiveMemoryId] = useState<string | null>(null);
   const [studioContext, setStudioContext] = useState<StudioContext | null>(null);
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [buildActivity, setBuildActivity] = useState<BuildActivity | null>(null);
+  const openLiveBuild = useCallback(() => setActiveTab("studio"), []);
+  const buildBusy = buildActivity?.status === "submitted" || buildActivity?.status === "streaming";
 
   useEffect(() => {
     if (user) void redeemReferral();
@@ -184,8 +189,8 @@ function Home() {
           <TabsTrigger value="mind" className="px-1 text-[11px]">{t("mind")}</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="chat" className="mt-0 flex min-h-0 flex-1 flex-col">
-          <ChatPanel userId={user.id} studioContext={studioContext} onOpenStudio={openMemoryInStudio} onWorkChanged={() => setRefreshKey((key) => key + 1)} />
+        <TabsContent forceMount value="chat" className="mt-0 flex min-h-0 flex-1 flex-col data-[state=inactive]:hidden">
+          <ChatPanel userId={user.id} studioContext={studioContext} onOpenStudio={openMemoryInStudio} onBuildStart={openLiveBuild} onBuildActivity={setBuildActivity} onWorkChanged={() => setRefreshKey((key) => key + 1)} />
         </TabsContent>
         <TabsContent value="memory" className="mt-0 flex-1 overflow-y-auto">
           <MemoryPanel userId={user.id} refreshKey={refreshKey} />
@@ -198,13 +203,14 @@ function Home() {
           />
         </TabsContent>
         <TabsContent value="studio" className="mt-0 flex min-h-0 flex-1 flex-col overflow-hidden">
-          <StudioPanel
+          {buildActivity && <LiveBuildProgress activity={buildActivity} />}
+          {!buildBusy && <StudioPanel
             userId={user.id}
             refreshKey={refreshKey}
             activeMemoryId={activeMemoryId}
             onMemorySaved={() => setRefreshKey((key) => key + 1)}
             onContextChanged={setStudioContext}
-          />
+          />}
         </TabsContent>
         <TabsContent value="mind" className="mt-0 flex-1 overflow-y-auto">
           <MindPanel userId={user.id} refreshKey={refreshKey} />

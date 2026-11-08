@@ -423,7 +423,7 @@ export function StudioPanel({
             <div className="flex flex-1 items-center justify-center overflow-hidden rounded-xl border border-border bg-background">
               <div className={device === "mobile" ? "h-full w-full max-w-[390px]" : "h-full w-full"}>
                 <iframe
-                  key={`${active?.id}-${device}-${reloadKey}`}
+                  key={`${active?.id}-${device}-${reloadKey}-${html.length}`}
                   title={active?.prompt ?? "Live preview"}
                   srcDoc={html}
                   sandbox="allow-scripts allow-forms allow-popups"
