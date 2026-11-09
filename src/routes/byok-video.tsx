@@ -44,9 +44,9 @@ function ByokVideo() {
 
   async function generate() {
     const key = keys.fal;
-    if (!key) return toast.error("Pehle Fal.ai key connect karein");
+    if (!key) { toast.error("Pehle Fal.ai key connect karein"); return; }
     const parts = scenes.length ? scenes : splitScript(script).map(text => ({ text, status: "pending" as const }));
-    if (!parts.length) return toast.error("Script likhein");
+    if (!parts.length) { toast.error("Script likhein"); return; }
     const ctrl = new AbortController(); abortRef.current = ctrl;
     setBusy(true); setMovie(undefined);
     const list: SceneState[] = parts.map(s => ({ ...s })); setScenes([...list]);
