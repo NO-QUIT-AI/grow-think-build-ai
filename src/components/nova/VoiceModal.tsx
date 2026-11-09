@@ -387,7 +387,8 @@ function LiveVoiceModal({ onClose, onFallback }: VoiceProps & { onFallback: () =
   };
 
   const conversation = useConversation({
-    micMuted: muted || (liveSpeaking && !interrupted) || thinking,
+    // Mic sirf agent ke bolte waqt band — local "thinking" guess par mic band karne se call atak jati thi
+    micMuted: muted || (liveSpeaking && !interrupted),
     onModeChange: ({ mode }) => {
       setLiveSpeaking(mode === "speaking"); setThinking(false); setInterrupted(false);
       lastVoice.current = 0;
@@ -438,6 +439,13 @@ function LiveVoiceModal({ onClose, onFallback }: VoiceProps & { onFallback: () =
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Safety: agar agent 8s tak jawab na de to "thinking" khud khatam ho jaye
+  useEffect(() => {
+    if (!thinking) return;
+    const t = setTimeout(() => { setThinking(false); liveState.current.thinking = false; }, 8000);
+    return () => clearTimeout(t);
+  }, [thinking]);
 
   const speaking = conversation.isSpeaking && !interrupted;
   liveState.current = { speaking, muted, thinking };
