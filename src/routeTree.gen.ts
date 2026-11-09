@@ -15,6 +15,7 @@ import { Route as AccountDeletionRouteImport } from './routes/account-deletion'
 import { Route as AndroidAppRouteImport } from './routes/android-app'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AutoVideoRouteImport } from './routes/auto-video'
+import { Route as ByokVideoRouteImport } from './routes/byok-video'
 import { Route as CallbackRouteImport } from './routes/callback'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -95,6 +96,11 @@ const AuthRoute = AuthRouteImport.update({
 const AutoVideoRoute = AutoVideoRouteImport.update({
   id: '/auto-video',
   path: '/auto-video',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ByokVideoRoute = ByokVideoRouteImport.update({
+  id: '/byok-video',
+  path: '/byok-video',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CallbackRoute = CallbackRouteImport.update({
@@ -362,6 +368,7 @@ export interface FileRoutesByFullPath {
   '/android-app': typeof AndroidAppRoute
   '/auth': typeof AuthRoute
   '/auto-video': typeof AutoVideoRoute
+  '/byok-video': typeof ByokVideoRoute
   '/callback': typeof CallbackRoute
   '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
@@ -421,6 +428,7 @@ export interface FileRoutesByTo {
   '/android-app': typeof AndroidAppRoute
   '/auth': typeof AuthRoute
   '/auto-video': typeof AutoVideoRoute
+  '/byok-video': typeof ByokVideoRoute
   '/callback': typeof CallbackRoute
   '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
@@ -481,6 +489,7 @@ export interface FileRoutesById {
   '/android-app': typeof AndroidAppRoute
   '/auth': typeof AuthRoute
   '/auto-video': typeof AutoVideoRoute
+  '/byok-video': typeof ByokVideoRoute
   '/callback': typeof CallbackRoute
   '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
@@ -542,6 +551,7 @@ export interface FileRouteTypes {
     | '/android-app'
     | '/auth'
     | '/auto-video'
+    | '/byok-video'
     | '/callback'
     | '/community'
     | '/contact'
@@ -601,6 +611,7 @@ export interface FileRouteTypes {
     | '/android-app'
     | '/auth'
     | '/auto-video'
+    | '/byok-video'
     | '/callback'
     | '/community'
     | '/contact'
@@ -660,6 +671,7 @@ export interface FileRouteTypes {
     | '/android-app'
     | '/auth'
     | '/auto-video'
+    | '/byok-video'
     | '/callback'
     | '/community'
     | '/contact'
@@ -720,6 +732,7 @@ export interface RootRouteChildren {
   AndroidAppRoute: typeof AndroidAppRoute
   AuthRoute: typeof AuthRoute
   AutoVideoRoute: typeof AutoVideoRoute
+  ByokVideoRoute: typeof ByokVideoRoute
   CallbackRoute: typeof CallbackRoute
   CommunityRoute: typeof CommunityRoute
   ContactRoute: typeof ContactRoute
@@ -814,6 +827,13 @@ declare module '@tanstack/react-router' {
       path: '/auto-video'
       fullPath: '/auto-video'
       preLoaderRoute: typeof AutoVideoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/byok-video': {
+      id: '/byok-video'
+      path: '/byok-video'
+      fullPath: '/byok-video'
+      preLoaderRoute: typeof ByokVideoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/callback': {
@@ -1194,6 +1214,7 @@ const rootRouteChildren: RootRouteChildren = {
   AndroidAppRoute: AndroidAppRoute,
   AuthRoute: AuthRoute,
   AutoVideoRoute: AutoVideoRoute,
+  ByokVideoRoute: ByokVideoRoute,
   CallbackRoute: CallbackRoute,
   CommunityRoute: CommunityRoute,
   ContactRoute: ContactRoute,
