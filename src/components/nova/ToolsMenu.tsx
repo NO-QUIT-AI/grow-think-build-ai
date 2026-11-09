@@ -30,6 +30,7 @@ const TOOLS: Tool[] = [
   { id: "jalsa", name: "Jalsa Mode (Local Chat)", icon: Radio, section: "PHONE TOOLS" },
   { id: "t2i", name: "Text to Image", icon: ImageIcon, section: "AI TOOLS" },
   { id: "auto-video", name: "Auto Story to Video", icon: Clapperboard, section: "AI TOOLS" },
+  { id: "byok-video", name: "BYOK Movie Maker", icon: Clapperboard, section: "AI TOOLS" },
   { id: "pdf", name: "PDF Reader", icon: FileSearch, section: "AI TOOLS" },
   { id: "voice", name: "Voice Tools", icon: Mic, section: "AI TOOLS" },
   { id: "scout", name: "Master Scout Agent", icon: Radar, section: "AI TOOLS" },
@@ -79,6 +80,7 @@ export function ToolsMenu({ onNewChat, onClose, history }: { onNewChat: () => vo
       case "cvs": onClose(); void navigate({ to: "/cv" }); return;
       case "space": onClose(); void navigate({ to: "/space" }); return;
       case "auto-video": onClose(); void navigate({ to: "/auto-video" }); return;
+      case "byok-video": onClose(); void navigate({ to: "/byok-video" }); return;
       case "scout": onClose(); void navigate({ to: "/scout" }); return;
       case "whatsapp": case "call": setModal(id); return;
       case "music": open("https://music.youtube.com"); return;
