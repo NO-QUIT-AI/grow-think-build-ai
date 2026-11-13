@@ -152,8 +152,6 @@ export const Route = createFileRoute("/api/chat")({
         const body = (await request.json()) as { messages?: unknown; lang?: unknown; studioContext?: unknown; product?: unknown; timezone?: unknown; conversationId?:unknown; approvedPlanId?:unknown; costApprovalId?:unknown; userId?: unknown };
 
         // SECURITY FIX: Never trust client-provided userId.
-        // userId sirf Supabase token se aayega, body se nahi.
-        // Agar client ne body me apni marzi se userId bheja aur wo token wali ID se match nahi karta, to block kar do.
         const claimedUserId = (body as { userId?: unknown }).userId;
         if (claimedUserId !== undefined && claimedUserId !== userId) {
           return new Response("Unauthorized", { status: 401 });
@@ -425,7 +423,7 @@ export const Route = createFileRoute("/api/chat")({
           const deploy = (project: string) =>
             (g.vercel_deploy.execute as (i: { project: string }, o: unknown) => Promise<unknown>)({ project }, {});
           const { vercelDomainTools, withAuditAndGrants, VERCEL_DOMAIN_PROMPT } = await import("@/lib/genesis-vercel.server");
-          const ownerTools={...allTools,...g,...genesisExtraTools({lovableKey:apiKey,deploy}),...genesisAutonomyTools(),...vercelDomainTools(supabase,userId),...studioTools};
+          const ownerTools={...allTools,...g,...genesisExtraTools({lovableKey: process.env["LOVABLE_API_KEY"] ?? "",deploy}),...genesisAutonomyTools(),...vercelDomainTools(supabase,userId),...studioTools};
           allTools = withAuditAndGrants(
             { ...ownerTools,...superTools(supabase,userId,[...Object.keys(ownerTools),"self_patch","self_revert"]) },
             supabase,
