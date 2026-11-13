@@ -9,6 +9,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
@@ -143,7 +144,9 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
   const androidPage = router.state.location.pathname === "/android-app";
-  useEffect(() => { void registerAppOfflineScreen().catch(() => {}); }, [androidPage]);
+  useEffect(() => {
+    void registerAppOfflineScreen().catch(() => {});
+  }, [androidPage]);
 
   // Load the runtime ad config (publisher ID from env) and inject the
   // AdSense script exactly once per page load — but ONLY on static content
@@ -167,9 +170,13 @@ function RootComponent() {
         body: JSON.stringify({ message, stack, route: window.location.pathname }),
       }).catch(() => {});
     };
-    const onError = (e: ErrorEvent) => send(e.message || "window error", e.error instanceof Error ? e.error.stack : undefined);
+    const onError = (e: ErrorEvent) =>
+      send(e.message || "window error", e.error instanceof Error ? e.error.stack : undefined);
     const onRejection = (e: PromiseRejectionEvent) =>
-      send(e.reason instanceof Error ? e.reason.message : String(e.reason), e.reason instanceof Error ? e.reason.stack : undefined);
+      send(
+        e.reason instanceof Error ? e.reason.message : String(e.reason),
+        e.reason instanceof Error ? e.reason.stack : undefined,
+      );
     window.addEventListener("error", onError);
     window.addEventListener("unhandledrejection", onRejection);
     return () => {
@@ -188,6 +195,7 @@ function RootComponent() {
         {!androidPage && <HelpAssistant />}
         <Toaster position="top-center" richColors />
         {!androidPage && <RewardAdHost />}
+        <SpeedInsights />
       </LanguageProvider>
     </QueryClientProvider>
   );
