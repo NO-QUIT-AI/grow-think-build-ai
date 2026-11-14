@@ -33,7 +33,7 @@ const TOOLS: Tool[] = [
   { id: "byok-video", name: "BYOK Movie Maker", icon: Clapperboard, section: "AI TOOLS" },
   { id: "pdf", name: "PDF Reader", icon: FileSearch, section: "AI TOOLS" },
   { id: "voice", name: "Voice Tools", icon: Mic, section: "AI TOOLS" },
-  { id: "scout", name: "Master Scout Agent", icon: Radar, section: "AI TOOLS" },
+  { id: "scout", name: "Scott Coach / Master Scout Agent", icon: Radar, section: "AI TOOLS" },
   { id: "space", name: "Space Photo (NASA)", icon: ImageIcon, section: "AI TOOLS" },
 ];
 

@@ -6,14 +6,15 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
+import { ScottChat } from "@/components/ScottChat";
 
 export const Route = createFileRoute("/scout")({
   head: () => ({
     meta: [
-      { title: "Master Scout Agent — NO QUIT AI" },
-      { name: "description", content: "NO QUIT AI Master Scout asks multiple AIs about market trends and gives you a simple Hinglish summary." },
-      { property: "og:title", content: "Master Scout Agent — NO QUIT AI" },
-      { property: "og:description", content: "Market se mashwara lo: Groq + DeepSeek agents combined into one smart summary." },
+      { title: "Scott Coach & Scout — NO QUIT AI" },
+      { name: "description", content: "Talk to Scott, your Roman Urdu and English motivational coach, or explore Scout market research." },
+      { property: "og:title", content: "Scott Coach & Scout — NO QUIT AI" },
+      { property: "og:description", content: "Private coaching conversations with Scott and market research with Scout in NO QUIT AI." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -28,15 +29,13 @@ function ScoutPage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const [running, setRunning] = useState(false);
+  const [mode, setMode] = useState<"coach" | "research">("coach");
   const [started, setStarted] = useState(false);
   const [logs, setLogs] = useState<Log[]>([]);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [error, setError] = useState<string | null>(null);
   const logEnd = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!loading && !user) navigate({ to: "/auth" });
-  }, [loading, user, navigate]);
 
   useEffect(() => logEnd.current?.scrollIntoView({ behavior: "smooth" }), [logs]);
 
@@ -98,7 +97,11 @@ function ScoutPage() {
           <ArrowLeft className="h-4 w-4" /> Home
         </Link>
 
-        {!started ? (
+        <div className="mb-5 flex gap-2" role="tablist" aria-label="Agent mode">
+          <Button role="tab" aria-selected={mode === "coach"} variant={mode === "coach" ? "default" : "secondary"} onClick={() => setMode("coach")}>Scott Coach</Button>
+          <Button role="tab" aria-selected={mode === "research"} variant={mode === "research" ? "default" : "secondary"} onClick={() => setMode("research")}>Scout Research</Button>
+        </div>
+        {mode === "coach" ? <ScottChat /> : !user ? <Link to="/auth" className="text-primary">Sign in for Scout Research</Link> : !started ? (
           <div className="flex min-h-[70vh] flex-col items-center justify-center gap-6 text-center">
             <Radar className="h-14 w-14 text-primary node-pulse" />
             <h1 className="text-2xl font-semibold md:text-3xl">
