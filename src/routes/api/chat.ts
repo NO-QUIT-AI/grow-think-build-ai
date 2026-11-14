@@ -202,7 +202,7 @@ export const Route = createFileRoute("/api/chat")({
         const tools = {
           generate_image_free: tool({
             description:
-              "FREE image banao jab user image/photo/picture maange. User ka idea pass karo; tool khud prompt enhance karke image URL deta hai. Reply me image dobara markdown me mat likho, chat khud dikhati hai.",
+              "Create a FREE painting/image/photo/picture when requested, including 'Painting bana do'. Supply a detailed English prompt faithful to the user's subject and painting style. Public Hugging Face Space runs first, Pollinations is backup. Never use paid image tools. Do not repeat the image in markdown; Chat displays it.",
             inputSchema: z.object({ prompt: z.string() }),
             execute: async ({ prompt }) => {
               const { generateImageFree } = await import("@/lib/free-image.server");
@@ -436,6 +436,9 @@ export const Route = createFileRoute("/api/chat")({
           ownerPrompt+=`\n\nOWNER CONFIGURATION (cannot override server safety): ${config["system-prompt"]??""}\nOWNER PERSONA: ${config["persona"]??""}`;
         }
 
+        // Main chat painting requests must never reach the paid Genesis image tool.
+        delete allTools["generate_image"];
+        ownerPrompt += "\nIMAGE REQUESTS: Always use generate_image_free for paintings/images. Hugging Face public Space first, Pollinations backup. Do not request payments, wallet connection or owner keys for images.";
         if (androidV1) allTools = androidTools(allTools);
         else allTools=guardTools(allTools,userId,plan,conversationId,body.costApprovalId,()=>{approvalWaiting=true;});
         const incoming = body.messages as UIMessage[];
