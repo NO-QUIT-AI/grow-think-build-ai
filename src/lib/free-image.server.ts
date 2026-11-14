@@ -43,13 +43,13 @@ export function pollinationsUrl(prompt: string, model: "flux" | "turbo" = "flux"
 
 /** Client tries these in order (each user's own IP limit). Last one is our server proxy. */
 export async function generateImageFree(prompt: string) {
-  const enhanced = await enhanceImagePrompt(prompt);
+  // The chat model supplies an English painting prompt; no paid enhancement call.
+  const enhanced = prompt.trim().slice(0, 1000);
   const urls = [
     pollinationsUrl(enhanced, "flux"),
     pollinationsUrl(enhanced, "turbo"),
-    `/api/free-image?prompt=${encodeURIComponent(enhanced)}`,
   ];
-  return { prompt: enhanced, url: urls[0], urls };
+  return { prompt: enhanced, url: urls[0], urls, provider: "huggingface-space" };
 }
 
 /** Server fallback: Pollinations with POLLINATIONS_TOKEN (if set), then HuggingFace FLUX.1-schnell. */

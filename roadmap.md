@@ -1,4 +1,5 @@
 # Pending completion
+- [ ] Main chat: free public Hugging Face painting generation first, timeout/error Pollinations backup, no paid image tools; verify signed-in request and explain key setup.
 - [x] Diagnose Scott: existing Scout was market research without coaching input/history. Added Scott coach mode, authenticated AI chat and private saved conversations; preserved research. Real signed-in motivational response and reload → Blue Lantern goal recall verified; mobile has no overflow, two context tests pass. Not published.
 - [x] Confirm Firebase Android registration details and add uploaded google-services.json to android/app: package matches com.noquitai.app, current release versionCode 4/versionName 1.3; existing Google services plugin is configured.
 - [x] Add FCM incoming-call dispatch, user-scoped device registration, native high-priority/full-screen call notification, Android notification/full-screen permissions, authenticated Accept/Reject into existing ZEGOCLOUD rooms, timeout/cancel handling and old-AAB compatibility. Firebase credentials verified; 16 call/release tests and signed-in invalid-notification rejection pass; preview build OK.

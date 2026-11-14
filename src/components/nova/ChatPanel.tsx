@@ -40,7 +40,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { VoiceModal, getSpeechRecognition } from "@/components/nova/VoiceModal";
 import { useLanguage } from "@/i18n/LanguageContext";
 import type { TranslationKey } from "@/i18n/translations";
-import { connectPollinations, generateWithUserKey, getUserPollinationsKey } from "@/lib/pollinations";
+import { paintingFromSpace } from "@/lib/free-painting";
 import { ButtonWithGuide } from "@/components/nova/ButtonWithGuide";
 import { GUIDE_EVT, GUIDE_ID_PREFIX, isGuideMessageId, saveGuideFeedback } from "@/lib/guide-agent";
 import { GenesisUsage, GenesisToolApproval } from "@/components/nova/GenesisUpgrade";
@@ -106,38 +106,19 @@ const GUIDE_ACTIONS = [
 type Thread = { id: string; title: string; updated_at: string };
 
 function FreeImage({ urls, prompt }: { urls: string[]; prompt: string }) {
-  const [connected, setConnected] = useState<boolean | null>(null);
-  const [skipConnect, setSkipConnect] = useState(false);
-  const [userUrl, setUserUrl] = useState<string | null>(null);
+  const [spaceUrl, setSpaceUrl] = useState<string | null>(null);
+  const [waiting, setWaiting] = useState(true);
   useEffect(() => {
-    const has = !!getUserPollinationsKey();
-    setConnected(has);
-    if (!has) return;
-    generateWithUserKey(prompt)
-      .then(setUserUrl)
-      .catch((e: unknown) => {
-        if (e instanceof Error && e.message === "not-connected") setConnected(false);
-        else setSkipConnect(true);
-      });
+    const controller = new AbortController();
+    setWaiting(true);
+    setSpaceUrl(null);
+    void paintingFromSpace(prompt, controller.signal)
+      .then(url => { if (!controller.signal.aborted) setSpaceUrl(url); })
+      .catch(() => undefined)
+      .finally(() => { if (!controller.signal.aborted) setWaiting(false); });
+    return () => controller.abort();
   }, [prompt]);
-  if (connected === null) return null;
-  if (!connected && !skipConnect) {
-    return (
-      <div className="mb-3 max-w-sm space-y-2 rounded-xl border border-border bg-secondary p-4">
-        <p className="text-sm">Pollinations se connect karo - 100% free hai, 1 click me</p>
-        <button type="button" onClick={() => void connectPollinations().catch(() => toast.error("Connect start nahi hua"))} className="btn-green h-9 rounded-xl px-4 text-xs">
-          Connect with Pollinations (Free)
-        </button>
-        <button type="button" onClick={() => setSkipConnect(true)} className="block text-xs text-muted-foreground underline">
-          Bina connect try karo
-        </button>
-      </div>
-    );
-  }
-  if (connected && !skipConnect) {
-    return <FreeImageView urls={userUrl ? [userUrl] : []} prompt={prompt} waiting={!userUrl} />;
-  }
-  return <FreeImageView urls={urls} prompt={prompt} />;
+  return <FreeImageView key={waiting ? "waiting" : spaceUrl ?? "backup"} urls={spaceUrl ? [spaceUrl, ...urls] : urls} prompt={prompt} waiting={waiting} />;
 }
 
 function FreeImageView({ urls, prompt, waiting }: { urls: string[]; prompt: string; waiting?: boolean }) {
@@ -146,6 +127,14 @@ function FreeImageView({ urls, prompt, waiting }: { urls: string[]; prompt: stri
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   const url = urls[idx];
+  useEffect(() => {
+    if (waiting || loaded || failed) return;
+    const timer = setTimeout(() => {
+      if (idx + 1 < urls.length) { setRetrying(true); setIdx(idx + 1); }
+      else setFailed(true);
+    }, 25_000);
+    return () => clearTimeout(timer);
+  }, [waiting, loaded, failed, idx, urls.length]);
   function onFail() {
     if (idx + 1 >= urls.length) { setFailed(true); return; }
     setRetrying(true);
@@ -159,8 +148,11 @@ function FreeImageView({ urls, prompt, waiting }: { urls: string[]; prompt: stri
     );
   }
   async function download() {
+    if (!url) return;
     try {
-      const blob = await (await fetch(url!)).blob();
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Download failed");
+      const blob = await response.blob();
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
       a.download = `noquit-ai-image-${Date.now()}.jpg`;
@@ -190,9 +182,9 @@ function FreeImageView({ urls, prompt, waiting }: { urls: string[]; prompt: stri
         />
       )}
       {loaded && (
-        <button type="button" onClick={() => void download()} className="btn-green h-9 rounded-xl px-4 text-xs">
+        <Button type="button" size="sm" onClick={() => void download()} className="btn-green">
           Download Image
-        </button>
+        </Button>
       )}
     </div>
   );
