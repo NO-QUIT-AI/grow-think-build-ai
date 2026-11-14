@@ -21,9 +21,9 @@ export const talkToScott = createServerFn({ method: "POST" }).middleware([requir
     const text = reply.output.flatMap(item => item.type === "message" ? item.content.flatMap(part => part.type === "output_text" ? [part.text] : []) : []).join("\n");
     if (!text.trim()) throw new Error("Scott ka jawab nahi aaya; aapka message abhi save nahi hua.");
     const { error: saveError } = await context.supabase.from("scott_messages").insert([
-      { user_id: context.userId, role: "user", content: data.message },
+      { user_id: context.userId, role: "user", content: data.message, created_at: new Date().toISOString() },
       { user_id: context.userId, role: "assistant", content: text, created_at: new Date(Date.now() + 1).toISOString() },
     ]);
-    if (saveError) throw new Error("Jawab aaya lekin chat save nahi hui; dobara try karein.");
+    if (saveError) { console.error("Scott persistence error", saveError.code, saveError.message); throw new Error("Jawab aaya lekin chat save nahi hui; dobara try karein."); }
     return { text };
   });
