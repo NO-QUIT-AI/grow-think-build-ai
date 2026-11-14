@@ -31,6 +31,7 @@ import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as MyStoryRouteImport } from './routes/my-story'
 import { Route as PlayerRouteImport } from './routes/player'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ScottRouteImport } from './routes/scott'
 import { Route as ScoutRouteImport } from './routes/scout'
 import { Route as SpaceRouteImport } from './routes/space'
 import { Route as StudioRouteImport } from './routes/studio'
@@ -176,6 +177,11 @@ const PlayerRoute = PlayerRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScottRoute = ScottRouteImport.update({
+  id: '/scott',
+  path: '/scott',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ScoutRoute = ScoutRouteImport.update({
@@ -384,6 +390,7 @@ export interface FileRoutesByFullPath {
   '/my-story': typeof MyStoryRoute
   '/player': typeof PlayerRoute
   '/privacy': typeof PrivacyRoute
+  '/scott': typeof ScottRoute
   '/scout': typeof ScoutRoute
   '/space': typeof SpaceRoute
   '/studio': typeof StudioRoute
@@ -444,6 +451,7 @@ export interface FileRoutesByTo {
   '/my-story': typeof MyStoryRoute
   '/player': typeof PlayerRoute
   '/privacy': typeof PrivacyRoute
+  '/scott': typeof ScottRoute
   '/scout': typeof ScoutRoute
   '/space': typeof SpaceRoute
   '/studio': typeof StudioRoute
@@ -505,6 +513,7 @@ export interface FileRoutesById {
   '/my-story': typeof MyStoryRoute
   '/player': typeof PlayerRoute
   '/privacy': typeof PrivacyRoute
+  '/scott': typeof ScottRoute
   '/scout': typeof ScoutRoute
   '/space': typeof SpaceRoute
   '/studio': typeof StudioRoute
@@ -567,6 +576,7 @@ export interface FileRouteTypes {
     | '/my-story'
     | '/player'
     | '/privacy'
+    | '/scott'
     | '/scout'
     | '/space'
     | '/studio'
@@ -627,6 +637,7 @@ export interface FileRouteTypes {
     | '/my-story'
     | '/player'
     | '/privacy'
+    | '/scott'
     | '/scout'
     | '/space'
     | '/studio'
@@ -687,6 +698,7 @@ export interface FileRouteTypes {
     | '/my-story'
     | '/player'
     | '/privacy'
+    | '/scott'
     | '/scout'
     | '/space'
     | '/studio'
@@ -748,6 +760,7 @@ export interface RootRouteChildren {
   MyStoryRoute: typeof MyStoryRoute
   PlayerRoute: typeof PlayerRoute
   PrivacyRoute: typeof PrivacyRoute
+  ScottRoute: typeof ScottRoute
   ScoutRoute: typeof ScoutRoute
   SpaceRoute: typeof SpaceRoute
   StudioRoute: typeof StudioRoute
@@ -939,6 +952,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/scott': {
+      id: '/scott'
+      path: '/scott'
+      fullPath: '/scott'
+      preLoaderRoute: typeof ScottRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/scout': {
@@ -1230,6 +1250,7 @@ const rootRouteChildren: RootRouteChildren = {
   MyStoryRoute: MyStoryRoute,
   PlayerRoute: PlayerRoute,
   PrivacyRoute: PrivacyRoute,
+  ScottRoute: ScottRoute,
   ScoutRoute: ScoutRoute,
   SpaceRoute: SpaceRoute,
   StudioRoute: StudioRoute,

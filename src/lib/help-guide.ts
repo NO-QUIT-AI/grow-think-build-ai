@@ -110,6 +110,20 @@ export const HELP_ENTRIES: HelpEntry[] = [
     tip: "Jalsa chat local connection par chalti hai — internet ke baghair bhi paas wale phone se baat ho sakti hai.",
   },
   {
+    id: "scott-coach",
+    title: "Scott Coach & Scout Research",
+    icon: "sparkles",
+    keywords: ["scott", "scot", "coach", "motivation", "quit", "scout", "research", "client", "idea"],
+    route: "/scout",
+    what: "Scott aap ko motivate karta hai; Scout Research ideas, plan aur clients dhoondta hai.",
+    steps: [
+      "Scott Coach page kholo (All Tools menu ya /scout).",
+      "Scott Coach tab mein apni baat likho, ya Scout Research tab chuno.",
+      "Jawab aur purani baatein wahin save rehti hain.",
+    ],
+    tip: "Quit karne ka dil kare to seedha Scott ko likho.",
+  },
+  {
     id: "ai-tools",
     title: "AI Tools (Image, Video, Research)",
     icon: "sparkles",
