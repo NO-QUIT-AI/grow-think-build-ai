@@ -1,0 +1,2 @@
+ALTER TABLE public.scott_messages ADD COLUMN IF NOT EXISTS agent text NOT NULL DEFAULT 'scott' CHECK (agent IN ('scott','scout'));
+CREATE INDEX IF NOT EXISTS scott_messages_user_agent_idx ON public.scott_messages(user_id, agent, created_at);

@@ -984,6 +984,7 @@ export type Database = {
       }
       scott_messages: {
         Row: {
+          agent: string
           content: string
           created_at: string
           id: string
@@ -991,6 +992,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          agent?: string
           content: string
           created_at?: string
           id?: string
@@ -998,6 +1000,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          agent?: string
           content?: string
           created_at?: string
           id?: string
