@@ -1,25 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Loader2, PhoneOff } from "lucide-react";
+import { Loader2, PhoneOff, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
+import { getZegoCallAccess } from "@/lib/zego-calls.functions";
 
 import { useAuth } from "@/hooks/useAuth";
 import { fetchCallInvite, sendCallSystemMessage, updateCallStatus } from "@/lib/calls";
 import { supabase } from "@/integrations/supabase/client";
-
-declare global {
-  interface Window {
-    // Loaded on demand from https://meet.jit.si/external_api.js
-    JitsiMeetExternalAPI?: new (
-      domain: string,
-      options: Record<string, unknown>,
-    ) => {
-      addListener: (event: string, handler: () => void) => void;
-      dispose: () => void;
-    };
-  }
-}
 
 type CallSearch = {
   type?: "audio" | "video" | undefined;
@@ -52,7 +41,10 @@ function CallPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const apiRef = useRef<{ dispose: () => void } | null>(null);
+  const apiRef = useRef<{ destroy: () => void } | null>(null);
+  const getAccess = useServerFn(getZegoCallAccess);
+  const [speakerOn, setSpeakerOn] = useState(true);
+  const speakerRef = useRef(true);
   const endedRef = useRef(false);
   const [failed, setFailed] = useState("");
   const [ready, setReady] = useState(false);
@@ -61,8 +53,9 @@ function CallPage() {
   const endCall = async () => {
     if (endedRef.current) return;
     endedRef.current = true;
-    apiRef.current?.dispose();
+    const api = apiRef.current;
     apiRef.current = null;
+    api?.destroy();
     try {
       const changed = inviteId && await updateCallStatus(inviteId, "ended");
       if (changed && user && peerRef.current) await sendCallSystemMessage(user.id, peerRef.current, user.id, `ended ${type}`);
@@ -74,32 +67,10 @@ function CallPage() {
     if (!user) return;
     let cancelled = false;
     let validated = false;
-    let script: HTMLScriptElement | undefined;
     let channel: ReturnType<typeof supabase.channel> | undefined;
     let poll: number | undefined;
     setFailed(""); setReady(false); endedRef.current = false;
-
-    const boot = () => {
-      if (cancelled || !validated || !containerRef.current || !window.JitsiMeetExternalAPI) return;
-      const api = new window.JitsiMeetExternalAPI("meet.jit.si", {
-        roomName: roomId,
-        parentNode: containerRef.current,
-        width: "100%",
-        height: "100%",
-        configOverwrite: {
-          startWithAudioMuted: false,
-          startWithVideoMuted: type !== "video",
-          prejoinPageEnabled: false,
-        },
-        interfaceConfigOverwrite: {
-          TOOLBAR_BUTTONS: ["microphone", "camera", "hangup", "chat"],
-          SHOW_JITSI_WATERMARK: false,
-        },
-      });
-      api.addListener("videoConferenceLeft", () => void endCall());
-      apiRef.current = api;
-      setReady(true);
-    };
+    setSpeakerOn(true); speakerRef.current = true;
     const validate = async () => {
       if (!inviteId) throw new Error("Call invitation nahi mili.");
       const invite = await fetchCallInvite(inviteId);
@@ -117,14 +88,36 @@ function CallPage() {
         event: "UPDATE", schema: "public", table: "call_invites", filter: `id=eq.${inviteId}`,
       }, refresh).subscribe();
       poll = window.setInterval(refresh, 2000);
-      if (window.JitsiMeetExternalAPI) boot();
-      else {
-        script = document.createElement("script");
-        script.src = "https://meet.jit.si/external_api.js"; script.async = true;
-        script.onload = boot;
-        script.onerror = () => { if (!cancelled) setFailed("Call service load nahi hui. Internet check karke dobara try karo."); };
-        document.head.appendChild(script);
-      }
+      const access = await getAccess({ data: { inviteId, roomId } });
+      const { ZegoUIKitPrebuilt } = await import("@zegocloud/zego-uikit-prebuilt");
+      if (cancelled || endedRef.current || !containerRef.current) return;
+      const kitToken = ZegoUIKitPrebuilt.generateKitTokenForProduction(access.appId, access.token, access.roomId, access.userId, user.user_metadata?.["full_name"] || "NO QUIT AI member");
+      const api = ZegoUIKitPrebuilt.create(kitToken);
+      apiRef.current = api;
+      api.joinRoom({
+        container: containerRef.current,
+        scenario: { mode: ZegoUIKitPrebuilt.OneONoneCall },
+        maxUsers: 2,
+        showPreJoinView: false,
+        turnOnMicrophoneWhenJoining: true,
+        turnOnCameraWhenJoining: access.callType === "video",
+        showMyCameraToggleButton: access.callType === "video",
+        showMyMicrophoneToggleButton: true,
+        showAudioVideoSettingsButton: true,
+        showTextChat: false,
+        showUserList: false,
+        showRoomDetailsButton: false,
+        showScreenSharingButton: false,
+        showLayoutButton: false,
+        showLeavingView: false,
+        showLeaveRoomConfirmDialog: false,
+        autoHideFooter: false,
+        onJoinRoom: () => { if (!cancelled) setReady(true); },
+        onLeaveRoom: () => { if (!cancelled) void endCall(); },
+        onUserLeave: () => { if (!cancelled) void endCall(); },
+      });
+      // UIKit renders its own loading/error states while joining.
+      setReady(true);
     };
     void validate().catch(error => { if (!cancelled) setFailed(error instanceof Error ? error.message : "Call load nahi hui"); });
 
@@ -132,13 +125,26 @@ function CallPage() {
       cancelled = true;
       if (poll !== undefined) window.clearInterval(poll);
       if (channel) void supabase.removeChannel(channel);
-      script?.remove();
-      apiRef.current?.dispose();
+      const api = apiRef.current;
       apiRef.current = null;
+      api?.destroy();
       if (validated && !endedRef.current && inviteId) void updateCallStatus(inviteId, "ended").catch(() => {});
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, roomId, type, friendId, inviteId]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const sync = () => container.querySelectorAll<HTMLMediaElement>("video,audio").forEach(media => {
+      // Preserve UIKit's muted self-preview; change playback volume only.
+      media.volume = speakerRef.current ? 1 : 0;
+    });
+    sync();
+    const observer = new MutationObserver(sync);
+    observer.observe(container, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, [speakerOn, ready]);
 
   if (loading) {
     return (
@@ -151,7 +157,8 @@ function CallPage() {
 
   return (
     <main className="flex min-h-dvh flex-col bg-background">
-      <div className="relative min-h-[70dvh] flex-1 [&>iframe]:absolute [&>iframe]:inset-0 [&>iframe]:h-full [&>iframe]:w-full" ref={containerRef}>
+      <div className="relative min-h-[70dvh] flex-1">
+        <div ref={containerRef} className="absolute inset-0" />
         {!ready && !failed && <div className="absolute inset-0 flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}
         {failed && (
             <div role="alert" className="flex min-h-[70dvh] flex-col items-center justify-center gap-3 px-4 text-center">
@@ -162,6 +169,10 @@ function CallPage() {
         )}
       </div>
       <div className="flex items-center justify-center gap-3 bg-background py-4">
+        <Button variant="secondary" size="icon" disabled={!ready || !!failed} aria-label={speakerOn ? "Mute speaker" : "Unmute speaker"} title={speakerOn ? "Mute speaker" : "Unmute speaker"}
+          onClick={() => { speakerRef.current = !speakerRef.current; setSpeakerOn(speakerRef.current); }}>
+          {speakerOn ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
+        </Button>
         <Button variant="destructive"
           onClick={() => void endCall()}
           className="flex items-center gap-2 rounded-full bg-destructive px-6 py-3 text-sm font-semibold text-destructive-foreground transition-transform hover:scale-105"
