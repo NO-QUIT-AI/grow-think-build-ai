@@ -1,3 +1,4 @@
+// @ts-expect-error Bun's test runner is available at test time.
 import { describe, it, expect, afterEach, mock } from "bun:test";
 import { paintingFromSpace, freePaintingSources, PAINTING_SPACE, SPACE_TIMEOUT_MS } from "./free-painting";
 
@@ -5,7 +6,7 @@ const originalFetch = globalThis.fetch;
 afterEach(() => { globalThis.fetch = originalFetch; });
 describe("free paintings", () => {
   it("uses public Hugging Face before Pollinations without an API key", async () => {
-    const calls: Array<{ url: string; init?: RequestInit }> = [];
+    const calls: Array<{ url: string; init: RequestInit | undefined }> = [];
     globalThis.fetch = mock(async (url: string | URL | Request, init?: RequestInit) => {
       calls.push({ url: String(url), init });
       return calls.length === 1
