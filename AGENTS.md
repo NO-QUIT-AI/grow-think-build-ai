@@ -15,6 +15,7 @@
 - Stock-provider credentials use server-only secret names and authenticated proxy requests, never VITE-prefixed browser variables — prevents API credentials appearing in browser bundles.
 - Build subdomains live on memories.subdomain (one per build, not per profile); served by src/server.ts host match + /s/$subdomain via security-definer RPCs — why: users have many builds and anon must read only published HTML.
 - Call invitations use conditional status updates and database validation of friendship/participants; call pages verify the accepted invite before opening media — prevents cancelled rings and forged app invitations.
+- Online friend calls use lazily loaded ZEGOCLOUD UIKit and server-minted room-scoped Token04 access for accepted participants; never expose AppSign or ServerSecret to browsers, and preserve existing invitation/button design.
 - Load AdSense after hydration through the shared configuration loader — Auto Ads must not mutate the server HTML before React hydrates.
 - My Story uses a browser-safe content module with separate faithful language versions and page-scoped theme tokens — keeps the original account intact without changing app-wide styling.
 - Jalsa uses QR-exchanged compressed WebRTC SDP with local ICE candidates only; local messages persist before send and require peer acknowledgments, while jalsa_messages is an owner-scoped archive, never a Community transport — browsers cannot provide Bluetooth peripheral mesh.

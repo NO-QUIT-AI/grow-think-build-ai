@@ -1,4 +1,5 @@
 # Pending completion
+- [ ] Connect existing friend-call buttons to ZEGOCLOUD UIKit with server-only secrets, room-bound access, preserved incoming call design and voice/video controls; verify lifecycle and media where credentials allow.
 - [ ] Auto-open Studio for build requests and show genuine streaming code/tool/table progress without interrupting Chat; verify signed-in flow and approvals.
 - [x] Android v4: https://noquitai.com/ Start URL, com.noquitai.app, versionCode 4/versionName 1.3; Gradle signed release, bundletool validation, jarsigner verification and certificate match with v3 pass; all 16 Mind icon/splash assets preserved, six release/boundary tests pass. AAB saved in Files; live mobile Start URL HTTP 200 verified. Native device behavior and Play Console acceptance require device/upload access.
 - [x] Correct Android package to com.noquitai.app; freshly built versionCode 2/versionName 1.1 signed AAB and clean revised source saved in Files. Bundletool and jarsigner pass; existing upload certificate preserved. Play Console acceptance requires owner's upload.
