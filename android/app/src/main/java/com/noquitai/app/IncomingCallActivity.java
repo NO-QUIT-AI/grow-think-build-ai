@@ -12,6 +12,13 @@ import android.widget.*;
 
 public class IncomingCallActivity extends Activity {
     private final Handler timer = new Handler(android.os.Looper.getMainLooper());
+    private final Runnable checkClosed = new Runnable() {
+        @Override public void run() {
+            String id = getIntent().getStringExtra("inviteId");
+            if (id != null && id.equals(getSharedPreferences("call_push", 0).getString("closed_invite", ""))) { finish(); return; }
+            timer.postDelayed(this, 500);
+        }
+    };
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         if (Build.VERSION.SDK_INT >= 27) { setShowWhenLocked(true); setTurnScreenOn(true); }
@@ -26,6 +33,7 @@ public class IncomingCallActivity extends Activity {
         Button decline = new Button(this); decline.setText("Reject"); decline.setOnClickListener(v -> open("reject")); layout.addView(decline);
         setContentView(layout);
         timer.postDelayed(this::finish, remaining);
+        timer.post(checkClosed);
     }
     private void open(String action) {
         String id = getIntent().getStringExtra("inviteId");

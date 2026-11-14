@@ -25,7 +25,11 @@ public class CallMessagingService extends FirebaseMessagingService {
         String id = data.get("inviteId");
         if (!"incoming_call".equals(data.get("kind")) || id == null || !id.matches("[a-fA-F0-9-]{36}")) return;
         NotificationManager manager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-        if (!"ringing".equals(data.get("status"))) { manager.cancel(id.hashCode()); return; }
+        if (!"ringing".equals(data.get("status"))) {
+            manager.cancel(id.hashCode());
+            getSharedPreferences("call_push", 0).edit().putString("closed_invite", id).apply();
+            return;
+        }
         if (!getSharedPreferences("call_push", 0).getBoolean("enabled", false)) return;
         long expires;
         try { expires = Long.parseLong(data.get("expiresAt")); } catch (Exception e) { return; }

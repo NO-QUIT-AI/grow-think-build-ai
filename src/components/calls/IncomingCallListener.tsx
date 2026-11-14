@@ -27,7 +27,7 @@ import {
 // Global WhatsApp-style incoming call overlay. Mounted once in the root route;
 // listens on call_invites for rows addressed to the signed-in user.
 export function IncomingCallListener() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [invite, setInvite] = useState<CallInvite | null>(null);
@@ -37,7 +37,7 @@ export function IncomingCallListener() {
   const savePush = useServerFn(registerCallPush);
 
   useEffect(() => {
-    if (!isAndroidCallPush()) return;
+    if (loading || !isAndroidCallPush()) return;
     if (!user) { void nativeCallPush.disable().catch(() => {}); return; }
     let disposed = false;
     const enable = async () => {
@@ -51,7 +51,7 @@ export function IncomingCallListener() {
     refreshToken();
     document.addEventListener("visibilitychange", refreshToken);
     return () => { disposed = true; toast.dismiss("call-push-permission"); document.removeEventListener("visibilitychange", refreshToken); };
-  }, [user?.id, savePush]);
+  }, [loading, user?.id, savePush]);
 
   useEffect(() => {
     if (!user) return;
@@ -71,7 +71,7 @@ export function IncomingCallListener() {
         if (changed) await sendCallSystemMessage(row.from_user, row.to_user, row.to_user, `missed ${row.call_type}`);
       } else if (action === "accept") {
         const changed = await updateCallStatus(id, "accepted");
-        if (changed) void navigate({ to: "/call/$roomId", params: { roomId: row.room_id }, search: { type: row.call_type, friendId: row.from_user, inviteId: id } });
+        if (changed) void navigate({ to: "/call/$roomId", params: { roomId: row.room_id }, search: { type: row.call_type === "video" ? "video" : "audio", friendId: row.from_user, inviteId: id } });
         else toast.error("Call ab available nahi hai");
       } else setInvite(row as CallInvite);
     };
