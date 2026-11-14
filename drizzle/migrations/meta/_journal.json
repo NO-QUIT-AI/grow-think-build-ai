@@ -169,6 +169,13 @@
       "when": 1794664327687,
       "tag": "0023_scott_private_coach_history",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1794666063387,
+      "tag": "0024_scott_messages_agent",
+      "breakpoints": true
     }
   ]
 }
