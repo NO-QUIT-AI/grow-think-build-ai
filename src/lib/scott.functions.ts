@@ -1,28 +1,30 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import { scottContext, SCOTT_PROMPT } from "./scott-coach";
+import { scottContext, agentPrompt } from "./scott-coach";
+const agentSchema = z.enum(["scott", "scout"]).default("scott");
 
 export const getScottHistory = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { data, error } = await context.supabase.from("scott_messages").select("id,role,content,created_at").eq("user_id", context.userId).order("created_at", { ascending: false }).limit(100);
+  .inputValidator(input => z.object({ agent: agentSchema }).parse(input ?? {}))
+  .handler(async ({ data: input, context }) => {
+    const { data, error } = await context.supabase.from("scott_messages").select("id,role,content,created_at").eq("user_id", context.userId).eq("agent", input.agent).order("created_at", { ascending: false }).limit(100);
     if (error) throw error;
     return (data ?? []).reverse();
   });
 
 export const talkToScott = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
-  .inputValidator(input => z.object({ message: z.string().trim().min(1).max(6000) }).parse(input))
+  .inputValidator(input => z.object({ message: z.string().trim().min(1).max(6000), agent: agentSchema }).parse(input))
   .handler(async ({ data, context }) => {
-    const { data: history, error } = await context.supabase.from("scott_messages").select("role,content").eq("user_id", context.userId).order("created_at", { ascending: false }).limit(40);
+    const { data: history, error } = await context.supabase.from("scott_messages").select("role,content").eq("user_id", context.userId).eq("agent", data.agent).order("created_at", { ascending: false }).limit(40);
     if (error) throw error;
     const { generateResponse } = await import("@lovable.dev/ai-gateway");
-    const reply = await generateResponse({ model: "openai/gpt-6-astra", instructions: SCOTT_PROMPT,
+    const reply = await generateResponse({ model: "openai/gpt-6-astra", instructions: agentPrompt(data.agent),
       input: [...scottContext((history ?? []).reverse()), { role: "user" as const, content: data.message }], reasoning: { effort: "low" } });
     const text = reply.output.flatMap(item => item.type === "message" ? item.content.flatMap(part => part.type === "output_text" ? [part.text] : []) : []).join("\n");
-    if (!text.trim()) throw new Error("Scott ka jawab nahi aaya; aapka message abhi save nahi hua.");
+    if (!text.trim()) throw new Error("Jawab nahi aaya; aapka message abhi save nahi hua.");
     const { error: saveError } = await context.supabase.from("scott_messages").insert([
-      { user_id: context.userId, role: "user", content: data.message, created_at: new Date().toISOString() },
-      { user_id: context.userId, role: "assistant", content: text, created_at: new Date(Date.now() + 1).toISOString() },
+      { user_id: context.userId, role: "user", agent: data.agent, content: data.message, created_at: new Date().toISOString() },
+      { user_id: context.userId, role: "assistant", agent: data.agent, content: text, created_at: new Date(Date.now() + 1).toISOString() },
     ]);
     if (saveError) { console.error("Scott persistence error", saveError.code, saveError.message); throw new Error("Jawab aaya lekin chat save nahi hui; dobara try karein."); }
     return { text };

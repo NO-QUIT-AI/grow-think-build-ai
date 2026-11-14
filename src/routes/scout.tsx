@@ -101,69 +101,7 @@ function ScoutPage() {
           <Button role="tab" aria-selected={mode === "coach"} variant={mode === "coach" ? "default" : "secondary"} onClick={() => setMode("coach")}>Scott Coach</Button>
           <Button role="tab" aria-selected={mode === "research"} variant={mode === "research" ? "default" : "secondary"} onClick={() => setMode("research")}>Scout Research</Button>
         </div>
-        {mode === "coach" ? <ScottChat /> : !user ? <Link to="/auth" className="text-primary">Sign in for Scout Research</Link> : !started ? (
-          <div className="flex min-h-[70vh] flex-col items-center justify-center gap-6 text-center">
-            <Radar className="h-14 w-14 text-primary node-pulse" />
-            <h1 className="text-2xl font-semibold md:text-3xl">
-              MASTER <span className="text-gradient">SCOUT AGENT</span>
-            </h1>
-            <p className="max-w-md text-sm text-muted-foreground">Groq aur DeepSeek se A2A mashwara — top AI CV builder trends 2026.</p>
-            <Button onClick={run} size="lg" className="glow h-14 rounded-2xl px-8 text-base font-semibold">
-              <Sparkles className="mr-2 h-5 w-5" /> Market Se Mashwara Lo
-            </Button>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-4 md:flex-row">
-            <section className="panel min-h-[60vh] p-5 md:w-[70%]">
-              <h2 className="mb-4 text-lg font-semibold">Final Summary</h2>
-              {summary ? (
-                <div className="space-y-4">
-                  <p className="text-base font-medium text-primary">{summary.intro}</p>
-                  <ol className="space-y-3">
-                    {(summary.points ?? []).slice(0, 3).map((p, i) => (
-                      <li key={i} className="rounded-xl border border-border bg-surface p-4">
-                        <p className="font-semibold">
-                          <span className="mr-2 text-primary">{i + 1}.</span>
-                          {p.title}
-                        </p>
-                        <p className="mt-1 text-sm text-muted-foreground">{p.detail}</p>
-                      </li>
-                    ))}
-                  </ol>
-                  {summary.outro && <p className="text-sm text-muted-foreground">{summary.outro}</p>}
-                </div>
-              ) : error ? (
-                <p className="text-sm text-destructive">{error}</p>
-              ) : (
-                <p className="text-sm text-muted-foreground node-pulse">Agents se jawab aa rahe hain...</p>
-              )}
-              {!running && (
-                <Button onClick={run} variant="secondary" className="mt-6">
-                  Dobara mashwara lo
-                </Button>
-              )}
-            </section>
-            <aside className="panel max-h-[70vh] overflow-y-auto p-4 md:w-[30%]">
-              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Live Logs</h2>
-              <ul className="space-y-2 font-mono text-xs">
-                {logs.map((l, i) => (
-                  <li
-                    key={i}
-                    className={cn(
-                      l.level === "ok" && "text-primary",
-                      l.level === "warn" && "text-accent",
-                      l.level === "error" && "text-destructive",
-                      l.level === "info" && "text-foreground",
-                    )}
-                  >
-                    <span className="text-muted-foreground">[{l.at}]</span> {l.text}
-                  </li>
-                ))}
-              </ul>
-              <div ref={logEnd} />
-            </aside>
-          </div>
-        )}
+        {mode === "coach" ? <ScottChat key="scott" agent="scott" /> : <ScottChat key="scout" agent="scout" />}
       </div>
     </main>
   );
