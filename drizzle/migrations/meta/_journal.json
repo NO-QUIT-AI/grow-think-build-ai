@@ -162,6 +162,13 @@
       "when": 1794663754026,
       "tag": "0022_incoming_call_push_devices",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1794664327687,
+      "tag": "0023_scott_private_coach_history",
+      "breakpoints": true
     }
   ]
 }
