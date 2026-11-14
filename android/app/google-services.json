@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "815756307253",
+    "project_id": "noquitai",
+    "storage_bucket": "noquitai.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:815756307253:android:9b230c007d7aa515793a7c",
+        "android_client_info": {
+          "package_name": "com.noquitai.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDCIsHyNDke3x3OoZtwqDzPD08-OQHDUA0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
