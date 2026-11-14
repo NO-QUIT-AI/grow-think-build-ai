@@ -50,6 +50,7 @@
         "@tanstack/react-router": "1.170.41",
         "@tanstack/react-start": "1.168.60",
         "@tanstack/router-plugin": "1.168.42",
+        "@zegocloud/zego-uikit-prebuilt": "^2.18.5",
         "ai": "^7.0.83",
         "aws4fetch": "^1.0.20",
         "class-variance-authority": "^0.7.1",
@@ -969,6 +970,8 @@
     "@workflow/serde": ["@workflow/serde@4.1.0", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@workflow/serde/-/serde-4.1.0.tgz", {}, "sha512-pav4F2BoirECWR7Nf1TKt+2eETcBj7jj4cBefQ8VXQCA6NPkaKeLfj/zMgi+3zYV5ZIBT4GuUiphsj0/b9hPQQ=="],
 
     "@xmldom/xmldom": ["@xmldom/xmldom@0.9.12", "", {}, "sha512-5AXjrcMClTryPe9LgZrygpB1lj7s0S9E0+W+AHaVKAVyHanafK86iPSvG5xHVSp/jC+VH1UXu0TAEmY279xH7A=="],
+
+    "@zegocloud/zego-uikit-prebuilt": ["@zegocloud/zego-uikit-prebuilt@2.18.5", "", {}, "sha512-a0WzHzRqfzxGSWFHWGHz09vdkvEa19oEnpIHPxhdLaJgGBQlVQCovzKRfLfRncP9CqLLA/Lyudr0gawxirJZ5A=="],
 
     "acorn": ["acorn@8.18.0", "", { "bin": { "acorn": "bin/acorn" } }, "sha512-lGq+9yr1/GuAWaVYIHRjvvySG5/4VfKIvC8EWxStPdcDh/Ka7FG3twP6v4d5BkravUilhIAsG4Qj83t02LWUPQ=="],
 

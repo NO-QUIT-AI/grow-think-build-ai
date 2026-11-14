@@ -61,6 +61,7 @@
     "@tanstack/react-router": "1.170.41",
     "@tanstack/react-start": "1.168.60",
     "@tanstack/router-plugin": "1.168.42",
+    "@zegocloud/zego-uikit-prebuilt": "^2.18.5",
     "ai": "^7.0.83",
     "aws4fetch": "^1.0.20",
     "class-variance-authority": "^0.7.1",
