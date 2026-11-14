@@ -1,0 +1,13 @@
+CREATE TABLE public.call_push_devices (token text PRIMARY KEY, user_id uuid NOT NULL, updated_at timestamptz NOT NULL DEFAULT now());
+GRANT SELECT, DELETE ON public.call_push_devices TO authenticated;
+GRANT ALL ON public.call_push_devices TO service_role;
+ALTER TABLE public.call_push_devices ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Read own push devices" ON public.call_push_devices FOR SELECT TO authenticated USING (user_id = auth.uid());
+CREATE POLICY "Delete own push devices" ON public.call_push_devices FOR DELETE TO authenticated USING (user_id = auth.uid());
+CREATE INDEX call_push_devices_user_idx ON public.call_push_devices(user_id);
+CREATE FUNCTION public.register_call_push_device(device_token text) RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$ BEGIN IF auth.uid() IS NULL OR length(device_token) < 20 OR length(device_token) > 4096 THEN RAISE EXCEPTION 'Invalid push registration'; END IF; INSERT INTO public.call_push_devices(token,user_id) VALUES(device_token,auth.uid()) ON CONFLICT(token) DO UPDATE SET user_id = auth.uid(), updated_at = now(); END; $$;
+REVOKE ALL ON FUNCTION public.register_call_push_device(text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.register_call_push_device(text) TO authenticated;
+CREATE TABLE public.call_push_dispatches (invite_id uuid NOT NULL REFERENCES public.call_invites(id) ON DELETE CASCADE, status text NOT NULL, created_at timestamptz NOT NULL DEFAULT now(), PRIMARY KEY(invite_id,status));
+GRANT ALL ON public.call_push_dispatches TO service_role;
+ALTER TABLE public.call_push_dispatches ENABLE ROW LEVEL SECURITY;
