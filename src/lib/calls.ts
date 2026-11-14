@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { CALL_RING_TIMEOUT_MS, expectedCallStatus } from "./call-rules";
+import { dispatchCallPush } from "./call-push.functions";
 export { CALL_RING_TIMEOUT_MS, isFreshRingingCall } from "./call-rules";
 
 export type CallType = "audio" | "video";
@@ -50,6 +51,8 @@ export async function createCallInvite(
     .select()
     .single();
   if (error) return null;
+  try { await dispatchCallPush({ data: { inviteId: data.id } }); }
+  catch (pushError) { console.error("Incoming call notification:", pushError); }
   return data as CallInvite;
 }
 
@@ -57,6 +60,7 @@ export async function updateCallStatus(id: string, status: CallStatus): Promise<
   const { data, error } = await supabase.from("call_invites").update({ status }).eq("id", id)
     .eq("status", expectedCallStatus(status)).select("id");
   if (error) throw error;
+  if (data?.length) void dispatchCallPush({ data: { inviteId: id } }).catch(() => {});
   return (data?.length ?? 0) > 0;
 }
 

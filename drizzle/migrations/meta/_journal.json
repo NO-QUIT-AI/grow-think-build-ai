@@ -155,6 +155,13 @@
       "when": 1793593597815,
       "tag": "0021_genesis_scoped_approvals",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1794663754026,
+      "tag": "0022_incoming_call_push_devices",
+      "breakpoints": true
     }
   ]
 }

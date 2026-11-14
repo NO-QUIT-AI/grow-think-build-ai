@@ -15,8 +15,9 @@ import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.BridgeWebViewClient;
 
 public class MainActivity extends BridgeActivity {
-    private static final String HOME = "https://noquitai.com/android-app";
+    private static final String HOME = "https://noquitai.com/";
     @Override public void onCreate(Bundle savedInstanceState) {
+        registerPlugin(CallPushPlugin.class);
         super.onCreate(savedInstanceState);
         WindowInsetsControllerCompat bars = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
         bars.hide(WindowInsetsCompat.Type.systemBars());
@@ -33,7 +34,7 @@ public class MainActivity extends BridgeActivity {
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 if (!request.isForMainFrame()) return super.shouldOverrideUrlLoading(view, request);
                 Uri uri = request.getUrl();
-                if ("https".equals(uri.getScheme()) && "noquitai.com".equals(uri.getHost()) && "/android-app".equals(uri.getPath())) return false;
+                if ("https".equals(uri.getScheme()) && "noquitai.com".equals(uri.getHost())) return false;
                 if ("https".equals(uri.getScheme()) && "localhost".equals(uri.getHost()) && "/offline.html".equals(uri.getPath())) return false;
                 if ("https".equals(uri.getScheme()) && "noquitai.com".equals(uri.getHost()) && ("/privacy".equals(uri.getPath()) || "/contact".equals(uri.getPath()))) {
                     try { startActivity(new Intent(Intent.ACTION_VIEW, uri)); } catch (Exception ignored) {}
@@ -53,5 +54,15 @@ public class MainActivity extends BridgeActivity {
                 new AlertDialog.Builder(MainActivity.this).setTitle("Close NO QUIT AI?").setNegativeButton("Stay", null).setPositiveButton("Close", (dialog, which) -> finish()).show();
             }
         });
+        openCallIntent(getIntent());
+    }
+    @Override protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent); setIntent(intent); openCallIntent(intent);
+    }
+    private void openCallIntent(Intent intent) {
+        Uri uri = intent.getData();
+        if (uri != null && "https".equals(uri.getScheme()) && "noquitai.com".equals(uri.getHost()) && "/".equals(uri.getPath()) && uri.getQueryParameter("incomingCall") != null) {
+            bridge.getWebView().loadUrl(uri.toString());
+        }
     }
 }

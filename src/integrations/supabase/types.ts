@@ -110,6 +110,50 @@ export type Database = {
           },
         ]
       }
+      call_push_devices: {
+        Row: {
+          token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          token: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      call_push_dispatches: {
+        Row: {
+          created_at: string
+          invite_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          invite_id: string
+          status: string
+        }
+        Update: {
+          created_at?: string
+          invite_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_push_dispatches_invite_id_fkey"
+            columns: ["invite_id"]
+            isOneToOne: false
+            referencedRelation: "call_invites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       community_posts: {
         Row: {
           app_link: string | null
@@ -1136,6 +1180,10 @@ export type Database = {
       nqai_share_bonus: { Args: never; Returns: Json }
       nqai_start_mining: { Args: never; Returns: Json }
       publish_build: { Args: { _build_id: string }; Returns: string }
+      register_call_push_device: {
+        Args: { device_token: string }
+        Returns: undefined
+      }
       rename_build_subdomain: {
         Args: { _build_id: string; _subdomain: string }
         Returns: string
