@@ -64,4 +64,4 @@ export const supabase = new Proxy({} as ReturnType<typeof createSupabaseClient>,
     if (!_supabase) _supabase = createSupabaseClient();
     return Reflect.get(_supabase, prop, receiver);
   },
-});
+}); 
