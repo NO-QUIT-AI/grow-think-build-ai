@@ -3,6 +3,9 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { Phone, PhoneOff, Video } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { useServerFn } from "@tanstack/react-start";
+import { registerCallPush } from "@/lib/call-push.functions";
+import { isAndroidCallPush, nativeCallPush } from "@/lib/native-call-push";
 
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,6 +34,50 @@ export function IncomingCallListener() {
   const [caller, setCaller] = useState<CommunityProfile | null>(null);
   const stopRingtone = useRef<(() => void) | null>(null);
   const [answering, setAnswering] = useState(false);
+  const savePush = useServerFn(registerCallPush);
+
+  useEffect(() => {
+    if (!isAndroidCallPush()) return;
+    if (!user) { void nativeCallPush.disable().catch(() => {}); return; }
+    let disposed = false;
+    const enable = async () => {
+      try {
+        const { token } = await nativeCallPush.register();
+        if (!disposed) await savePush({ data: { token } });
+      } catch { if (!disposed) toast.error("Call notifications enable nahi huin; Android notification settings check karein."); }
+    };
+    toast("Background call notifications", { id: "call-push-permission", duration: Infinity, action: { label: "Enable", onClick: () => { void enable(); } } });
+    const refreshToken = () => { if (document.visibilityState === "visible") void nativeCallPush.refresh().then(async result => { if (result.token && !disposed) await savePush({ data: { token: result.token } }); }).catch(() => {}); };
+    refreshToken();
+    document.addEventListener("visibilitychange", refreshToken);
+    return () => { disposed = true; toast.dismiss("call-push-permission"); document.removeEventListener("visibilitychange", refreshToken); };
+  }, [user?.id, savePush]);
+
+  useEffect(() => {
+    if (!user) return;
+    const query = new URLSearchParams(window.location.search);
+    const id = query.get("incomingCall");
+    if (!id || !/^[a-f\d-]{36}$/i.test(id)) return;
+    const action = query.get("callAction");
+    let disposed = false;
+    const open = async () => {
+      const { data: row } = await supabase.from("call_invites").select("*").eq("id", id).eq("to_user", user.id).maybeSingle();
+      if (disposed) return;
+      query.delete("incomingCall"); query.delete("callAction");
+      window.history.replaceState(null, "", window.location.pathname + (query.size ? `?${query}` : ""));
+      if (!row || !isFreshRingingCall(row as CallInvite)) { toast.error("Call ab available nahi hai"); return; }
+      if (action === "reject") {
+        const changed = await updateCallStatus(id, "rejected");
+        if (changed) await sendCallSystemMessage(row.from_user, row.to_user, row.to_user, `missed ${row.call_type}`);
+      } else if (action === "accept") {
+        const changed = await updateCallStatus(id, "accepted");
+        if (changed) void navigate({ to: "/call/$roomId", params: { roomId: row.room_id }, search: { type: row.call_type, friendId: row.from_user, inviteId: id } });
+        else toast.error("Call ab available nahi hai");
+      } else setInvite(row as CallInvite);
+    };
+    void open().catch(() => toast.error("Call open nahi hui; dobara try karein"));
+    return () => { disposed = true; };
+  }, [user?.id, navigate]);
 
   useEffect(() => {
     if (!user) return;
@@ -89,6 +136,7 @@ export function IncomingCallListener() {
       });
     }, 1500);
     return () => {
+      if (isAndroidCallPush()) void nativeCallPush.dismiss({ inviteId: invite.id }).catch(() => {});
       disposed = true; window.clearTimeout(timer); window.clearInterval(poll);
       void supabase.removeChannel(channel); stopRingtone.current?.(); stopRingtone.current = null;
     };

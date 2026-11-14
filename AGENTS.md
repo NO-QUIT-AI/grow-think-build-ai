@@ -26,6 +26,7 @@
 - Android's current Capacitor release loads the full public site at the configured server URL; retain the separate builder-only entry and its tool allowlist for users visiting it directly.
 - Keep Capacitor config and native Android source in the project for reproducible releases; signing credentials stay external and all releases reuse the existing upload certificate.
 - Keep the Android Firebase registration configuration in android/app/google-services.json and validate its package against applicationId; this file registers the app but does not authorize server-side push sending.
+- Background friend calls use authenticated invite-validated FCM data messages plus a native Capacitor notification bridge; native Accept/Reject must revalidate the recipient and fresh invite before entering the existing ZEGOCLOUD room. Notification taps carry no credentials or room-access tokens.
 - Voice capture and sphere feedback share a phase-gated input volume source; stop recognition during assistant playback and only submit final transcripts, avoiding echo-triggered turns.
 - App-shell offline support uses generated Workbox with one preview-guarded registration module; never cache API/auth traffic or register in editor previews.
 - Genesis self-patches affect allowlisted persisted runtime configuration only; authenticated user clicks apply version-checked backups, never model-provided confirmation or compiled security code.

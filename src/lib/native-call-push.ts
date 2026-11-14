@@ -1,6 +1,7 @@
 import { registerPlugin, Capacitor } from "@capacitor/core";
 interface NativeCallPush {
   register(): Promise<{ token: string }>;
+  refresh(): Promise<{ token?: string }>;
   disable(): Promise<void>;
   dismiss(options: { inviteId: string }): Promise<void>;
 }

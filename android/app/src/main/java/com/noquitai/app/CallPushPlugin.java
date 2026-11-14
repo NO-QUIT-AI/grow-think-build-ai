@@ -32,6 +32,10 @@ public class CallPushPlugin extends Plugin {
             JSObject result = new JSObject(); result.put("token", task.getResult()); call.resolve(result);
         });
     }
+    @PluginMethod public void refresh(PluginCall call) {
+        if (!getContext().getSharedPreferences("call_push", 0).getBoolean("enabled", false) || (Build.VERSION.SDK_INT >= 33 && getPermissionState("notifications") != PermissionState.GRANTED)) { call.resolve(new JSObject()); return; }
+        registerToken(call);
+    }
     @PluginMethod public void disable(PluginCall call) {
         getContext().getSharedPreferences("call_push", 0).edit().putBoolean("enabled", false).apply();
         FirebaseMessaging.getInstance().deleteToken();
