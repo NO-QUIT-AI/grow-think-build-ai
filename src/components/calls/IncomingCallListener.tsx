@@ -43,7 +43,10 @@ export function IncomingCallListener() {
     const enable = async () => {
       try {
         const { token } = await nativeCallPush.register();
-        if (!disposed) await savePush({ data: { token } });
+        if (!disposed) {
+          await savePush({ data: { token } });
+          await nativeCallPush.fullScreenSettings();
+        }
       } catch { if (!disposed) toast.error("Call notifications enable nahi huin; Android notification settings check karein."); }
     };
     toast("Background call notifications", { id: "call-push-permission", duration: Infinity, action: { label: "Enable", onClick: () => { void enable(); } } });

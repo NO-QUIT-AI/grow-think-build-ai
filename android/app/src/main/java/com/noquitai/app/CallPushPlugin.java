@@ -2,6 +2,10 @@ package com.noquitai.app;
 
 import android.Manifest;
 import android.os.Build;
+import android.app.NotificationManager;
+import android.content.Intent;
+import android.net.Uri;
+import android.provider.Settings;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
@@ -31,6 +35,12 @@ public class CallPushPlugin extends Plugin {
             getContext().getSharedPreferences("call_push", 0).edit().putBoolean("enabled", true).apply();
             JSObject result = new JSObject(); result.put("token", task.getResult()); call.resolve(result);
         });
+    }
+    @PluginMethod public void fullScreenSettings(PluginCall call) {
+        if (Build.VERSION.SDK_INT >= 34 && !((NotificationManager)getContext().getSystemService(android.content.Context.NOTIFICATION_SERVICE)).canUseFullScreenIntent()) {
+            getActivity().startActivity(new Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT, Uri.parse("package:" + getContext().getPackageName())));
+        }
+        call.resolve();
     }
     @PluginMethod public void refresh(PluginCall call) {
         if (!getContext().getSharedPreferences("call_push", 0).getBoolean("enabled", false) || (Build.VERSION.SDK_INT >= 33 && getPermissionState("notifications") != PermissionState.GRANTED)) { call.resolve(new JSObject()); return; }
