@@ -1,6 +1,6 @@
 # Pending completion
-- [x] Confirm Firebase Android registration details: applicationId/package com.noquitai.app, current release versionCode 4/versionName 1.3; google-services.json is not present in the project.
-- [ ] Add FCM incoming-call push and Android background/full-screen notification handling (blocked: Firebase connection was skipped; Android Firebase configuration and real-device testing required).
+- [x] Confirm Firebase Android registration details and add uploaded google-services.json to android/app: package matches com.noquitai.app, current release versionCode 4/versionName 1.3; existing Google services plugin is configured.
+- [ ] Add FCM incoming-call push and Android background/full-screen notification handling (blocked: Firebase sending connection was skipped; native notification implementation, updated AAB and real-device testing still required; Android Firebase configuration is now present).
 - [x] Connect existing friend-call buttons to ZEGOCLOUD UIKit with server-only secrets, room-bound access, preserved incoming call design, microphone/camera controls and speaker playback toggle; 10 tests pass, SDK browser import and signed-in invalid-invite rejection verified; preview build OK.
 - [ ] Verify accepted ZEGOCLOUD voice/video media between two consenting users (blocked: second signed-in participant/device unavailable); publish only on explicit request. Browser speaker control mutes playback; physical earpiece routing depends on device/browser.
 - [ ] Auto-open Studio for build requests and show genuine streaming code/tool/table progress without interrupting Chat; verify signed-in flow and approvals.
