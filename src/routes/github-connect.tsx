@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { readableCode } from "@/lib/github-rules";
+import { GitHubSelfUpdate } from "@/components/GitHubSelfUpdate";
 import { githubStatus, startGitHubConnect, completeGitHubConnect, disconnectGitHub, listGitHubRepos, selectGitHubRepo, getGitHubTree, getGitHubFile, analyzeGitHubFile, fixGitHubFile, pushGitHubFix } from "@/lib/github.functions";
 
 export const Route = createFileRoute("/github-connect")({
@@ -120,6 +121,7 @@ function GitHubPage() {
         {user && <Button disabled={!!busy || status.isPending} variant={status.data?.connected ? "outline" : "default"} onClick={() => status.data?.connected ? void act("Disconnect ho raha hai…", async () => { await disconnect(); setNotice("GitHub disconnected."); await qc.invalidateQueries({ queryKey: ["github-status", user.id] }); }) : setPermission(true)}>{status.data?.connected ? <Unplug /> : <Github />}{status.data?.connected ? "Disconnect GitHub" : "Connect GitHub"}</Button>}
       </header>
       {loading ? <Loader2 className="animate-spin text-primary" /> : !user ? <Button asChild><Link to="/auth">GitHub connect karne ke liye Sign in</Link></Button> : !status.data?.connected ? <div className="py-10"><ShieldCheck className="mb-4 h-12 w-12 text-primary" /><h2 className="mb-2 text-xl font-semibold">Apni repository, apni permission.</h2><p className="max-w-lg text-muted-foreground">NO QUIT AI will only read your repos to help fix code. We will not delete anything without your permission.</p></div> : <>
+        <GitHubSelfUpdate userId={user.id} selectedRepo={repo?.name ?? null} />
         <div className="mb-6 grid gap-4 md:grid-cols-[320px_1fr]">
           <section className="min-w-0 border-r border-border pr-4"><h2 className="mb-3 font-semibold">Your repositories</h2><Input aria-label="Search repositories" placeholder="Repository dhoondo…" value={search} onChange={e => setSearch(e.target.value)} />
             <div className="mt-3 max-h-72 space-y-1 overflow-auto">{repos.filter(r => r.name.toLowerCase().includes(search.toLowerCase())).map(r => <Button key={r.id} disabled={!!busy} variant={repo?.id === r.id ? "secondary" : "ghost"} onClick={() => void choose(r)} className="h-auto w-full justify-start whitespace-normal py-3 text-left"><Github className="shrink-0" /><span className="min-w-0 break-all">{r.name}<small className="block text-muted-foreground">{r.private ? "Private" : "Public"}</small></span></Button>)}{!repos.length && !busy && <p className="py-3 text-sm text-muted-foreground">Koi repository nahi mili.</p>}</div>
