@@ -47,7 +47,7 @@ async function allowedRepos(userId: string) {
 }
 // Literal-text hints via GitHub code search (default branch index); failures fall back to AI path selection.
 async function searchHints(userId: string, repo: string, request: string) {
-  const phrases = [...request.matchAll(/["“'‘]([^"”'’]{3,80})["”'’]/g)].map(m => m[1].trim()).slice(0, 3);
+  const phrases = [...request.matchAll(/["“'‘]([^"”'’]{3,80})["”'’]/g)].map(m => (m[1] ?? "").trim()).slice(0, 3);
   const hits = new Set<string>();
   for (const phrase of phrases) {
     try {
