@@ -5,14 +5,14 @@ import { Github, GitBranch, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { startGitHubConnect, completeGitHubConnect, listGitHubRepos, selectGitHubRepo } from "@/lib/github.functions";
-import { selfUpdateStatus, bindSelfRepo, approveSelfUpdate, discardSelfUpdate } from "@/lib/self-update.functions";
+import { chatGitHubProposals, bindSelfRepo, approveSelfUpdate, discardSelfUpdate } from "@/lib/self-update.functions";
 import { updateChanges } from "@/lib/self-update-rules";
 
 export function GitHubChatAction({ output, disabled, onConnected }: {
   output: Record<string, unknown>; disabled: boolean; onConnected: () => void;
 }) {
   const { user } = useAuth();
-  const statusFn = useServerFn(selfUpdateStatus), start = useServerFn(startGitHubConnect), complete = useServerFn(completeGitHubConnect);
+  const statusFn = useServerFn(chatGitHubProposals), start = useServerFn(startGitHubConnect), complete = useServerFn(completeGitHubConnect);
   const list = useServerFn(listGitHubRepos), select = useServerFn(selectGitHubRepo), bind = useServerFn(bindSelfRepo);
   const approve = useServerFn(approveSelfUpdate), discard = useServerFn(discardSelfUpdate);
   const previewId = typeof output['previewId'] === "string" ? output['previewId'] : null;
@@ -67,7 +67,7 @@ export function GitHubChatAction({ output, disabled, onConnected }: {
       </div>
       <div className="max-h-60 overflow-auto">{repos.map(repo => <Button key={repo.id} variant={chosen === repo.name ? "secondary" : "ghost"} disabled={busy || !repo.canPush} onClick={() => setChosen(repo.name)} className="h-auto w-full justify-start whitespace-normal text-left"><Github className="shrink-0" /><span className="min-w-0 break-all">{repo.name}</span></Button>)}</div>
       {more && <Button variant="outline" disabled={busy} onClick={() => void act(() => load(page + 1))}>Load more</Button>}
-      {chosen && <><p className="break-all text-sm">{chosen} — ye NO QUIT AI ka apna source repo hai?</p><Button disabled={busy || disabled} className="h-auto whitespace-normal" onClick={() => void act(async () => { const repo = chosen; await select({ data: { repo } }); await bind({ data: { repo, confirmed: true } }); setReady(true); setNotice("GitHub connected; own repository confirmed ✅"); onConnected(); })}>Confirm own repository & Continue</Button></>}
+      {chosen && <><p className="break-all text-sm">{chosen} — is repo ko chat use karega?</p><Button disabled={busy || disabled} className="h-auto whitespace-normal" onClick={() => void act(async () => { const repo = chosen; await select({ data: { repo } }); await bind({ data: { repo, confirmed: true } }).catch(() => undefined); setReady(true); setNotice("GitHub connected; own repository confirmed ✅"); onConnected(); })}>Confirm repository & Continue</Button></>}
     </>}
     {previewId && <>
       {status.isPending && <p className="text-sm">Before / After load ho raha hai…</p>}

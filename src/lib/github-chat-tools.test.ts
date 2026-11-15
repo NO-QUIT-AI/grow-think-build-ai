@@ -17,7 +17,7 @@ describe("chat GitHub tool boundary", () => {
   it("push tool only prepares Before/After and cannot invoke a push", async () => {
     let prepared = "";
     const tools = githubChatTools({ connect: async () => ({}), read: async () => null, prepare: async request => { prepared = request; return { previewId: "preview", needsApproval: true }; } });
-    assert.deepEqual(await tools.github_push_branch.execute?.({ request: "Add a feature" }, options), { previewId: "preview", needsApproval: true });
+    assert.deepEqual(await tools.github_push_to_new_branch.execute?.({ request: "Add a feature" }, options), { previewId: "preview", needsApproval: true });
     assert.equal(prepared, "Add a feature");
   });
 });
