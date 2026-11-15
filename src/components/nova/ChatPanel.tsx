@@ -1,4 +1,5 @@
 import { ToolsMenu, CHAT_ACTION_EVT } from "@/components/nova/ToolsMenu";
+import { GitHubChatAction } from "@/components/nova/GitHubChatAction";
 import { detectSpeechLang } from "@/lib/voice-transcript";
 import { backupToWorker } from "@/lib/worker-backup";
 import type { StudioContext } from "@/lib/studio-edit";
@@ -877,6 +878,7 @@ function ChatThread({
                   </div>
                 )}
                 {!isUser && tools.map((part,index)=> <GenesisToolApproval key={`approval-${index}`} disabled={busy} output={(part as {output?:Record<string,unknown>}).output??{}} onPlanApproved={id=>{planRef.current=id;void submit("Approved plan — shuru karo, steps ke mutabiq kaam karo.");}} onCostApproved={(id,tool)=>{costRef.current=id;void submit(`Approved cost for ${tool}. Retry exactly the saved tool arguments; do not change them.`);}}/>)}
+                {!isUser && tools.filter(part => ["tool-github_connect", "tool-github_push_branch", "tool-prepare_self_update"].includes(part.type)).map((part, index) => <GitHubChatAction key={`github-${index}`} disabled={busy} output={(part as { output?: Record<string, unknown> }).output ?? {}} onConnected={() => { void submit("GitHub consent and own repository selection completed. Check github_connect and continue my previous GitHub request; prepare Before/After only, do not push."); }} />)}
                 {message.parts.filter(part=>part.type==="file").map((part,index)=>part.type==="file"?<img key={`attachment-${index}`} src={part.url} alt="Attached screenshot" className="mb-2 max-h-64 rounded-md object-contain"/>:null)}
                 {!isUser &&
                   tools
