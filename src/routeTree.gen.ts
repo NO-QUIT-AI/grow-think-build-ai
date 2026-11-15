@@ -23,6 +23,7 @@ import { Route as CvRouteImport } from './routes/cv'
 import { Route as DeleteAccountRouteImport } from './routes/delete-account'
 import { Route as DeleteDataRouteImport } from './routes/delete-data'
 import { Route as EarnRouteImport } from './routes/earn'
+import { Route as GithubConnectRouteImport } from './routes/github-connect'
 import { Route as HowToUseRouteImport } from './routes/how-to-use'
 import { Route as InviteRouteImport } from './routes/invite'
 import { Route as JalsaChatRouteImport } from './routes/jalsa-chat'
@@ -139,6 +140,11 @@ const DeleteDataRoute = DeleteDataRouteImport.update({
 const EarnRoute = EarnRouteImport.update({
   id: '/earn',
   path: '/earn',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GithubConnectRoute = GithubConnectRouteImport.update({
+  id: '/github-connect',
+  path: '/github-connect',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HowToUseRoute = HowToUseRouteImport.update({
@@ -394,6 +400,7 @@ export interface FileRoutesByFullPath {
   '/delete-account': typeof DeleteAccountRoute
   '/delete-data': typeof DeleteDataRoute
   '/earn': typeof EarnRoute
+  '/github-connect': typeof GithubConnectRoute
   '/how-to-use': typeof HowToUseRoute
   '/invite': typeof InviteRoute
   '/jalsa-chat': typeof JalsaChatRoute
@@ -457,6 +464,7 @@ export interface FileRoutesByTo {
   '/delete-account': typeof DeleteAccountRoute
   '/delete-data': typeof DeleteDataRoute
   '/earn': typeof EarnRoute
+  '/github-connect': typeof GithubConnectRoute
   '/how-to-use': typeof HowToUseRoute
   '/invite': typeof InviteRoute
   '/jalsa-chat': typeof JalsaChatRoute
@@ -521,6 +529,7 @@ export interface FileRoutesById {
   '/delete-account': typeof DeleteAccountRoute
   '/delete-data': typeof DeleteDataRoute
   '/earn': typeof EarnRoute
+  '/github-connect': typeof GithubConnectRoute
   '/how-to-use': typeof HowToUseRoute
   '/invite': typeof InviteRoute
   '/jalsa-chat': typeof JalsaChatRoute
@@ -586,6 +595,7 @@ export interface FileRouteTypes {
     | '/delete-account'
     | '/delete-data'
     | '/earn'
+    | '/github-connect'
     | '/how-to-use'
     | '/invite'
     | '/jalsa-chat'
@@ -649,6 +659,7 @@ export interface FileRouteTypes {
     | '/delete-account'
     | '/delete-data'
     | '/earn'
+    | '/github-connect'
     | '/how-to-use'
     | '/invite'
     | '/jalsa-chat'
@@ -712,6 +723,7 @@ export interface FileRouteTypes {
     | '/delete-account'
     | '/delete-data'
     | '/earn'
+    | '/github-connect'
     | '/how-to-use'
     | '/invite'
     | '/jalsa-chat'
@@ -776,6 +788,7 @@ export interface RootRouteChildren {
   DeleteAccountRoute: typeof DeleteAccountRoute
   DeleteDataRoute: typeof DeleteDataRoute
   EarnRoute: typeof EarnRoute
+  GithubConnectRoute: typeof GithubConnectRoute
   HowToUseRoute: typeof HowToUseRoute
   InviteRoute: typeof InviteRoute
   JalsaChatRoute: typeof JalsaChatRoute
@@ -922,6 +935,13 @@ declare module '@tanstack/react-router' {
       path: '/earn'
       fullPath: '/earn'
       preLoaderRoute: typeof EarnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/github-connect': {
+      id: '/github-connect'
+      path: '/github-connect'
+      fullPath: '/github-connect'
+      preLoaderRoute: typeof GithubConnectRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/how-to-use': {
@@ -1282,6 +1302,7 @@ const rootRouteChildren: RootRouteChildren = {
   DeleteAccountRoute: DeleteAccountRoute,
   DeleteDataRoute: DeleteDataRoute,
   EarnRoute: EarnRoute,
+  GithubConnectRoute: GithubConnectRoute,
   HowToUseRoute: HowToUseRoute,
   InviteRoute: InviteRoute,
   JalsaChatRoute: JalsaChatRoute,
