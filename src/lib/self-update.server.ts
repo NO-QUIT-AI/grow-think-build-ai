@@ -35,7 +35,7 @@ async function jsonAI(instructions: string, input: string) {
   const text = reply.output.flatMap(i => i.type === "message" ? i.content.flatMap(p => p.type === "output_text" ? [p.text] : []) : []).join("\n");
   return JSON.parse(text.replace(/^```(?:json)?\s*/, "").replace(/\s*```$/, "")) as unknown;
 }
-export async function prepareSelfUpdate(sb: SupabaseClient, userId: string, request: string) {
+export async function prepareSelfUpdate(_sb: SupabaseClient, userId: string, request: string) {
   const repo = await chatRepo(userId);
   const info = await githubRequest(userId, `/repos/${repo}`) as { default_branch: string; permissions?: { push?: boolean } };
   if (!info.permissions?.push) throw new Error("Is repo par write permission chahiye.");
@@ -126,7 +126,6 @@ export function selfUpdateTools(sb: SupabaseClient, userId: string) {
   return {
     ...chatTools,
     github_self_update_status: tool({ description: "Check before any GitHub self-update: is owner's GitHub connected, which repo is selected and designated as NO QUIT AI own repo, and pending approvals. Read only.", inputSchema: z.object({}), execute: async () => {
-      await requireSelfOwner(sb, userId);
       const admin = await db();
       const [{ data: conn }, { data: ws }, { data: own }, { data: pending }] = await Promise.all([
         admin.from("app_user_connections").select("user_id").eq("user_id", userId).eq("connector_id", "github").maybeSingle(),
