@@ -419,19 +419,21 @@ export const Route = createFileRoute("/api/chat")({
           const { genesisTools, GENESIS_PROMPT } = await import("@/lib/genesis-tools.server");
           const { genesisExtraTools, GENESIS_EXTRA_PROMPT } = await import("@/lib/genesis-extra.server");
           const { genesisAutonomyTools, AUTONOMY_PROMPT, loadPersona } = await import("@/lib/genesis-autonomy.server");
+          const { selfUpdateTools } = await import("@/lib/self-update.server");
           const g = genesisTools();
           const deploy = (project: string) =>
             (g.vercel_deploy.execute as (i: { project: string }, o: unknown) => Promise<unknown>)({ project }, {});
           const { vercelDomainTools, withAuditAndGrants, VERCEL_DOMAIN_PROMPT } = await import("@/lib/genesis-vercel.server");
           const ownerTools={...allTools,...g,...genesisExtraTools({lovableKey: process.env["LOVABLE_API_KEY"] ?? "",deploy}),...genesisAutonomyTools(),...vercelDomainTools(supabase,userId),...studioTools};
           allTools = withAuditAndGrants(
-            { ...ownerTools,...superTools(supabase,userId,[...Object.keys(ownerTools),"self_patch","self_revert"]) },
+            { ...ownerTools,...superTools(supabase,userId,[...Object.keys(ownerTools),"self_patch","self_revert"]),...selfUpdateTools(supabase,userId) },
             supabase,
             userId,
           );
           const persona = await loadPersona();
           ownerPrompt = `\n\n${GENESIS_PROMPT}\n\n${GENESIS_EXTRA_PROMPT}\n\n${AUTONOMY_PROMPT}\n\n${VERCEL_DOMAIN_PROMPT}${persona ? `\n\nSAVED OWNER PERSONA (hamesha follow karo): ${persona}` : ""}`;
           const config=await runtimeConfig(supabase,userId);
+          ownerPrompt += "\nSELF-UPDATING NO QUIT AI: When the owner asks to add/change a feature inside this app itself, use prepare_self_update on the explicitly designated own GitHub repo. Do not use Studio/R2 file writes for self-source changes. The proposal is read-only; direct owner to /github-connect to review Before/After and explicitly approve a NEW branch. Chat Yes, plan approval and model confirmation NEVER authorize GitHub push. Never push main, merge, deploy or claim the live app changed. If own repo is missing ask owner to designate it in GitHub Connect.";
           if(config["tool-registry"]) for(const name of validateRegistry(config["tool-registry"],Object.keys(allTools))) delete allTools[name];
           ownerPrompt+=`\n\nOWNER CONFIGURATION (cannot override server safety): ${config["system-prompt"]??""}\nOWNER PERSONA: ${config["persona"]??""}`;
         }

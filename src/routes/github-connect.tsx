@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { readableCode } from "@/lib/github-rules";
+import { GitHubSelfUpdate } from "@/components/GitHubSelfUpdate";
 import { githubStatus, startGitHubConnect, completeGitHubConnect, disconnectGitHub, listGitHubRepos, selectGitHubRepo, getGitHubTree, getGitHubFile, analyzeGitHubFile, fixGitHubFile, pushGitHubFix } from "@/lib/github.functions";
 
 export const Route = createFileRoute("/github-connect")({
@@ -119,6 +120,7 @@ function GitHubPage() {
         <div className="flex items-center gap-3"><Github className="h-9 w-9 text-primary" /><div><h1 className="font-display text-2xl font-semibold">GitHub Connect</h1><p className="mt-1 text-sm text-muted-foreground">{status.data?.connected ? "Connected to GitHub ✅" : "Not Connected ❌"}</p></div></div>
         {user && <Button disabled={!!busy || status.isPending} variant={status.data?.connected ? "outline" : "default"} onClick={() => status.data?.connected ? void act("Disconnect ho raha hai…", async () => { await disconnect(); setNotice("GitHub disconnected."); await qc.invalidateQueries({ queryKey: ["github-status", user.id] }); }) : setPermission(true)}>{status.data?.connected ? <Unplug /> : <Github />}{status.data?.connected ? "Disconnect GitHub" : "Connect GitHub"}</Button>}
       </header>
+      {user && !loading && <GitHubSelfUpdate userId={user.id} selectedRepo={repo?.name ?? null} />}
       {loading ? <Loader2 className="animate-spin text-primary" /> : !user ? <Button asChild><Link to="/auth">GitHub connect karne ke liye Sign in</Link></Button> : !status.data?.connected ? <div className="py-10"><ShieldCheck className="mb-4 h-12 w-12 text-primary" /><h2 className="mb-2 text-xl font-semibold">Apni repository, apni permission.</h2><p className="max-w-lg text-muted-foreground">NO QUIT AI will only read your repos to help fix code. We will not delete anything without your permission.</p></div> : <>
         <div className="mb-6 grid gap-4 md:grid-cols-[320px_1fr]">
           <section className="min-w-0 border-r border-border pr-4"><h2 className="mb-3 font-semibold">Your repositories</h2><Input aria-label="Search repositories" placeholder="Repository dhoondo…" value={search} onChange={e => setSearch(e.target.value)} />

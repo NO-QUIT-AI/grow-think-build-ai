@@ -1,0 +1,11 @@
+CREATE TABLE public.github_self_repos (user_id uuid PRIMARY KEY, repo text NOT NULL, created_at timestamptz NOT NULL DEFAULT now());
+GRANT SELECT ON public.github_self_repos TO authenticated;
+GRANT ALL ON public.github_self_repos TO service_role;
+ALTER TABLE public.github_self_repos ENABLE ROW LEVEL SECURITY;
+CREATE POLICY owner_reads_self_repo ON public.github_self_repos FOR SELECT TO authenticated USING (user_id=auth.uid() AND public.is_owner(auth.uid()));
+CREATE TABLE public.github_self_updates (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), user_id uuid NOT NULL, repo text NOT NULL, base_branch text NOT NULL, base_sha text NOT NULL, target_branch text NOT NULL CHECK (target_branch LIKE 'noquit-ai/update-%'), request text NOT NULL, summary text NOT NULL, changes jsonb NOT NULL, status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','pushing','pushed','failed','discarded')), commit_sha text, created_at timestamptz NOT NULL DEFAULT now());
+GRANT SELECT ON public.github_self_updates TO authenticated;
+GRANT ALL ON public.github_self_updates TO service_role;
+ALTER TABLE public.github_self_updates ENABLE ROW LEVEL SECURITY;
+CREATE POLICY owner_reads_self_updates ON public.github_self_updates FOR SELECT TO authenticated USING (user_id=auth.uid() AND public.is_owner(auth.uid()));
+CREATE INDEX github_self_updates_user ON public.github_self_updates(user_id,created_at DESC);
