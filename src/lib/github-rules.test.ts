@@ -1,23 +1,24 @@
-import { describe, it, expect } from "bun:test";
+import { describe, it } from "node:test";
+import assert from "node:assert/strict";
 import { assertPushApproval, assertSelectedRepo, readableCode, codePath, repoName } from "./github-rules";
 describe("GitHub permission boundaries", () => {
   it("only reads the repository selected by the authenticated user", () => {
-    expect(() => assertSelectedRepo("user/allowed", "user/other")).toThrow();
-    expect(() => assertSelectedRepo(null, "user/allowed")).toThrow();
-    expect(() => assertSelectedRepo("user/allowed", "user/allowed")).not.toThrow();
+    assert.throws(() => assertSelectedRepo("user/allowed", "user/other"));
+    assert.throws(() => assertSelectedRepo(null, "user/allowed"));
+    assert.doesNotThrow(() => assertSelectedRepo("user/allowed", "user/allowed"));
   });
   it("requires explicit Yes for push", () => {
-    expect(() => assertPushApproval(false)).toThrow();
-    expect(() => assertPushApproval(true)).not.toThrow();
+    assert.throws(() => assertPushApproval(false));
+    assert.doesNotThrow(() => assertPushApproval(true));
   });
   it("rejects provider path traversal", () => {
-    expect(codePath.safeParse("../other.ts").success).toBe(false);
-    expect(repoName.safeParse("user/repo/../../apps").success).toBe(false);
-    expect(codePath.safeParse("src/index.ts").success).toBe(true);
+    assert.equal(codePath.safeParse("../other.ts").success, false);
+    assert.equal(repoName.safeParse("user/repo/../../apps").success, false);
+    assert.equal(codePath.safeParse("src/index.ts").success, true);
   });
   it("does not send sensitive files to AI", () => {
-    expect(readableCode(".env.production")).toBe(false);
-    expect(readableCode("firebase-service-account.json")).toBe(false);
-    expect(readableCode("src/index.ts")).toBe(true);
+    assert.equal(readableCode(".env.production"), false);
+    assert.equal(readableCode("firebase-service-account.json"), false);
+    assert.equal(readableCode("src/index.ts"), true);
   });
 });

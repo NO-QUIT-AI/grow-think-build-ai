@@ -46,10 +46,10 @@ export const disconnectGitHub = createServerFn({ method: "POST" }).middleware([r
     await disconnectAppUser({ gatewayBaseUrl: "https://connector-gateway.lovable.dev", connectorId: "github", connectionAPIKey });
   }
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  for (const table of ["app_user_connections", "github_workspaces", "github_fix_previews"] as const) {
-    let query = supabaseAdmin.from(table).delete().eq("user_id", context.userId);
-    if (table === "app_user_connections") query = query.eq("connector_id", "github");
-    const { error } = await query;
+  const { error: connectionError } = await supabaseAdmin.from("app_user_connections").delete().eq("user_id", context.userId).eq("connector_id", "github");
+  if (connectionError) throw connectionError;
+  for (const table of ["github_workspaces", "github_fix_previews"] as const) {
+    const { error } = await supabaseAdmin.from(table).delete().eq("user_id", context.userId);
     if (error) throw error;
   }
   return { connected: false };
