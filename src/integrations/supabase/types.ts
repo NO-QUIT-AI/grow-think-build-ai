@@ -38,6 +38,33 @@ export type Database = {
         }
         Relationships: []
       }
+      app_user_connections: {
+        Row: {
+          connection_key_ciphertext: string
+          connector_id: string
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          connection_key_ciphertext: string
+          connector_id: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          connection_key_ciphertext?: string
+          connector_id?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       artifacts: {
         Row: {
           content: Json
@@ -496,6 +523,66 @@ export type Database = {
           id?: string
           status?: string
           steps?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
+      github_fix_previews: {
+        Row: {
+          after_code: string
+          before_code: string
+          branch: string
+          created_at: string
+          id: string
+          original_sha: string
+          path: string
+          repo: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          after_code: string
+          before_code: string
+          branch: string
+          created_at?: string
+          id?: string
+          original_sha: string
+          path: string
+          repo: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          after_code?: string
+          before_code?: string
+          branch?: string
+          created_at?: string
+          id?: string
+          original_sha?: string
+          path?: string
+          repo?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      github_workspaces: {
+        Row: {
+          branch: string | null
+          oauth_nonce: string | null
+          repo: string | null
+          user_id: string
+        }
+        Insert: {
+          branch?: string | null
+          oauth_nonce?: string | null
+          repo?: string | null
+          user_id: string
+        }
+        Update: {
+          branch?: string | null
+          oauth_nonce?: string | null
+          repo?: string | null
           user_id?: string
         }
         Relationships: []
