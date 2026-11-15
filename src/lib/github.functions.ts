@@ -110,6 +110,9 @@ export const pushGitHubFix = createServerFn({ method: "POST" }).middleware([requ
     if (Date.now() - Date.parse(preview.created_at) > 3600000) throw new Error("Preview expired; fresh fix banayein.");
     const { readCode, githubRequest } = await import("./github.server");
     const current = await readCode(context.userId, preview.repo, preview.path);
+    const { data: selfRepo, error: selfRepoError } = await supabaseAdmin.from("github_self_repos").select("repo").eq("user_id", context.userId).maybeSingle();
+    if (selfRepoError) throw selfRepoError;
+    if (selfRepo?.repo === preview.repo) throw new Error("NO QUIT AI own repo: Self-Updating section use karein; existing branch par direct fix push allowed nahi.");
     if (current.sha !== preview.original_sha || current.branch !== preview.branch) throw new Error("GitHub code badal gaya hai; fresh fix banayein.");
     const { data: claimed, error: claimError } = await supabaseAdmin.from("github_fix_previews").update({ status: "pushing" }).eq("id", preview.id).eq("user_id", context.userId).eq("status", "pending").select("id").maybeSingle();
     if (claimError || !claimed) throw new Error("Push already started.");
