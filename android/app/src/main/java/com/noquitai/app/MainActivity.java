@@ -18,6 +18,7 @@ public class MainActivity extends BridgeActivity {
     private static final String HOME = "https://noquitai.com/";
     @Override public void onCreate(Bundle savedInstanceState) {
         registerPlugin(CallPushPlugin.class);
+        registerPlugin(DeviceSafetyPlugin.class);
         super.onCreate(savedInstanceState);
         WindowInsetsControllerCompat bars = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
         bars.hide(WindowInsetsCompat.Type.systemBars());
