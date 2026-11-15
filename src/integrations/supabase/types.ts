@@ -566,6 +566,69 @@ export type Database = {
         }
         Relationships: []
       }
+      github_self_repos: {
+        Row: {
+          created_at: string
+          repo: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          repo: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          repo?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      github_self_updates: {
+        Row: {
+          base_branch: string
+          base_sha: string
+          changes: Json
+          commit_sha: string | null
+          created_at: string
+          id: string
+          repo: string
+          request: string
+          status: string
+          summary: string
+          target_branch: string
+          user_id: string
+        }
+        Insert: {
+          base_branch: string
+          base_sha: string
+          changes: Json
+          commit_sha?: string | null
+          created_at?: string
+          id?: string
+          repo: string
+          request: string
+          status?: string
+          summary: string
+          target_branch: string
+          user_id: string
+        }
+        Update: {
+          base_branch?: string
+          base_sha?: string
+          changes?: Json
+          commit_sha?: string | null
+          created_at?: string
+          id?: string
+          repo?: string
+          request?: string
+          status?: string
+          summary?: string
+          target_branch?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       github_workspaces: {
         Row: {
           branch: string | null
