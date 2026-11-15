@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useAuth } from "@/hooks/useAuth";
 import { readableCode } from "@/lib/github-rules";
 import { GitHubSelfUpdate } from "@/components/GitHubSelfUpdate";
+import { GitHubSmartChange } from "@/components/GitHubSmartChange";
 import { githubStatus, startGitHubConnect, completeGitHubConnect, disconnectGitHub, listGitHubRepos, selectGitHubRepo, getGitHubTree, getGitHubFile, analyzeGitHubFile, fixGitHubFile, pushGitHubFix } from "@/lib/github.functions";
 
 export const Route = createFileRoute("/github-connect")({
@@ -130,6 +131,7 @@ function GitHubPage() {
           <section className="min-w-0">{!repo ? <p className="py-8 text-muted-foreground">Bhai, ek repository select karo.</p> : <><h2 className="break-all font-semibold">{repo.name}</h2><p className="my-2 flex items-center gap-2 text-sm text-muted-foreground"><GitBranch className="h-4 w-4" />{repo.branch}</p>
             <div className="mb-4 flex flex-wrap gap-2"><Button disabled={!!busy || !files.length} onClick={() => void scan()} className="h-auto min-h-9 whitespace-normal"><ScanSearch />Analyze Code - Kya Kharab Hai?</Button><Button disabled={!!busy || !file || !repo.canPush} variant="outline" onClick={() => file && void act("Fix preview ban rahi hai…", async () => { setPreview(await fix({ data: { repo: repo.name, path: file.path } })); })} className="h-auto min-h-9 whitespace-normal"><Wrench />Fix My Code - Theek Karo</Button></div>
             {!repo.canPush && <p className="mb-3 text-sm text-muted-foreground">Is repo par write permission nahi; sirf analyze kar sakte hain.</p>}
+            <GitHubSmartChange key={repo.name} repo={repo.name} canPush={repo.canPush} />
             <div className="grid min-w-0 gap-3 lg:grid-cols-[220px_1fr]">
               <div className="max-h-96 overflow-auto rounded-lg border border-border p-2"><div className="mb-2 break-all text-xs text-muted-foreground">/{folder}</div>{folder && <Button size="sm" variant="ghost" onClick={() => setFolder(folder.split("/").slice(0, -1).join("/"))}>← Parent folder</Button>}{children.sort((a,b) => Number(b.folder)-Number(a.folder) || a.path.localeCompare(b.path)).map(f => <Button key={f.path} disabled={!!busy || (!f.folder && !readableCode(f.path))} variant={file?.path === f.path ? "secondary" : "ghost"} onClick={() => f.folder ? setFolder(f.path) : void openFile(f.path)} className="h-auto w-full justify-start whitespace-normal py-2 text-left">{f.folder ? <Folder /> : <FileCode />}<span className="min-w-0 break-all text-xs">{f.path.split("/").pop()}</span></Button>)}</div>
               <div className="min-w-0 overflow-hidden rounded-lg border border-border">{file ? <><p className="break-all border-b border-border px-3 py-2 text-sm">{file.path}</p><CodeView code={file.content} /></> : <p className="p-5 text-sm text-muted-foreground">Code file select karein.</p>}</div>
