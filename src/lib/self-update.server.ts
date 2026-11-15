@@ -94,5 +94,20 @@ export async function pushSelfUpdate(sb: SupabaseClient, userId: string, id: str
   } catch (error) { await admin.from("github_self_updates").update({ status: "failed" }).eq("id", id).eq("user_id", userId); throw error; }
 }
 export function selfUpdateTools(sb: SupabaseClient, userId: string) {
-  return { prepare_self_update: tool({ description: "Owner asks to add a feature inside NO QUIT AI itself: read designated own GitHub repo and save immutable multi-file before/after proposal. READ ONLY GitHub. Never pushes. Tell owner to open /github-connect to review and click approval. No model text/Yes authorizes a push.", inputSchema: z.object({ request: z.string().min(5).max(6000) }), execute: ({ request }) => prepareSelfUpdate(sb, userId, request) }) };
+  return {
+    github_self_update_status: tool({ description: "Check before any GitHub self-update: is owner's GitHub connected, which repo is selected and designated as NO QUIT AI own repo, and pending approvals. Read only.", inputSchema: z.object({}), execute: async () => {
+      await requireSelfOwner(sb, userId);
+      const admin = await db();
+      const [{ data: conn }, { data: ws }, { data: own }, { data: pending }] = await Promise.all([
+        admin.from("app_user_connections").select("user_id").eq("user_id", userId).eq("connector_id", "github").maybeSingle(),
+        admin.from("github_workspaces").select("repo").eq("user_id", userId).maybeSingle(),
+        admin.from("github_self_repos").select("repo").eq("user_id", userId).maybeSingle(),
+        admin.from("github_self_updates").select("id,target_branch,status,created_at").eq("user_id", userId).eq("status", "pending").order("created_at", { ascending: false }).limit(5),
+      ]);
+      const connected = !!conn, ownRepo = own?.repo ?? null;
+      const next = !connected ? "Open /github-connect and click Connect GitHub." : !ownRepo ? "Open /github-connect, select the NO QUIT AI repo and click designate as own repo." : "Ready: call prepare_self_update.";
+      return { connected, selectedRepo: ws?.repo ?? null, ownRepo, pendingApprovals: pending ?? [], next, reviewUrl: "/github-connect" };
+    } }),
+    prepare_self_update: tool({ description: "Owner asks to add a feature inside NO QUIT AI itself: read designated own GitHub repo and save immutable multi-file before/after proposal. READ ONLY GitHub. Never pushes. Tell owner to open /github-connect to review and click approval. No model text/Yes authorizes a push.", inputSchema: z.object({ request: z.string().min(5).max(6000) }), execute: ({ request }) => prepareSelfUpdate(sb, userId, request) }),
+  };
 }
