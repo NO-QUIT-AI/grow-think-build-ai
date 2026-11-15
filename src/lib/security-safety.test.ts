@@ -1,4 +1,4 @@
-/// <reference types="bun" />
+// @ts-expect-error Bun test runner types are intentionally excluded from the browser project.
 import { describe, expect, it } from "bun:test";
 import { backupDue, deviceSafetyScore, linkWarnings } from "./security-safety";
 import { encryptBackup, decryptBackup } from "./security-crypto";
