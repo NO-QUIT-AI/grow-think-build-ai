@@ -41,4 +41,7 @@ export const discardSelfUpdate = createServerFn({ method: "POST" }).middleware([
   const { error } = await supabaseAdmin.from("github_self_updates").update({ status: "discarded" }).eq("id", data.id).eq("user_id", context.userId).eq("status", "pending");
   if (error) throw error;
   return { ok: true };
+});export const smartChangeRequest = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).inputValidator(i => z.object({ repo: repoName, request: z.string().trim().min(5).max(6000) }).parse(i)).handler(async ({ context, data }) => {
+  const { prepareSelfUpdate } = await import("./self-update.server");
+  return prepareSelfUpdate(context.supabase, context.userId, data.request, data.repo);
 });
