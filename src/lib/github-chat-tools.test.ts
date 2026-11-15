@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { githubChatTools } from "./github-chat-tools";
 
 describe("chat GitHub tool boundary", () => {
-  const options = { toolCallId: "test", messages: [] };
+  const options = { toolCallId: "test", messages: [], context: undefined };
   it("connect requests user consent rather than silently authorizing", async () => {
     const tools = githubChatTools({ connect: async () => ({ connected: false, chatAction: "github_connect" }), read: async () => null, prepare: async () => null });
     assert.deepEqual(await tools.github_connect.execute?.({}, options), { connected: false, chatAction: "github_connect" });

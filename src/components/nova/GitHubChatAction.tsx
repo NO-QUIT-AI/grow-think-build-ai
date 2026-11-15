@@ -15,8 +15,8 @@ export function GitHubChatAction({ output, disabled, onConnected }: {
   const statusFn = useServerFn(selfUpdateStatus), start = useServerFn(startGitHubConnect), complete = useServerFn(completeGitHubConnect);
   const list = useServerFn(listGitHubRepos), select = useServerFn(selectGitHubRepo), bind = useServerFn(bindSelfRepo);
   const approve = useServerFn(approveSelfUpdate), discard = useServerFn(discardSelfUpdate);
-  const previewId = typeof output.previewId === "string" ? output.previewId : null;
-  const connection = output.chatAction === "github_connect";
+  const previewId = typeof output['previewId'] === "string" ? output['previewId'] : null;
+  const connection = output['chatAction'] === "github_connect";
   const status = useQuery({ queryKey: ["chat-github-review", user?.id, previewId], queryFn: () => statusFn(), enabled: !!user && !!previewId });
   const [busy, setBusy] = useState(false), [error, setError] = useState(""), [notice, setNotice] = useState("");
   const [repos, setRepos] = useState<{ id: number; name: string; canPush: boolean }[]>([]);
@@ -62,8 +62,8 @@ export function GitHubChatAction({ output, disabled, onConnected }: {
       <p className="text-sm">NO QUIT AI will only read your repos to help fix code. We will not delete anything without your permission.</p>
       <p className="text-xs text-muted-foreground">Reviewed code sirf Approve ke baad nayi branch mein jayega; main unchanged. AI review mein safe code AI service ko bheja jayega.</p>
       <div className="flex flex-wrap gap-2">
-        <Button disabled={busy || disabled} onClick={() => void connect()}><Github />{output.connected ? "Reconnect GitHub" : "Connect GitHub"}</Button>
-        {output.connected === true && <Button variant="outline" disabled={busy || disabled} onClick={() => void act(() => load())}>Select repository</Button>}
+        <Button disabled={busy || disabled} onClick={() => void connect()}><Github />{output['connected'] ? "Reconnect GitHub" : "Connect GitHub"}</Button>
+        {output['connected'] === true && <Button variant="outline" disabled={busy || disabled} onClick={() => void act(() => load())}>Select repository</Button>}
       </div>
       <div className="max-h-60 overflow-auto">{repos.map(repo => <Button key={repo.id} variant={chosen === repo.name ? "secondary" : "ghost"} disabled={busy || !repo.canPush} onClick={() => setChosen(repo.name)} className="h-auto w-full justify-start whitespace-normal text-left"><Github className="shrink-0" /><span className="min-w-0 break-all">{repo.name}</span></Button>)}</div>
       {more && <Button variant="outline" disabled={busy} onClick={() => void act(() => load(page + 1))}>Load more</Button>}
