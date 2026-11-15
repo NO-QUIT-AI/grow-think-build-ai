@@ -2,7 +2,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { tool } from "ai";
 import { generateResponse } from "@lovable.dev/ai-gateway";
-import { githubRequest } from "./github.server";
+import { githubRequest, readCode } from "./github.server";
+import { githubChatTools } from "./github-chat-tools";
 import { readableCode } from "./github-rules";
 import { updatePath, updateChanges, validateUpdatePaths, assertUpdateBranch, assertUpdateApproval } from "./self-update-rules";
 
@@ -94,7 +95,27 @@ export async function pushSelfUpdate(sb: SupabaseClient, userId: string, id: str
   } catch (error) { await admin.from("github_self_updates").update({ status: "failed" }).eq("id", id).eq("user_id", userId); throw error; }
 }
 export function selfUpdateTools(sb: SupabaseClient, userId: string) {
+  const chatTools = githubChatTools({
+    connect: async () => {
+      await requireSelfOwner(sb, userId);
+      const admin = await db();
+      const results = await Promise.all([
+        admin.from("app_user_connections").select("user_id").eq("user_id", userId).eq("connector_id", "github").maybeSingle(),
+        admin.from("github_workspaces").select("repo").eq("user_id", userId).maybeSingle(),
+        admin.from("github_self_repos").select("repo").eq("user_id", userId).maybeSingle(),
+      ]);
+      for (const result of results) if (result.error) throw result.error;
+      const connected = !!results[0].data;
+      const selectedRepo = results[1].data?.repo ?? null;
+      const repo = results[2].data?.repo ?? null;
+      const ready = connected && !!repo && selectedRepo === repo;
+      return { connected, selectedRepo, ownRepo: repo, ready, chatAction: ready ? null : "github_connect", message: ready ? "GitHub ready; read files or prepare a branch preview." : "Use the GitHub control in this chat to consent and select your own repository." };
+    },
+    read: async path => { await requireSelfOwner(sb, userId); return readCode(userId, await ownRepo(userId), path); },
+    prepare: request => prepareSelfUpdate(sb, userId, request),
+  });
   return {
+    ...chatTools,
     github_self_update_status: tool({ description: "Check before any GitHub self-update: is owner's GitHub connected, which repo is selected and designated as NO QUIT AI own repo, and pending approvals. Read only.", inputSchema: z.object({}), execute: async () => {
       await requireSelfOwner(sb, userId);
       const admin = await db();

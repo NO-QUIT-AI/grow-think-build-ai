@@ -1,4 +1,5 @@
 # Pending completion
+- [ ] Expose github_connect, github_read_file and github_push_branch in owner chat with inline consent/repo selection and persisted Before/After approval; preserve manual GitHub UI.
 - [x] Add owner-only self-updating GitHub workflow: explicitly bind own repo, main-chat prepare tool, immutable multi-file before/after previews, explicit one-use approval and new-branch-only commits with stale-base checks; nine GitHub/safety tests pass. No automatic merge/deploy; designated self repo also blocks legacy direct fix pushes.
 - [ ] Verify real self-update feature → approved new GitHub branch end-to-end (requires owner GitHub consent and designation of this app's own repository); publish only on request.
 - [x] Add per-user GitHub Connect in AI Tools: encrypted OAuth storage, selected-repo folder/file viewer, incremental AI findings, per-file before/after fixes and one-use SHA-checked approved push. Four permission tests pass; signed-in OAuth reaches provider, cancelled consent stays disconnected, mobile no overflow, no page errors, build OK; schema confirmed present.
