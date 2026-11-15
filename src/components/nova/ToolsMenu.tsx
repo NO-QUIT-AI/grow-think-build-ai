@@ -2,7 +2,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Camera, ChevronRight, FileText, Flashlight, Globe, Hammer, History, ImageIcon, Instagram,
-  Link2, MessageCircle, Mic, Music, Phone, Plus, Radio, Search, FileSearch, Clapperboard, Radar,
+  Link2, MessageCircle, Mic, Music, Phone, Plus, Radio, Search, FileSearch, Clapperboard, Radar, ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -28,6 +28,7 @@ const TOOLS: Tool[] = [
   { id: "camera", name: "Camera", icon: Camera, section: "PHONE TOOLS" },
   { id: "instagram", name: "Instagram Opener", icon: Instagram, section: "PHONE TOOLS" },
   { id: "jalsa", name: "Jalsa Mode (Local Chat)", icon: Radio, section: "PHONE TOOLS" },
+  { id: "security", name: "Security Center / Hifazat", icon: ShieldCheck, section: "PHONE TOOLS" },
   { id: "t2i", name: "Text to Image", icon: ImageIcon, section: "AI TOOLS" },
   { id: "auto-video", name: "Auto Story to Video", icon: Clapperboard, section: "AI TOOLS" },
   { id: "byok-video", name: "BYOK Movie Maker", icon: Clapperboard, section: "AI TOOLS" },
@@ -82,6 +83,7 @@ export function ToolsMenu({ onNewChat, onClose, history }: { onNewChat: () => vo
       case "auto-video": onClose(); void navigate({ to: "/auto-video" }); return;
       case "byok-video": onClose(); void navigate({ to: "/byok-video" }); return;
       case "scout": onClose(); void navigate({ to: "/scout" }); return;
+      case "security": onClose(); void navigate({ to: "/security-center" }); return;
       case "whatsapp": case "call": setModal(id); return;
       case "music": open("https://music.youtube.com"); return;
       case "flash": void toggleTorch(); return;

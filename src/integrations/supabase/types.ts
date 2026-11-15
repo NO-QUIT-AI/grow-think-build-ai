@@ -1009,6 +1009,30 @@ export type Database = {
         }
         Relationships: []
       }
+      security_backup_settings: {
+        Row: {
+          auto_enabled: boolean
+          last_backup_at: string | null
+          object_id: string | null
+          row_count: number
+          user_id: string
+        }
+        Insert: {
+          auto_enabled?: boolean
+          last_backup_at?: string | null
+          object_id?: string | null
+          row_count?: number
+          user_id: string
+        }
+        Update: {
+          auto_enabled?: boolean
+          last_backup_at?: string | null
+          object_id?: string | null
+          row_count?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       tool_audit_log: {
         Row: {
           args: Json | null
