@@ -1,3 +1,4 @@
+/// <reference types="bun" />
 import { describe, expect, it } from "bun:test";
 import { backupDue, deviceSafetyScore, linkWarnings } from "./security-safety";
 import { encryptBackup, decryptBackup } from "./security-crypto";
