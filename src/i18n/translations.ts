@@ -107,7 +107,7 @@ export const translations = {
     download: "Download",
     imageAttached: "Image attached — describe the change, then send.",
     imageInstruction: "What should change in the image…",
-    askNewQuestion: "Ask a new question...",
+    askNewQuestion: "Build anything...",
     imageOnly: "Please choose an image file",
     imageTooLarge: "Image must be under 30MB",
     imageLoadFailed: "Could not load the image. Try again.",
