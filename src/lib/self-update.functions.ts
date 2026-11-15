@@ -31,9 +31,12 @@ export const approveSelfUpdate = createServerFn({ method: "POST" }).middleware([
   const { pushSelfUpdate } = await import("./self-update.server");
   return pushSelfUpdate(context.supabase, context.userId, data.id, data.confirmed);
 });
+export const chatGitHubProposals = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  const { data, error } = await context.supabase.from("github_self_updates").select("*").eq("user_id", context.userId).order("created_at", { ascending: false }).limit(10);
+  if (error) throw error;
+  return { proposals: data ?? [] };
+});
 export const discardSelfUpdate = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).inputValidator(i => z.object({ id: z.string().uuid() }).parse(i)).handler(async ({ context, data }) => {
-  const { requireSelfOwner } = await import("./self-update.server");
-  await requireSelfOwner(context.supabase, context.userId);
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { error } = await supabaseAdmin.from("github_self_updates").update({ status: "discarded" }).eq("id", data.id).eq("user_id", context.userId).eq("status", "pending");
   if (error) throw error;

@@ -83,7 +83,7 @@ export function guardTools<T extends Record<string,unknown>>(tools:T,userId:stri
     const execute=t.execute;
     out[name]={...t,execute:async(input:unknown,options:unknown)=>{
       if(waiting) return {error:"Wait for the user's approval button."};
-      if(name!=="prepare_plan" && planNeedsApproval(calls,!!plan)) return {error:"Plan approval required. Call prepare_plan and wait for the user's button click."};
+      if(name!=="prepare_plan" && !name.startsWith("github_") && planNeedsApproval(calls,!!plan)) return {error:"Plan approval required. Call prepare_plan and wait for the user's button click."};
       if(plan && calls>=plan.steps.length) {waiting=true;onWait();return {error:"Approved plan exhausted. Prepare a new plan for additional work."};}
       const estimate=ESTIMATED_TOOL_USD[name]??0;
       const db=await admin();

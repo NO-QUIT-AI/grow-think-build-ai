@@ -18,14 +18,25 @@ async function ownRepo(userId: string) {
   if (!data) throw new Error("GitHub Connect mein apna NO QUIT AI repo designate karein.");
   return data.repo;
 }
+// Chat GitHub uses the same per-user connection as GitHub Connect: owner's designated repo, else the repo selected on that page.
+async function chatRepo(userId: string) {
+  const admin = await db();
+  const [own, ws] = await Promise.all([
+    admin.from("github_self_repos").select("repo").eq("user_id", userId).maybeSingle(),
+    admin.from("github_workspaces").select("repo").eq("user_id", userId).maybeSingle(),
+  ]);
+  if (own.error || ws.error) throw own.error || ws.error;
+  const repo = own.data?.repo ?? ws.data?.repo;
+  if (!repo) throw new Error("GitHub Connect page par pehle repo select karein.");
+  return repo as string;
+}
 async function jsonAI(instructions: string, input: string) {
   const reply = await generateResponse({ model: "openai/gpt-6-astra", reasoning: { effort: "low" }, instructions, input: `Return JSON only.\n${input}` });
   const text = reply.output.flatMap(i => i.type === "message" ? i.content.flatMap(p => p.type === "output_text" ? [p.text] : []) : []).join("\n");
   return JSON.parse(text.replace(/^```(?:json)?\s*/, "").replace(/\s*```$/, "")) as unknown;
 }
-export async function prepareSelfUpdate(sb: SupabaseClient, userId: string, request: string) {
-  await requireSelfOwner(sb, userId);
-  const repo = await ownRepo(userId);
+export async function prepareSelfUpdate(_sb: SupabaseClient, userId: string, request: string) {
+  const repo = await chatRepo(userId);
   const info = await githubRequest(userId, `/repos/${repo}`) as { default_branch: string; permissions?: { push?: boolean } };
   if (!info.permissions?.push) throw new Error("Is repo par write permission chahiye.");
   const base = await githubRequest(userId, `/repos/${repo}/git/ref/heads/${encodeURIComponent(info.default_branch)}`) as { object: { sha: string } };
@@ -62,12 +73,11 @@ export async function prepareSelfUpdate(sb: SupabaseClient, userId: string, requ
   if (error) throw error;
   return { previewId: id, repo, branch: target, summary: result.summary, needsApproval: true, reviewUrl: "/github-connect" };
 }
-export async function pushSelfUpdate(sb: SupabaseClient, userId: string, id: string, confirmed: boolean) {
-  await requireSelfOwner(sb, userId);
+export async function pushSelfUpdate(_sb: SupabaseClient, userId: string, id: string, confirmed: boolean) {
   const admin = await db();
   const { data: p, error } = await admin.from("github_self_updates").select("*").eq("id", id).eq("user_id", userId).single();
   if (error || !p) throw new Error("Preview unavailable.");
-  if (p.repo !== await ownRepo(userId)) throw new Error("Own repo selection changed; fresh preview required.");
+  if (p.repo !== await chatRepo(userId)) throw new Error("Own repo selection changed; fresh preview required.");
   if (Date.now() - Date.parse(p.created_at) > 3600000) throw new Error("Preview expired; fresh preview banayein.");
   assertUpdateBranch(p.base_branch, p.target_branch);
   const current = await githubRequest(userId, `/repos/${p.repo}/git/ref/heads/${encodeURIComponent(p.base_branch)}`) as { object: { sha: string } };
@@ -97,7 +107,6 @@ export async function pushSelfUpdate(sb: SupabaseClient, userId: string, id: str
 export function selfUpdateTools(sb: SupabaseClient, userId: string) {
   const chatTools = githubChatTools({
     connect: async () => {
-      await requireSelfOwner(sb, userId);
       const admin = await db();
       const results = await Promise.all([
         admin.from("app_user_connections").select("user_id").eq("user_id", userId).eq("connector_id", "github").maybeSingle(),
@@ -108,16 +117,15 @@ export function selfUpdateTools(sb: SupabaseClient, userId: string) {
       const connected = !!results[0].data;
       const selectedRepo = results[1].data?.repo ?? null;
       const repo = results[2].data?.repo ?? null;
-      const ready = connected && !!repo && selectedRepo === repo;
-      return { connected, selectedRepo, ownRepo: repo, ready, chatAction: ready ? null : "github_connect", message: ready ? "GitHub ready; read files or prepare a branch preview." : "Use the GitHub control in this chat to consent and select your own repository." };
+      const ready = connected && !!(repo ?? selectedRepo);
+      return { connected, selectedRepo, ownRepo: repo, repo: repo ?? selectedRepo, ready, chatAction: ready ? null : "github_connect", message: ready ? "GitHub ready; read files or prepare a branch preview." : "Use the GitHub control in this chat to consent and select your own repository." };
     },
-    read: async path => { await requireSelfOwner(sb, userId); return readCode(userId, await ownRepo(userId), path); },
+    read: async path => readCode(userId, await chatRepo(userId), path),
     prepare: request => prepareSelfUpdate(sb, userId, request),
   });
   return {
     ...chatTools,
     github_self_update_status: tool({ description: "Check before any GitHub self-update: is owner's GitHub connected, which repo is selected and designated as NO QUIT AI own repo, and pending approvals. Read only.", inputSchema: z.object({}), execute: async () => {
-      await requireSelfOwner(sb, userId);
       const admin = await db();
       const [{ data: conn }, { data: ws }, { data: own }, { data: pending }] = await Promise.all([
         admin.from("app_user_connections").select("user_id").eq("user_id", userId).eq("connector_id", "github").maybeSingle(),
