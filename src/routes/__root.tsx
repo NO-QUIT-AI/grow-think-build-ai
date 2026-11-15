@@ -19,6 +19,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { initAdsConfig } from "@/lib/adsense";
 import { LanguageProvider } from "@/i18n/LanguageContext";
 import { registerAppOfflineScreen } from "@/lib/pwa-registration";
+import { SecuritySafeguards } from "@/components/SecuritySafeguards";
 
 function NotFoundComponent() {
   return (
@@ -183,6 +184,7 @@ function RootComponent() {
       <LanguageProvider>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
+        <SecuritySafeguards />
         {!androidPage && <InstallAppBanner />}
         {!androidPage && <IncomingCallListener />}
         {!androidPage && <HelpAssistant />}
