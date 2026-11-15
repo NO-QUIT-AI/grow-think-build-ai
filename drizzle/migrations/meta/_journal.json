@@ -183,6 +183,13 @@
       "when": 1794730084291,
       "tag": "0025_security_backup_preferences",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1794753635013,
+      "tag": "0026_github_user_connections_and_reviews",
+      "breakpoints": true
     }
   ]
 }

@@ -2,7 +2,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Camera, ChevronRight, FileText, Flashlight, Globe, Hammer, History, ImageIcon, Instagram,
-  Link2, MessageCircle, Mic, Music, Phone, Plus, Radio, Search, FileSearch, Clapperboard, Radar, ShieldCheck,
+  Link2, MessageCircle, Mic, Music, Phone, Plus, Radio, Search, FileSearch, Clapperboard, Radar, ShieldCheck, Github,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -35,6 +35,7 @@ const TOOLS: Tool[] = [
   { id: "pdf", name: "PDF Reader", icon: FileSearch, section: "AI TOOLS" },
   { id: "voice", name: "Voice Tools", icon: Mic, section: "AI TOOLS" },
   { id: "scout", name: "Scott Coach / Master Scout Agent", icon: Radar, section: "AI TOOLS" },
+  { id: "github", name: "GitHub Connect", icon: Github, section: "AI TOOLS" },
   { id: "space", name: "Space Photo (NASA)", icon: ImageIcon, section: "AI TOOLS" },
 ];
 
@@ -83,6 +84,7 @@ export function ToolsMenu({ onNewChat, onClose, history }: { onNewChat: () => vo
       case "auto-video": onClose(); void navigate({ to: "/auto-video" }); return;
       case "byok-video": onClose(); void navigate({ to: "/byok-video" }); return;
       case "scout": onClose(); void navigate({ to: "/scout" }); return;
+      case "github": onClose(); void navigate({ to: "/github-connect" }); return;
       case "security": onClose(); void navigate({ to: "/security-center" }); return;
       case "whatsapp": case "call": setModal(id); return;
       case "music": open("https://music.youtube.com"); return;

@@ -23,6 +23,7 @@ import { Route as CvRouteImport } from './routes/cv'
 import { Route as DeleteAccountRouteImport } from './routes/delete-account'
 import { Route as DeleteDataRouteImport } from './routes/delete-data'
 import { Route as EarnRouteImport } from './routes/earn'
+import { Route as GithubConnectRouteImport } from './routes/github-connect'
 import { Route as HowToUseRouteImport } from './routes/how-to-use'
 import { Route as InviteRouteImport } from './routes/invite'
 import { Route as JalsaChatRouteImport } from './routes/jalsa-chat'
@@ -67,6 +68,7 @@ import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as ApiMindThinkRouteImport } from './routes/api/mind/think'
 import { Route as ApiPublicAccountDeletionRouteImport } from './routes/api/public/account-deletion'
 import { Route as ApiPublicErrorReportRouteImport } from './routes/api/public/error-report'
+import { Route as ApiPublicGithubReturnRouteImport } from './routes/api/public/github-return'
 import { Route as ApiPublicR2VideoRouteImport } from './routes/api/public/r2-video'
 import { Route as ApiPublicJobsDailyReportRouteImport } from './routes/api/public/jobs/daily-report'
 
@@ -138,6 +140,11 @@ const DeleteDataRoute = DeleteDataRouteImport.update({
 const EarnRoute = EarnRouteImport.update({
   id: '/earn',
   path: '/earn',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GithubConnectRoute = GithubConnectRouteImport.update({
+  id: '/github-connect',
+  path: '/github-connect',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HowToUseRoute = HowToUseRouteImport.update({
@@ -361,6 +368,11 @@ const ApiPublicErrorReportRoute = ApiPublicErrorReportRouteImport.update({
   path: '/api/public/error-report',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicGithubReturnRoute = ApiPublicGithubReturnRouteImport.update({
+  id: '/api/public/github-return',
+  path: '/api/public/github-return',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicR2VideoRoute = ApiPublicR2VideoRouteImport.update({
   id: '/api/public/r2-video',
   path: '/api/public/r2-video',
@@ -388,6 +400,7 @@ export interface FileRoutesByFullPath {
   '/delete-account': typeof DeleteAccountRoute
   '/delete-data': typeof DeleteDataRoute
   '/earn': typeof EarnRoute
+  '/github-connect': typeof GithubConnectRoute
   '/how-to-use': typeof HowToUseRoute
   '/invite': typeof InviteRoute
   '/jalsa-chat': typeof JalsaChatRoute
@@ -432,6 +445,7 @@ export interface FileRoutesByFullPath {
   '/api/mind/think': typeof ApiMindThinkRoute
   '/api/public/account-deletion': typeof ApiPublicAccountDeletionRoute
   '/api/public/error-report': typeof ApiPublicErrorReportRoute
+  '/api/public/github-return': typeof ApiPublicGithubReturnRoute
   '/api/public/r2-video': typeof ApiPublicR2VideoRoute
   '/api/public/jobs/daily-report': typeof ApiPublicJobsDailyReportRoute
 }
@@ -450,6 +464,7 @@ export interface FileRoutesByTo {
   '/delete-account': typeof DeleteAccountRoute
   '/delete-data': typeof DeleteDataRoute
   '/earn': typeof EarnRoute
+  '/github-connect': typeof GithubConnectRoute
   '/how-to-use': typeof HowToUseRoute
   '/invite': typeof InviteRoute
   '/jalsa-chat': typeof JalsaChatRoute
@@ -494,6 +509,7 @@ export interface FileRoutesByTo {
   '/api/mind/think': typeof ApiMindThinkRoute
   '/api/public/account-deletion': typeof ApiPublicAccountDeletionRoute
   '/api/public/error-report': typeof ApiPublicErrorReportRoute
+  '/api/public/github-return': typeof ApiPublicGithubReturnRoute
   '/api/public/r2-video': typeof ApiPublicR2VideoRoute
   '/api/public/jobs/daily-report': typeof ApiPublicJobsDailyReportRoute
 }
@@ -513,6 +529,7 @@ export interface FileRoutesById {
   '/delete-account': typeof DeleteAccountRoute
   '/delete-data': typeof DeleteDataRoute
   '/earn': typeof EarnRoute
+  '/github-connect': typeof GithubConnectRoute
   '/how-to-use': typeof HowToUseRoute
   '/invite': typeof InviteRoute
   '/jalsa-chat': typeof JalsaChatRoute
@@ -557,6 +574,7 @@ export interface FileRoutesById {
   '/api/mind/think': typeof ApiMindThinkRoute
   '/api/public/account-deletion': typeof ApiPublicAccountDeletionRoute
   '/api/public/error-report': typeof ApiPublicErrorReportRoute
+  '/api/public/github-return': typeof ApiPublicGithubReturnRoute
   '/api/public/r2-video': typeof ApiPublicR2VideoRoute
   '/api/public/jobs/daily-report': typeof ApiPublicJobsDailyReportRoute
 }
@@ -577,6 +595,7 @@ export interface FileRouteTypes {
     | '/delete-account'
     | '/delete-data'
     | '/earn'
+    | '/github-connect'
     | '/how-to-use'
     | '/invite'
     | '/jalsa-chat'
@@ -621,6 +640,7 @@ export interface FileRouteTypes {
     | '/api/mind/think'
     | '/api/public/account-deletion'
     | '/api/public/error-report'
+    | '/api/public/github-return'
     | '/api/public/r2-video'
     | '/api/public/jobs/daily-report'
   fileRoutesByTo: FileRoutesByTo
@@ -639,6 +659,7 @@ export interface FileRouteTypes {
     | '/delete-account'
     | '/delete-data'
     | '/earn'
+    | '/github-connect'
     | '/how-to-use'
     | '/invite'
     | '/jalsa-chat'
@@ -683,6 +704,7 @@ export interface FileRouteTypes {
     | '/api/mind/think'
     | '/api/public/account-deletion'
     | '/api/public/error-report'
+    | '/api/public/github-return'
     | '/api/public/r2-video'
     | '/api/public/jobs/daily-report'
   id:
@@ -701,6 +723,7 @@ export interface FileRouteTypes {
     | '/delete-account'
     | '/delete-data'
     | '/earn'
+    | '/github-connect'
     | '/how-to-use'
     | '/invite'
     | '/jalsa-chat'
@@ -745,6 +768,7 @@ export interface FileRouteTypes {
     | '/api/mind/think'
     | '/api/public/account-deletion'
     | '/api/public/error-report'
+    | '/api/public/github-return'
     | '/api/public/r2-video'
     | '/api/public/jobs/daily-report'
   fileRoutesById: FileRoutesById
@@ -764,6 +788,7 @@ export interface RootRouteChildren {
   DeleteAccountRoute: typeof DeleteAccountRoute
   DeleteDataRoute: typeof DeleteDataRoute
   EarnRoute: typeof EarnRoute
+  GithubConnectRoute: typeof GithubConnectRoute
   HowToUseRoute: typeof HowToUseRoute
   InviteRoute: typeof InviteRoute
   JalsaChatRoute: typeof JalsaChatRoute
@@ -807,6 +832,7 @@ export interface RootRouteChildren {
   BlogIndexRoute: typeof BlogIndexRoute
   ApiPublicAccountDeletionRoute: typeof ApiPublicAccountDeletionRoute
   ApiPublicErrorReportRoute: typeof ApiPublicErrorReportRoute
+  ApiPublicGithubReturnRoute: typeof ApiPublicGithubReturnRoute
   ApiPublicR2VideoRoute: typeof ApiPublicR2VideoRoute
   ApiPublicJobsDailyReportRoute: typeof ApiPublicJobsDailyReportRoute
 }
@@ -909,6 +935,13 @@ declare module '@tanstack/react-router' {
       path: '/earn'
       fullPath: '/earn'
       preLoaderRoute: typeof EarnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/github-connect': {
+      id: '/github-connect'
+      path: '/github-connect'
+      fullPath: '/github-connect'
+      preLoaderRoute: typeof GithubConnectRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/how-to-use': {
@@ -1219,6 +1252,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicErrorReportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/github-return': {
+      id: '/api/public/github-return'
+      path: '/api/public/github-return'
+      fullPath: '/api/public/github-return'
+      preLoaderRoute: typeof ApiPublicGithubReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/r2-video': {
       id: '/api/public/r2-video'
       path: '/api/public/r2-video'
@@ -1262,6 +1302,7 @@ const rootRouteChildren: RootRouteChildren = {
   DeleteAccountRoute: DeleteAccountRoute,
   DeleteDataRoute: DeleteDataRoute,
   EarnRoute: EarnRoute,
+  GithubConnectRoute: GithubConnectRoute,
   HowToUseRoute: HowToUseRoute,
   InviteRoute: InviteRoute,
   JalsaChatRoute: JalsaChatRoute,
@@ -1305,6 +1346,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogIndexRoute: BlogIndexRoute,
   ApiPublicAccountDeletionRoute: ApiPublicAccountDeletionRoute,
   ApiPublicErrorReportRoute: ApiPublicErrorReportRoute,
+  ApiPublicGithubReturnRoute: ApiPublicGithubReturnRoute,
   ApiPublicR2VideoRoute: ApiPublicR2VideoRoute,
   ApiPublicJobsDailyReportRoute: ApiPublicJobsDailyReportRoute,
 }
