@@ -67,6 +67,7 @@ import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as ApiMindThinkRouteImport } from './routes/api/mind/think'
 import { Route as ApiPublicAccountDeletionRouteImport } from './routes/api/public/account-deletion'
 import { Route as ApiPublicErrorReportRouteImport } from './routes/api/public/error-report'
+import { Route as ApiPublicGithubReturnRouteImport } from './routes/api/public/github-return'
 import { Route as ApiPublicR2VideoRouteImport } from './routes/api/public/r2-video'
 import { Route as ApiPublicJobsDailyReportRouteImport } from './routes/api/public/jobs/daily-report'
 
@@ -361,6 +362,11 @@ const ApiPublicErrorReportRoute = ApiPublicErrorReportRouteImport.update({
   path: '/api/public/error-report',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicGithubReturnRoute = ApiPublicGithubReturnRouteImport.update({
+  id: '/api/public/github-return',
+  path: '/api/public/github-return',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicR2VideoRoute = ApiPublicR2VideoRouteImport.update({
   id: '/api/public/r2-video',
   path: '/api/public/r2-video',
@@ -432,6 +438,7 @@ export interface FileRoutesByFullPath {
   '/api/mind/think': typeof ApiMindThinkRoute
   '/api/public/account-deletion': typeof ApiPublicAccountDeletionRoute
   '/api/public/error-report': typeof ApiPublicErrorReportRoute
+  '/api/public/github-return': typeof ApiPublicGithubReturnRoute
   '/api/public/r2-video': typeof ApiPublicR2VideoRoute
   '/api/public/jobs/daily-report': typeof ApiPublicJobsDailyReportRoute
 }
@@ -494,6 +501,7 @@ export interface FileRoutesByTo {
   '/api/mind/think': typeof ApiMindThinkRoute
   '/api/public/account-deletion': typeof ApiPublicAccountDeletionRoute
   '/api/public/error-report': typeof ApiPublicErrorReportRoute
+  '/api/public/github-return': typeof ApiPublicGithubReturnRoute
   '/api/public/r2-video': typeof ApiPublicR2VideoRoute
   '/api/public/jobs/daily-report': typeof ApiPublicJobsDailyReportRoute
 }
@@ -557,6 +565,7 @@ export interface FileRoutesById {
   '/api/mind/think': typeof ApiMindThinkRoute
   '/api/public/account-deletion': typeof ApiPublicAccountDeletionRoute
   '/api/public/error-report': typeof ApiPublicErrorReportRoute
+  '/api/public/github-return': typeof ApiPublicGithubReturnRoute
   '/api/public/r2-video': typeof ApiPublicR2VideoRoute
   '/api/public/jobs/daily-report': typeof ApiPublicJobsDailyReportRoute
 }
@@ -621,6 +630,7 @@ export interface FileRouteTypes {
     | '/api/mind/think'
     | '/api/public/account-deletion'
     | '/api/public/error-report'
+    | '/api/public/github-return'
     | '/api/public/r2-video'
     | '/api/public/jobs/daily-report'
   fileRoutesByTo: FileRoutesByTo
@@ -683,6 +693,7 @@ export interface FileRouteTypes {
     | '/api/mind/think'
     | '/api/public/account-deletion'
     | '/api/public/error-report'
+    | '/api/public/github-return'
     | '/api/public/r2-video'
     | '/api/public/jobs/daily-report'
   id:
@@ -745,6 +756,7 @@ export interface FileRouteTypes {
     | '/api/mind/think'
     | '/api/public/account-deletion'
     | '/api/public/error-report'
+    | '/api/public/github-return'
     | '/api/public/r2-video'
     | '/api/public/jobs/daily-report'
   fileRoutesById: FileRoutesById
@@ -807,6 +819,7 @@ export interface RootRouteChildren {
   BlogIndexRoute: typeof BlogIndexRoute
   ApiPublicAccountDeletionRoute: typeof ApiPublicAccountDeletionRoute
   ApiPublicErrorReportRoute: typeof ApiPublicErrorReportRoute
+  ApiPublicGithubReturnRoute: typeof ApiPublicGithubReturnRoute
   ApiPublicR2VideoRoute: typeof ApiPublicR2VideoRoute
   ApiPublicJobsDailyReportRoute: typeof ApiPublicJobsDailyReportRoute
 }
@@ -1219,6 +1232,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicErrorReportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/github-return': {
+      id: '/api/public/github-return'
+      path: '/api/public/github-return'
+      fullPath: '/api/public/github-return'
+      preLoaderRoute: typeof ApiPublicGithubReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/r2-video': {
       id: '/api/public/r2-video'
       path: '/api/public/r2-video'
@@ -1305,6 +1325,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogIndexRoute: BlogIndexRoute,
   ApiPublicAccountDeletionRoute: ApiPublicAccountDeletionRoute,
   ApiPublicErrorReportRoute: ApiPublicErrorReportRoute,
+  ApiPublicGithubReturnRoute: ApiPublicGithubReturnRoute,
   ApiPublicR2VideoRoute: ApiPublicR2VideoRoute,
   ApiPublicJobsDailyReportRoute: ApiPublicJobsDailyReportRoute,
 }
