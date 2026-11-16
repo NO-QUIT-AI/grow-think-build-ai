@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { tool } from "ai";
-import { generateResponse } from "@lovable.dev/ai-gateway";
+import { aiText } from "./ai-provider.server";
 import { githubRequest, readCode } from "./github.server";
 import { githubChatTools } from "./github-chat-tools";
 import { readableCode } from "./github-rules";
@@ -32,8 +32,7 @@ async function chatRepo(userId: string) {
   return repo as string;
 }
 async function jsonAI(instructions: string, input: string) {
-  const reply = await generateResponse({ model: "openai/gpt-6-astra", reasoning: { effort: "low" }, instructions, input: `Return JSON only.\n${input}` });
-  const text = reply.output.flatMap(i => i.type === "message" ? i.content.flatMap(p => p.type === "output_text" ? [p.text] : []) : []).join("\n");
+  const text = await aiText(instructions, `Return JSON only.\n${input}`);
   return JSON.parse(text.replace(/^```(?:json)?\s*/, "").replace(/\s*```$/, "")) as unknown;
 }
 async function allowedRepos(userId: string) {
