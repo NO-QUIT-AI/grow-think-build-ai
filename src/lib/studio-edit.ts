@@ -1,4 +1,3 @@
-export const STUDIO_MODEL = "anthropic/claude-sonnet-5";
 export type StudioContext = { memoryId: string; code: string };
 
 export function editedCode(text: string) {
