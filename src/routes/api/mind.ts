@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
-import { streamText, Output } from "ai";
+import { generateText, Output } from "ai";
 import { z } from "zod";
 
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { createAIModel } from "@/lib/ai-provider.server";
 
 function userClient(token: string) {
   const url = process.env["SUPABASE_URL"]!;
@@ -33,8 +33,6 @@ export const Route = createFileRoute("/api/mind")({
         if (userError || !userData.user) return new Response("Unauthorized", { status: 401 });
         const userId = userData.user.id;
 
-        const apiKey = process.env["LOVABLE_API_KEY"];
-        if (!apiKey) return new Response("AI is not configured", { status: 500 });
 
         const [{ data: known }, { data: builds }] = await Promise.all([
           supabase
@@ -51,10 +49,11 @@ export const Route = createFileRoute("/api/mind")({
             .limit(15),
         ]);
 
-        const gateway = createLovableAiGatewayProvider(apiKey);
-
-        const result = streamText({
-          model: gateway("google/gemini-3.7-flash"),
+        try {
+        const result = await generateText({
+          model: createAIModel(),
+          maxRetries: 0,
+          abortSignal: request.signal,
           system:
             "Tum NO QUIT AI ka 'Mind' ho — background thinking engine. Tumhara kaam: user ki maujooda knowledge aur builds dekh kar khud se EK naya, useful, non-duplicate insight/idea/next-step nikalna aur usay memory me add karna. Roman Urdu me likho, short aur actionable. Jo pehle se maujood hai wo dobara mat likho.",
           prompt: `Maujooda memories:\n${(known ?? [])
@@ -65,8 +64,7 @@ export const Route = createFileRoute("/api/mind")({
           output: Output.object({ schema: InsightSchema }),
         });
 
-        try {
-          const insight = await result.output;
+          const insight = result.output;
           const row = {
             user_id: userId,
             topic: insight.topic.slice(0, 120),

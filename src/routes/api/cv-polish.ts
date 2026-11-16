@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { generateText } from "ai";
 
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { createAIModel } from "@/lib/ai-provider.server";
+import { userFromRequest } from "@/lib/auth-user.server";
 import { LANGUAGES, type Lang } from "@/i18n/translations";
 
 type Body = { data?: Record<string, unknown>; lang?: unknown };
@@ -25,26 +25,16 @@ export const Route = createFileRoute("/api/cv-polish")({
     handlers: {
       POST: async ({ request }) => {
         const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
-        if (!token) return new Response("Unauthorized", { status: 401 });
+        if (!token || !await userFromRequest(request)) return new Response("Unauthorized", { status: 401 });
 
         const body = (await request.json()) as Body;
         if (!body.data) return new Response("CV data is required", { status: 400 });
 
-        const apiKey = process.env["LOVABLE_API_KEY"];
-        const deepseekKey = process.env["DEEPSEEK_API_KEY"];
-        if (!apiKey && !deepseekKey) return new Response("AI is not configured", { status: 500 });
-
-        const model = deepseekKey
-          ? createOpenAICompatible({
-              name: "deepseek",
-              baseURL: "https://api.deepseek.com",
-              apiKey: deepseekKey,
-            }).chatModel("deepseek-chat")
-          : createLovableAiGatewayProvider(apiKey!)("google/gemini-3.7-flash");
-
         try {
           const { text } = await generateText({
-            model,
+            model: createAIModel(),
+            maxRetries: 0,
+            abortSignal: request.signal,
             system: `${SYSTEM}\nSelected language: ${LANGUAGE_NAMES[validLang(body.lang)]}. All generated prose must use this language.`,
             prompt: JSON.stringify(body.data).slice(0, 12_000),
           });
