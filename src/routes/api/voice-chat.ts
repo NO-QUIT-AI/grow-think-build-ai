@@ -11,20 +11,6 @@ Remember context, never repeat a question you already asked.`;
 
 type Msg = { role: "user" | "assistant"; content: string };
 
-async function callOpenAI(url: string, key: string, model: string, messages: Msg[]) {
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
-    body: JSON.stringify({ model, messages: [{ role: "system", content: VOICE_PROMPT }, ...messages], temperature: 0.8 }),
-  });
-  if (!res.ok) throw new Error(`${model} ${res.status}`);
-  const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
-  const text = json.choices?.[0]?.message?.content?.trim();
-  if (!text) throw new Error("empty");
-  return text;
-}
-
-/** Voice mode: pehle Groq, credit/error par DeepSeek. */
 export const Route = createFileRoute("/api/voice-chat")({
   server: {
     handlers: {
@@ -43,18 +29,10 @@ export const Route = createFileRoute("/api/voice-chat")({
           ? "User is speaking ENGLISH. Reply ONLY in casual English, e.g. \"I'm great bro, what's up?\""
           : "Reply in the exact same language and script as the user's last message.";
         messages.push({ role: "user", content: `(Instruction: ${langRule})` });
-        const groq = process.env["GROQ_API_KEY"];
-        const deepseek = process.env["DEEPSEEK_API_KEY"];
-        const providers: (() => Promise<string>)[] = [];
-        if (groq) providers.push(() => callOpenAI("https://api.groq.com/openai/v1/chat/completions", groq, "llama-3.1-8b-instant", messages));
-        if (deepseek) providers.push(() => callOpenAI("https://api.deepseek.com/chat/completions", deepseek, "deepseek-chat", messages));
-        for (const run of providers) {
-          try {
-            return Response.json({ text: await run() });
-          } catch (e) {
-            console.error("[voice-chat]", e);
-          }
-        }
+        try {
+          const { aiText } = await import("@/lib/ai-provider.server");
+          return Response.json({ text: await aiText(VOICE_PROMPT, messages, request.signal) });
+        } catch { console.warn("[voice-chat] providers unavailable"); }
         return new Response("Voice AI unavailable", { status: 503 });
       },
     },

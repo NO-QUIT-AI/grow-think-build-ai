@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
-import { streamText, Output } from "ai";
+import { generateText, Output } from "ai";
 import { z } from "zod";
 
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { createAIModel } from "@/lib/ai-provider.server";
 import { LANGUAGES, type Lang } from "@/i18n/translations";
 
 const LANGUAGE_NAMES: Record<Lang, string> = { en: "English", ur: "Urdu", hi: "Hindi", ar: "Arabic" };
@@ -38,8 +38,6 @@ export const Route = createFileRoute("/api/mind/think")({
         if (userError || !userData.user) return new Response("Unauthorized", { status: 401 });
         const userId = userData.user.id;
 
-        const apiKey = process.env["LOVABLE_API_KEY"];
-        if (!apiKey) return new Response("AI is not configured", { status: 500 });
 
         const [{ data: memories }, { data: past }] = await Promise.all([
           supabase
@@ -63,18 +61,18 @@ export const Route = createFileRoute("/api/mind/think")({
         const pastText =
           (past ?? []).map((p) => `- ${p.thought}`).join("\n") || "- (koi purani soch nahi)";
 
-        const gateway = createLovableAiGatewayProvider(apiKey);
-
-        const result = streamText({
-          model: gateway("google/gemini-3.7-flash"),
+        try {
+        const result = await generateText({
+          model: createAIModel(),
+          maxRetries: 0,
+          abortSignal: request.signal,
           system:
             `You are NO QUIT AI's background thinking engine. Produce one new, concrete, actionable insight from the user's latest memories. Write 1–3 short lines in ${LANGUAGE_NAMES[lang]}. Do not repeat old thoughts. source_chat must contain a short piece of the source prompt, or 'general'.`,
           prompt: `Aakhri memories:\n${memoryText}\n\nPurani sochein (repeat na karo):\n${pastText}\n\nAb ek bilkul nayi soch nikalo.`,
           output: Output.object({ schema: ThoughtSchema }),
         });
 
-        try {
-          const generated = await result.output;
+          const generated = result.output;
           const isAuto = new URL(request.url).searchParams.get("manual") !== "1";
           const { data, error } = await supabase
             .from("mind_thoughts")

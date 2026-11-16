@@ -17,10 +17,8 @@ export const talkToScott = createServerFn({ method: "POST" }).middleware([requir
   .handler(async ({ data, context }) => {
     const { data: history, error } = await context.supabase.from("scott_messages").select("role,content").eq("user_id", context.userId).eq("agent", data.agent).order("created_at", { ascending: false }).limit(40);
     if (error) throw error;
-    const { generateResponse } = await import("@lovable.dev/ai-gateway");
-    const reply = await generateResponse({ model: "openai/gpt-6-astra", instructions: agentPrompt(data.agent),
-      input: [...scottContext((history ?? []).reverse()), { role: "user" as const, content: data.message }], reasoning: { effort: "low" } });
-    const text = reply.output.flatMap(item => item.type === "message" ? item.content.flatMap(part => part.type === "output_text" ? [part.text] : []) : []).join("\n");
+    const { aiText } = await import("./ai-provider.server");
+    const text = await aiText(agentPrompt(data.agent), [...scottContext((history ?? []).reverse()), { role: "user" as const, content: data.message }]);
     if (!text.trim()) throw new Error("Jawab nahi aaya; aapka message abhi save nahi hua.");
     const { error: saveError } = await context.supabase.from("scott_messages").insert([
       { user_id: context.userId, role: "user", agent: data.agent, content: data.message, created_at: new Date().toISOString() },

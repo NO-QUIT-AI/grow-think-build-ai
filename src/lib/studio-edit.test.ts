@@ -1,7 +1,6 @@
 // @ts-nocheck -- Bun test runner.
 import { expect, test } from "bun:test";
-import { assertEditBase, claudeFrames, editedCode, STUDIO_MODEL } from "./studio-edit";
-test("uses the chosen Claude Sonnet 5 model", () => expect(STUDIO_MODEL).toBe("anthropic/claude-sonnet-5"));
+import { assertEditBase, claudeFrames, editedCode } from "./studio-edit";
 test("edits only code and removes a whole response fence", () => {
   expect(editedCode('```html\n<h1>NO QUIT AI</h1>\n```')).toBe('<h1>NO QUIT AI</h1>');
 });
