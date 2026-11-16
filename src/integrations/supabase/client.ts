@@ -7,6 +7,25 @@ function isNewSupabaseApiKey(value: string): boolean {
   return value.startsWith('sb_publishable_') || value.startsWith('sb_secret_');
 }
 
+function readEnv(key: string): string | undefined {
+  // Vite replaces `import.meta.env.*` at build time. During SSR this is usually
+  // still defined, but guard against environments (tests, non-Vite runtimes)
+  // where `import.meta.env` is undefined so we don't throw a TypeError before
+  // the friendly "missing env" message can run.
+  try {
+    const metaEnv = (import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env;
+    const viteKey = `VITE_${key}`;
+    const fromVite = metaEnv?.[viteKey];
+    if (fromVite) return fromVite;
+  } catch {
+    // ignore — fall through to process.env
+  }
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env[key];
+  }
+  return undefined;
+}
+
 function createSupabaseFetch(supabaseKey: string): typeof fetch {
   return (input, init) => {
     const headers = new Headers(
@@ -28,10 +47,8 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 }
  
 function createSupabaseClient() {
-  // Use import.meta.env for client-side (Vite build-time replacement)
-  // Fall back to process.env for SSR (server-side rendering)
-  const SUPABASE_URL = import.meta.env['VITE_SUPABASE_URL'] || process.env['SUPABASE_URL'] || "https://c--c89b8eaa-c367-4fa0-8890-1c20199b1274-prod.lovable.cloud";
-  const SUPABASE_PUBLISHABLE_KEY = import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'] || process.env['SUPABASE_PUBLISHABLE_KEY'] || "sb_publishable_BwapQP-s4GHJjSEKwV6qvA_4RKH8txF";
+  const SUPABASE_URL = readEnv('SUPABASE_URL') || "https://c--c89b8eaa-c367-4fa0-8890-1c20199b1274-prod.lovable.cloud";
+  const SUPABASE_PUBLISHABLE_KEY = readEnv('SUPABASE_PUBLISHABLE_KEY') || "sb_publishable_BwapQP-s4GHJjSEKwV6qvA_4RKH8txF";
 
   if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
     const missing = [
@@ -64,4 +81,4 @@ export const supabase = new Proxy({} as ReturnType<typeof createSupabaseClient>,
     if (!_supabase) _supabase = createSupabaseClient();
     return Reflect.get(_supabase, prop, receiver);
   },
-}); 
+});

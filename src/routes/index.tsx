@@ -54,6 +54,17 @@ function Home() {
   const [inviteOpen, setInviteOpen] = useState(false);
   const [buildActivity, setBuildActivity] = useState<BuildActivity | null>(null);
   const openLiveBuild = useCallback(() => setActiveTab("studio"), []);
+  const openMemoryInStudio = useCallback((memoryId: string) => {
+    setActiveMemoryId(memoryId);
+    setActiveTab("studio");
+  }, []);
+  const bumpRefresh = useCallback(() => setRefreshKey((key) => key + 1), []);
+  const handleContextChanged = useCallback((ctx: StudioContext | null) => {
+    setStudioContext(ctx);
+  }, []);
+  const handleBuildActivity = useCallback((activity: BuildActivity | null) => {
+    setBuildActivity(activity);
+  }, []);
   const buildBusy = buildActivity?.status === "submitted" || buildActivity?.status === "streaming";
 
   useEffect(() => {
@@ -102,11 +113,6 @@ function Home() {
         </main>
       </div>
     );
-  }
-
-  function openMemoryInStudio(memoryId: string) {
-    setActiveMemoryId(memoryId);
-    setActiveTab("studio");
   }
 
   return (
@@ -190,7 +196,14 @@ function Home() {
         </TabsList>
 
         <TabsContent forceMount value="chat" className="mt-0 flex min-h-0 flex-1 flex-col data-[state=inactive]:hidden">
-          <ChatPanel userId={user.id} studioContext={studioContext} onOpenStudio={openMemoryInStudio} onBuildStart={openLiveBuild} onBuildActivity={setBuildActivity} onWorkChanged={() => setRefreshKey((key) => key + 1)} />
+          <ChatPanel
+            userId={user.id}
+            studioContext={studioContext}
+            onOpenStudio={openMemoryInStudio}
+            onBuildStart={openLiveBuild}
+            onBuildActivity={handleBuildActivity}
+            onWorkChanged={bumpRefresh}
+          />
         </TabsContent>
         <TabsContent value="memory" className="mt-0 flex-1 overflow-y-auto">
           <MemoryPanel userId={user.id} refreshKey={refreshKey} />
@@ -208,8 +221,8 @@ function Home() {
             userId={user.id}
             refreshKey={refreshKey}
             activeMemoryId={activeMemoryId}
-            onMemorySaved={() => setRefreshKey((key) => key + 1)}
-            onContextChanged={setStudioContext}
+            onMemorySaved={bumpRefresh}
+            onContextChanged={handleContextChanged}
           />}
         </TabsContent>
         <TabsContent value="mind" className="mt-0 flex-1 overflow-y-auto">

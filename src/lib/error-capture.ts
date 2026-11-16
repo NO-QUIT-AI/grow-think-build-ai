@@ -52,15 +52,23 @@ function isErrorLike(value: unknown): value is Error {
 // Wrap console.error so errors logged by any layer — including h3's internal
 // unhandled-error logging, which this file cannot hook directly — are both
 // recorded for consumeLastCapturedError and expanded before serialization.
-const originalConsoleError = console.error.bind(console);
-console.error = (...args: unknown[]) => {
-  const expanded = args.map((arg) => {
-    if (!isErrorLike(arg)) return arg;
-    record(arg);
-    return describeError(arg);
-  });
-  originalConsoleError(...expanded);
-};
+// Guard against double-wrapping (e.g. module re-evaluated under HMR).
+const WRAP_FLAG = Symbol.for("nqai.errorCapture.wrapped");
+type ConsoleWithFlag = typeof console & { [WRAP_FLAG]?: true };
+const consoleRef = console as ConsoleWithFlag;
+
+if (!consoleRef[WRAP_FLAG]) {
+  consoleRef[WRAP_FLAG] = true;
+  const originalConsoleError = console.error.bind(console);
+  console.error = (...args: unknown[]) => {
+    const expanded = args.map((arg) => {
+      if (!isErrorLike(arg)) return arg;
+      record(arg);
+      return describeError(arg);
+    });
+    originalConsoleError(...expanded);
+  };
+}
 
 if (typeof globalThis.addEventListener === "function") {
   globalThis.addEventListener("error", (event) => record((event as ErrorEvent).error ?? event));
