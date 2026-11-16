@@ -1,4 +1,6 @@
 # Pending completion
+- [ ] Replace backend AI Gateway SDK calls with a shared Groq → DeepSeek → Gemini fallback; preserve streaming/tools and verify failures and signed-in chat.
+- [ ] Add separately approved Main-branch merge after smart-change branch push (deferred until AI provider migration is complete).
 - [x] Expose github_connect, github_read_file and github_push_branch in owner chat with inline consent/repo selection and persisted Before/After approval; manual GitHub UI unchanged. Twelve boundary tests pass; real owner chat invokes github_connect, opens github.com consent and handles cancellation; mobile no horizontal overflow; build OK. Real read/preview/approved push awaits owner GitHub consent and repo designation (existing verification task below).
 - [x] Add owner-only self-updating GitHub workflow: explicitly bind own repo, main-chat prepare tool, immutable multi-file before/after previews, explicit one-use approval and new-branch-only commits with stale-base checks; nine GitHub/safety tests pass. No automatic merge/deploy; designated self repo also blocks legacy direct fix pushes.
 - [ ] Verify real self-update feature → approved new GitHub branch end-to-end (requires owner GitHub consent and designation of this app's own repository); publish only on request.
