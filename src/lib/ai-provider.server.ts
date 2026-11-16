@@ -2,6 +2,7 @@ import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { generateText, type ModelMessage } from "ai";
 
 type Model = ReturnType<ReturnType<typeof createOpenAICompatible>["chatModel"]>;
+type StreamPart = Awaited<ReturnType<Model["doStream"]>>["stream"] extends ReadableStream<infer P> ? P : never;
 type Candidate = { name: string; model: Model };
 const WAIT_MS = 30_000;
 
@@ -54,11 +55,11 @@ export function fallbackModel(candidates: Candidate[]): Model {
         stopped(options.abortSignal);
         const candidate = candidates[i];
         if (!candidate) continue;
-        let reader: ReadableStreamDefaultReader<Awaited<ReturnType<Model["doStream"]>>["stream"] extends ReadableStream<infer P> ? P : never> | undefined;
+        let reader: ReadableStreamDefaultReader<StreamPart> | undefined;
         try {
           const result = await candidate.model.doStream(options);
           reader = result.stream.getReader();
-          const held = [];
+          const held: StreamPart[] = [];
           let meaningful = false;
           while (!meaningful) {
             const next = await reader.read();
@@ -92,6 +93,6 @@ export function fallbackModel(candidates: Candidate[]): Model {
 export function createAIModel(vision = false) { return fallbackModel(aiCandidates(vision)); }
 export async function aiText(system: string, input: string | ModelMessage[], signal?: AbortSignal) {
   const result = await generateText({ model: createAIModel(), system,
-    ...(typeof input === "string" ? { prompt: input } : { messages: input }), abortSignal: signal, maxRetries: 0 });
+    ...(typeof input === "string" ? { prompt: input } : { messages: input }), ...(signal ? { abortSignal: signal } : {}), maxRetries: 0 });
   return result.text;
 }
