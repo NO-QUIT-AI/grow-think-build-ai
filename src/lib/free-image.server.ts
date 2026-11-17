@@ -11,37 +11,87 @@ export function pollinationsUrl(prompt: string, model: "flux" | "turbo" = "flux"
   return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&model=${model}&nologo=true${extra}&seed=${seed}`;
 }
 
-/** Client tries these in order (each user's own IP limit). Last one is our server proxy. */
-export async function generateImageFree(prompt: string) {
-  // The chat model supplies an English painting prompt; no paid enhancement call.
-  const enhanced = prompt.trim().slice(0, 1000);
-  const urls = [
-    pollinationsUrl(enhanced, "flux"),
-    pollinationsUrl(enhanced, "turbo"),
-  ];
-  return { prompt: enhanced, url: urls[0], urls, provider: "huggingface-space" };
+const HF_FLUX_URL = "https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-schnell";
+const HF_TIMEOUT_MS = 45_000;
+
+function isImage(res: Response) {
+  return res.ok && !!res.headers.get("content-type")?.startsWith("image/");
 }
 
-/** Server fallback: Pollinations with POLLINATIONS_TOKEN (if set), then HuggingFace FLUX.1-schnell. */
-export async function serverImage(prompt: string): Promise<Response> {
-  const token = process.env["POLLINATIONS_TOKEN"];
-  if (token) {
-    try {
-      const r = await fetch(pollinationsUrl(prompt, "flux"), { headers: { authorization: `Bearer ${token}` } });
-      if (r.ok && r.headers.get("content-type")?.startsWith("image/")) return r;
-      console.error("[free-image] pollinations token", r.status);
-    } catch (e) { console.error("[free-image] pollinations token", e); }
-  }
+async function tryHuggingFace(prompt: string): Promise<Response | null> {
   const hf = process.env["HUGGINGFACE_API_KEY"];
   const headers: Record<string, string> = { "content-type": "application/json", accept: "image/png" };
   if (hf) headers["authorization"] = `Bearer ${hf}`;
-  // api-inference.huggingface.co is retired; router is the current free endpoint.
-  const r = await fetch("https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-schnell", {
-    method: "POST", headers, body: JSON.stringify({ inputs: prompt }),
-  });
-  if (!r.ok || !r.headers.get("content-type")?.startsWith("image/")) {
-    console.error("[free-image] huggingface", r.status, (await r.text()).slice(0, 200));
-    return new Response("All free image providers failed", { status: 502 });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), HF_TIMEOUT_MS);
+  try {
+    const r = await fetch(HF_FLUX_URL, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ inputs: prompt }),
+      signal: controller.signal,
+    });
+    if (!isImage(r)) {
+      console.error("[free-image] huggingface busy/failed", r.status);
+      return null;
+    }
+    return r;
+  } catch (e) {
+    console.error("[free-image] huggingface error", e);
+    return null;
+  } finally {
+    clearTimeout(timer);
   }
-  return r;
+}
+
+async function tryPollinations(prompt: string, model: "flux" | "turbo" = "flux"): Promise<Response | null> {
+  // Pollinations public tier: no key required. Optional token only raises limits.
+  const token = process.env["POLLINATIONS_TOKEN"];
+  const headers: Record<string, string> = {};
+  if (token) headers["authorization"] = `Bearer ${token}`;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), HF_TIMEOUT_MS);
+  try {
+    const r = await fetch(pollinationsUrl(prompt, model), { headers, signal: controller.signal });
+    if (!isImage(r)) {
+      console.error("[free-image] pollinations busy/failed", model, r.status);
+      return null;
+    }
+    return r;
+  } catch (e) {
+    console.error("[free-image] pollinations error", model, e);
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Load-balanced free image generation:
+ * 1) Try Hugging Face (FLUX.1-schnell) first.
+ * 2) On HF busy/fail/slow, automatically fall back to Pollinations (flux, then turbo).
+ * 3) Both providers are 100% free; no Adobe AI / credits involved.
+ * The returned Response can be dropped straight into Adobe Express for manual edit.
+ */
+export async function serverImage(prompt: string): Promise<Response> {
+  const clean = prompt.trim().slice(0, 1000);
+  const hf = await tryHuggingFace(clean);
+  if (hf) return hf;
+  const pFlux = await tryPollinations(clean, "flux");
+  if (pFlux) return pFlux;
+  const pTurbo = await tryPollinations(clean, "turbo");
+  if (pTurbo) return pTurbo;
+  return new Response("All free image providers failed", { status: 502 });
+}
+
+/** Client-tries-in-order hints: HF-first then Pollinations URLs (each user's own IP limit). */
+export async function generateImageFree(prompt: string) {
+  const enhanced = prompt.trim().slice(0, 1000);
+  const primary = `/api/free-image?prompt=${encodeURIComponent(enhanced)}`;
+  const urls = [
+    primary,
+    pollinationsUrl(enhanced, "flux"),
+    pollinationsUrl(enhanced, "turbo"),
+  ];
+  return { prompt: enhanced, url: urls[0], urls, provider: "huggingface-first+" };
 }
