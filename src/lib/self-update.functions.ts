@@ -45,3 +45,19 @@ export const discardSelfUpdate = createServerFn({ method: "POST" }).middleware([
   const { prepareSelfUpdate } = await import("./self-update.server");
   return prepareSelfUpdate(context.supabase, context.userId, data.request, data.repo);
 });
+
+export const approveMainMerge = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).inputValidator(i => z.object({ id: z.string().uuid(), repo: repoName, confirmed: z.literal(true) }).parse(i)).handler(async ({ context, data }) => {
+  const { mergeSelfUpdateToMain } = await import("./self-update.server");
+  return mergeSelfUpdateToMain(context.userId, data.id, data.repo, data.confirmed);
+});
+
+export const mainMergeCandidates = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).inputValidator(i => z.object({ repo: repoName }).parse(i)).handler(async ({ context, data }) => {
+  const { selectedWorkspace } = await import("./github.server");
+  await selectedWorkspace(context.userId, data.repo);
+  const [updates, merges] = await Promise.all([
+    context.supabase.from("github_self_updates").select("id,target_branch,commit_sha").eq("user_id", context.userId).eq("repo", data.repo).eq("status", "pushed").order("created_at", { ascending: false }).limit(10),
+    context.supabase.from("github_main_merges").select("preview_id,status,merged_sha").eq("user_id", context.userId).eq("repo", data.repo),
+  ]);
+  if (updates.error || merges.error) throw updates.error || merges.error;
+  return (updates.data ?? []).map(p => ({ id: p.id, branch: p.target_branch, mergeStatus: merges.data?.find(m => m.preview_id === p.id)?.status ?? null }));
+});

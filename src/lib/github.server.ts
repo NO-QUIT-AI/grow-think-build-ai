@@ -13,7 +13,7 @@ export async function githubRequest(userId: string, path: string, init?: Request
     console.error("GitHub provider error", response.status, body);
     throw new Error(`GitHub (${response.status}): ${response.status === 403 || response.status === 429 ? "Permission ya rate limit; GitHub account check karein." : response.status === 409 ? "Code badal gaya hai; dobara analyze karein." : "Request complete nahi hui."}`);
   }
-  return response.json();
+  return response.status === 204 ? null : response.json();
 }
 export async function selectedWorkspace(userId: string, repo: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

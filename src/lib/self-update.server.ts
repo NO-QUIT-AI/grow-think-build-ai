@@ -163,3 +163,24 @@ export function selfUpdateTools(sb: SupabaseClient, userId: string) {
     prepare_self_update: tool({ description: "Owner asks to add a feature inside NO QUIT AI itself: read designated own GitHub repo and save immutable multi-file before/after proposal. READ ONLY GitHub. Never pushes. Tell owner to open /github-connect to review and click approval. No model text/Yes authorizes a push.", inputSchema: z.object({ request: z.string().min(5).max(6000) }), execute: ({ request }) => prepareSelfUpdate(sb, userId, request) }),
   };
 }
+
+export async function mergeSelfUpdateToMain(userId: string, id: string, repo: string, confirmed: boolean) {
+  await selectedWorkspaceCheck(userId, repo);
+  const admin = await db();
+  const { data: proposal, error } = await admin.from("github_self_updates").select("id,repo,target_branch,status,commit_sha").eq("id", id).eq("user_id", userId).single();
+  if (error || !proposal) throw new Error("Aapka pushed preview nahi mila.");
+  const info = await githubRequest(userId, `/repos/${repo}`) as { permissions?: { push?: boolean } };
+  if (!info.permissions?.push) throw new Error("Is repo par write permission chahiye.");
+  const { executeMainMerge } = await import("./github-main-merge");
+  return executeMainMerge(proposal, repo, confirmed, {
+    request: (path, init) => githubRequest(userId, path, init),
+    claim: async (mainSha, sourceSha) => {
+      const { error: claimError } = await admin.from("github_main_merges").insert({ preview_id: id, user_id: userId, repo, branch: proposal.target_branch, source_sha: sourceSha, main_before_sha: mainSha });
+      if (claimError) throw new Error("Merge approval already used ya unavailable; GitHub status check karein.");
+    },
+    finish: async (status, sha) => {
+      const { error: saveError } = await admin.from("github_main_merges").update({ status, merged_sha: sha ?? null }).eq("preview_id", id).eq("user_id", userId).eq("status", "merging");
+      if (saveError) throw new Error("Merge confirmation save nahi hui; GitHub check karein, retry na karein.");
+    },
+  });
+}
