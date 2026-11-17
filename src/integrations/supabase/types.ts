@@ -566,6 +566,50 @@ export type Database = {
         }
         Relationships: []
       }
+      github_main_merges: {
+        Row: {
+          branch: string
+          created_at: string
+          main_before_sha: string
+          merged_sha: string | null
+          preview_id: string
+          repo: string
+          source_sha: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          branch: string
+          created_at?: string
+          main_before_sha: string
+          merged_sha?: string | null
+          preview_id: string
+          repo: string
+          source_sha: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          branch?: string
+          created_at?: string
+          main_before_sha?: string
+          merged_sha?: string | null
+          preview_id?: string
+          repo?: string
+          source_sha?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "github_main_merges_preview_id_fkey"
+            columns: ["preview_id"]
+            isOneToOne: true
+            referencedRelation: "github_self_updates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       github_self_repos: {
         Row: {
           created_at: string
