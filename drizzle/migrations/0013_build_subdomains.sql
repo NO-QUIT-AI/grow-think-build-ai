@@ -22,7 +22,7 @@ BEGIN
   IF m.id IS NULL THEN RAISE EXCEPTION 'not found'; END IF;
   IF m.subdomain IS NOT NULL THEN RETURN m.subdomain; END IF;
   SELECT public.slugify(coalesce(username, display_name, 'user')) INTO uname FROM public.profiles WHERE id = auth.uid();
-  base := left(public.slugify(array_to_string((regexp_split_to_array(trim(coalesce(nullif(m.summary,''), m.prompt)), '\s+'))[1:2], ' ')), 18);
+  base := left(public.slugify(array_to_string((regexp_split_to_array(trim(coalesce(nullif(m.summary,''), m.prompt)), E'\\s+'))[1:2], ' ')), 18);
   IF base = '' THEN base := 'app'; END IF;
   base := left(base || '-' || coalesce(nullif(uname,''), 'user'), 36);
   base := trim(both '-' from base);
