@@ -1,5 +1,6 @@
 import { ToolsMenu, CHAT_ACTION_EVT } from "@/components/nova/ToolsMenu";
 import { GitHubChatAction } from "@/components/nova/GitHubChatAction";
+import { isGitHubConnectRequest } from "@/lib/github-chat-intent";
 import { detectSpeechLang } from "@/lib/voice-transcript";
 import { backupToWorker } from "@/lib/worker-backup";
 import type { StudioContext } from "@/lib/studio-edit";
@@ -473,6 +474,7 @@ function ChatThread({
   const bottomRef = useRef<HTMLDivElement>(null);
   const convRef = useRef<string | null>(conversationId);
   const [voiceOpen, setVoiceOpen] = useState(false);
+  const [githubOpen, setGithubOpen] = useState(false);
   useEffect(() => {
     const textarea = composerRef.current;
     if (!textarea) return;
@@ -496,9 +498,10 @@ function ChatThread({
   }, [input, composerPlaceholder]);
   useEffect(() => {
     const h = (e: Event) => {
-      const d = (e as CustomEvent<{ prefill?: string; voice?: boolean }>).detail;
+      const d = (e as CustomEvent<{ prefill?: string; voice?: boolean; github?: boolean }>).detail;
       if (d?.prefill) setInput(d.prefill);
       if (d?.voice) setVoiceOpen(true);
+      if (d?.github) setGithubOpen(true);
     };
     window.addEventListener(CHAT_ACTION_EVT, h);
     return () => window.removeEventListener(CHAT_ACTION_EVT, h);
@@ -708,6 +711,11 @@ function ChatThread({
       return;
     }
     if ((!value && !attached) || busy) return;
+    if (!attached && isGitHubConnectRequest(value)) {
+      setInput(""); setGithubOpen(true);
+      setMessages(previous => [...previous, { id: crypto.randomUUID(), role: "user", parts: [{ type: "text", text: value }] }]);
+      return;
+    }
     if (isBuildRequest(value) || (buildRequest && (planRef.current || costRef.current))) {
       const request = { id: `build-${Date.now()}`, prompt: value, start: messages.length };
       setBuildRequest(request);
@@ -812,6 +820,7 @@ function ChatThread({
     <div className="genesis-chat flex min-h-0 flex-1 flex-col bg-background">
       <GenesisUsage revision={usageRevision}/>
       <div className="flex-1 space-y-4 overflow-y-auto px-1 pb-4">
+        {githubOpen && <div className="min-w-0"><div className="flex items-center justify-between"><h3 className="font-semibold">GitHub Connect</h3><Button variant="ghost" size="icon" aria-label="Close GitHub card" onClick={() => setGithubOpen(false)}><X /></Button></div><GitHubChatAction output={{ chatAction: "github_connect" }} disabled={busy} onConnected={() => { setGithubOpen(false); void submit("GitHub repository selected in this chat. Check github_connect and tell me which project is ready. Do not make changes yet."); }} /></div>}
         {messages.length === 0 && (
           <div className="panel p-5">
             <div className="mb-3 flex items-center gap-2 text-sm font-medium">

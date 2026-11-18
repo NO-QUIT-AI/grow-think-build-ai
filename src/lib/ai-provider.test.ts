@@ -1,6 +1,6 @@
 // @ts-nocheck -- Bun test runner.
 import { afterEach, expect, test } from "bun:test";
-import { aiCandidates, fallbackModel } from "./ai-provider.server";
+import { aiCandidates, fallbackModel, createChatModel } from "./ai-provider.server";
 const saved = { GROQ_API_KEY: process.env.GROQ_API_KEY, DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY, GEMINI_API_KEY: process.env.GEMINI_API_KEY };
 afterEach(() => { for (const [key, value] of Object.entries(saved)) { if (value === undefined) delete process.env[key]; else process.env[key] = value; } });
 const options = { prompt: [], abortSignal: new AbortController().signal };
@@ -18,6 +18,15 @@ test("provider order is exactly Groq → DeepSeek → Gemini", () => {
 test("missing keys are skipped rather than stopping the chain", () => {
   delete process.env.GROQ_API_KEY; delete process.env.DEEPSEEK_API_KEY; process.env.GEMINI_API_KEY = "test";
   expect(aiCandidates().map(c => c.name)).toEqual(["Gemini"]);
+});
+test("main chat uses saved Gemini 2.5 Flash even when Groq and DeepSeek exist", () => {
+  process.env.GROQ_API_KEY = "test-groq"; process.env.DEEPSEEK_API_KEY = "test-deepseek"; process.env.GEMINI_API_KEY = "test-gemini";
+  expect(createChatModel().modelId).toBe("gemini-2.5-flash");
+  expect(createChatModel().provider).toContain("gemini");
+});
+test("main chat does not silently substitute another provider without Gemini key", () => {
+  process.env.GROQ_API_KEY = "test-groq"; delete process.env.GEMINI_API_KEY;
+  expect(() => createChatModel()).toThrow("Saved Gemini key");
 });
 test("nonstream errors fall through DeepSeek to Gemini", async () => {
   const calls = [];

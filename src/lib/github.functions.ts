@@ -10,6 +10,12 @@ export const githubStatus = createServerFn({ method: "POST" }).middleware([requi
   const { getConnectionKeyForUser } = await import("./appUserConnections.server");
   return { connected: !!await getConnectionKeyForUser(context.userId, "github"), configured: !!process.env['GITHUB_APP_USER_CONNECTOR_CLIENT_API_KEY'] };
 });
+export const chatGitHubConnection = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  const { getConnectionKeyForUser } = await import("./appUserConnections.server");
+  const { data, error } = await context.supabase.from("github_workspaces").select("repo").eq("user_id", context.userId).maybeSingle();
+  if (error) throw error;
+  return { connected: !!await getConnectionKeyForUser(context.userId, "github"), repo: data?.repo ?? null };
+});
 export const startGitHubConnect = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   const clientAPIKey = process.env['GITHUB_APP_USER_CONNECTOR_CLIENT_API_KEY'];
   if (!clientAPIKey) throw new Error("GitHub setup abhi complete nahi.");

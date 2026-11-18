@@ -27,8 +27,8 @@ async function chatRepo(userId: string) {
     admin.from("github_workspaces").select("repo").eq("user_id", userId).maybeSingle(),
   ]);
   if (own.error || ws.error) throw own.error || ws.error;
-  const repo = own.data?.repo ?? ws.data?.repo;
-  if (!repo) throw new Error("GitHub Connect page par pehle repo select karein.");
+  const repo = ws.data?.repo ?? own.data?.repo;
+  if (!repo) throw new Error("Isi chat mein GitHub card se pehle repo select karein.");
   return repo as string;
 }
 async function jsonAI(instructions: string, input: string) {
@@ -140,8 +140,8 @@ export function selfUpdateTools(sb: SupabaseClient, userId: string) {
       const connected = !!results[0].data;
       const selectedRepo = results[1].data?.repo ?? null;
       const repo = results[2].data?.repo ?? null;
-      const ready = connected && !!(repo ?? selectedRepo);
-      return { connected, selectedRepo, ownRepo: repo, repo: repo ?? selectedRepo, ready, chatAction: ready ? null : "github_connect", message: ready ? "GitHub ready; read files or prepare a branch preview." : "Use the GitHub control in this chat to consent and select your own repository." };
+      const ready = connected && !!(selectedRepo ?? repo);
+      return { connected, selectedRepo, ownRepo: repo, repo: selectedRepo ?? repo, ready, chatAction: "github_connect", message: ready ? "GitHub ready; read files or prepare a branch preview." : "Use the GitHub control in this chat to consent and select your own repository." };
     },
     read: async path => readCode(userId, await chatRepo(userId), path),
     prepare: request => prepareSelfUpdate(sb, userId, request),
@@ -157,10 +157,10 @@ export function selfUpdateTools(sb: SupabaseClient, userId: string) {
         admin.from("github_self_updates").select("id,target_branch,status,created_at").eq("user_id", userId).eq("status", "pending").order("created_at", { ascending: false }).limit(5),
       ]);
       const connected = !!conn, ownRepo = own?.repo ?? null;
-      const next = !connected ? "Open /github-connect and click Connect GitHub." : !ownRepo ? "Open /github-connect, select the NO QUIT AI repo and click designate as own repo." : "Ready: call prepare_self_update.";
-      return { connected, selectedRepo: ws?.repo ?? null, ownRepo, pendingApprovals: pending ?? [], next, reviewUrl: "/github-connect" };
+      const next = !connected || !(ws?.repo ?? ownRepo) ? "Call github_connect to show consent and repository selection in this chat." : "Ready: call github_push_to_new_branch to prepare Before/After in this chat.";
+      return { connected, selectedRepo: ws?.repo ?? null, ownRepo, pendingApprovals: pending ?? [], next, chatAction: "github_connect" };
     } }),
-    prepare_self_update: tool({ description: "Owner asks to add a feature inside NO QUIT AI itself: read designated own GitHub repo and save immutable multi-file before/after proposal. READ ONLY GitHub. Never pushes. Tell owner to open /github-connect to review and click approval. No model text/Yes authorizes a push.", inputSchema: z.object({ request: z.string().min(5).max(6000) }), execute: ({ request }) => prepareSelfUpdate(sb, userId, request) }),
+    prepare_self_update: tool({ description: "Read the user's selected GitHub repo and save immutable multi-file Before/After in this chat. READ ONLY GitHub. Never pushes. User must click the inline approval button. No model text/Yes authorizes a push.", inputSchema: z.object({ request: z.string().min(5).max(6000) }), execute: ({ request }) => prepareSelfUpdate(sb, userId, request) }),
   };
 }
 

@@ -58,7 +58,7 @@ export function ToolsMenu({ onNewChat, onClose, history }: { onNewChat: () => vo
   const sections = [...new Set(list.map((t) => t.section))];
 
   const tab = (v: string) => { window.dispatchEvent(new CustomEvent(OPEN_TAB_EVT, { detail: v })); onClose(); };
-  const chat = (detail: { prefill?: string; voice?: boolean }) => { window.dispatchEvent(new CustomEvent(CHAT_ACTION_EVT, { detail })); onClose(); };
+  const chat = (detail: { prefill?: string; voice?: boolean; github?: boolean }) => { window.dispatchEvent(new CustomEvent(OPEN_TAB_EVT, { detail: "chat" })); window.dispatchEvent(new CustomEvent(CHAT_ACTION_EVT, { detail })); onClose(); };
   const open = (url: string) => window.open(url, "_blank", "noopener,noreferrer");
 
   async function toggleTorch() {
@@ -84,7 +84,7 @@ export function ToolsMenu({ onNewChat, onClose, history }: { onNewChat: () => vo
       case "auto-video": onClose(); void navigate({ to: "/auto-video" }); return;
       case "byok-video": onClose(); void navigate({ to: "/byok-video" }); return;
       case "scout": onClose(); void navigate({ to: "/scout" }); return;
-      case "github": onClose(); void navigate({ to: "/github-connect" }); return;
+      case "github": chat({ github: true }); return;
       case "security": onClose(); void navigate({ to: "/security-center" }); return;
       case "whatsapp": case "call": setModal(id); return;
       case "music": open("https://music.youtube.com"); return;

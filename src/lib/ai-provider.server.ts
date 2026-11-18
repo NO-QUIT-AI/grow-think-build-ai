@@ -91,6 +91,23 @@ export function fallbackModel(candidates: Candidate[]): Model {
 }
 
 export function createAIModel(vision = false) { return fallbackModel(aiCandidates(vision)); }
+// Main chat explicitly uses the existing saved Gemini key, not another provider.
+export function createChatModel() {
+  const gemini = aiCandidates().find(candidate => candidate.name === "Gemini");
+  if (!gemini) throw new Error("Saved Gemini key configured nahi hai.");
+  const model = gemini.model;
+  const explain = (error: unknown): never => {
+    if (error instanceof Error && /no longer available|NOT_FOUND|not found/i.test(error.message)) {
+      throw new Error("Google saved key ke liye Gemini 2.5 Flash available nahi kar raha. Gemini 3.8 Flash par switch ke liye approval chahiye.");
+    }
+    throw error;
+  };
+  return { specificationVersion: model.specificationVersion, provider: model.provider, modelId: model.modelId, supportedUrls: model.supportedUrls, doGenerate: async (options: Parameters<Model["doGenerate"]>[0]) => {
+    try { return await model.doGenerate(options); } catch (error) { return explain(error); }
+  }, doStream: async (options: Parameters<Model["doStream"]>[0]) => {
+    try { return await model.doStream(options); } catch (error) { return explain(error); }
+  } } as Model;
+}
 export async function aiText(system: string, input: string | ModelMessage[], signal?: AbortSignal) {
   const result = await generateText({ model: createAIModel(), system,
     ...(typeof input === "string" ? { prompt: input } : { messages: input }), ...(signal ? { abortSignal: signal } : {}), maxRetries: 0 });
