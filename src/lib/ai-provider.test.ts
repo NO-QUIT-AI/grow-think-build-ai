@@ -19,9 +19,9 @@ test("missing keys are skipped rather than stopping the chain", () => {
   delete process.env.GROQ_API_KEY; delete process.env.DEEPSEEK_API_KEY; process.env.GEMINI_API_KEY = "test";
   expect(aiCandidates().map(c => c.name)).toEqual(["Gemini"]);
 });
-test("main chat uses saved Gemini 2.5 Flash even when Groq and DeepSeek exist", () => {
+test("main chat uses approved Gemini 3.8 Flash with saved key even when other providers exist", () => {
   process.env.GROQ_API_KEY = "test-groq"; process.env.DEEPSEEK_API_KEY = "test-deepseek"; process.env.GEMINI_API_KEY = "test-gemini";
-  expect(createChatModel().modelId).toBe("gemini-2.5-flash");
+  expect(createChatModel().modelId).toBe("gemini-3.8-flash");
   expect(createChatModel().provider).toContain("gemini");
 });
 test("main chat does not silently substitute another provider without Gemini key", () => {
