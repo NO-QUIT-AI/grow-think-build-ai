@@ -32,7 +32,7 @@ async function chatRepo(userId: string) {
   return repo as string;
 }
 async function jsonAI(instructions: string, input: string) {
-  const text = await aiText(instructions, `Return JSON only.\n${input}`);
+  const text = await aiText(instructions, `Return JSON only.\n${input}`, undefined, "coding");
   return JSON.parse(text.replace(/^```(?:json)?\s*/, "").replace(/\s*```$/, "")) as unknown;
 }
 async function allowedRepos(userId: string) {

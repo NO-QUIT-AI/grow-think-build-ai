@@ -1,6 +1,6 @@
 // @ts-nocheck -- Bun test runner.
 import { afterEach, expect, test } from "bun:test";
-import { aiCandidates, fallbackModel, createChatModel } from "./ai-provider.server";
+import { aiCandidates, fallbackModel, createChatModel, isCodingRequest } from "./ai-provider.server";
 const saved = { GROQ_API_KEY: process.env.GROQ_API_KEY, DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY, GEMINI_API_KEY: process.env.GEMINI_API_KEY };
 afterEach(() => { for (const [key, value] of Object.entries(saved)) { if (value === undefined) delete process.env[key]; else process.env[key] = value; } });
 const options = { prompt: [], abortSignal: new AbortController().signal };
@@ -19,14 +19,36 @@ test("missing keys are skipped rather than stopping the chain", () => {
   delete process.env.GROQ_API_KEY; delete process.env.DEEPSEEK_API_KEY; process.env.GEMINI_API_KEY = "test";
   expect(aiCandidates().map(c => c.name)).toEqual(["Gemini"]);
 });
-test("main chat uses approved Gemini 3.8 Flash with saved key even when other providers exist", () => {
+test("coding prioritizes DeepSeek and voice prioritizes Groq", () => {
   process.env.GROQ_API_KEY = "test-groq"; process.env.DEEPSEEK_API_KEY = "test-deepseek"; process.env.GEMINI_API_KEY = "test-gemini";
-  expect(createChatModel().modelId).toBe("gemini-3.8-flash");
-  expect(createChatModel().provider).toContain("gemini");
+  expect(aiCandidates(false, "coding").map(c => c.name)).toEqual(["DeepSeek", "Groq", "Gemini"]);
+  expect(aiCandidates(false, "voice").map(c => c.name)).toEqual(["Groq", "DeepSeek", "Gemini"]);
+  expect(aiCandidates().at(-1).model.modelId).toBe("gemini-3.8-flash");
+  expect(createChatModel(true).modelId).toBe("deepseek-groq-gemini");
 });
-test("main chat does not silently substitute another provider without Gemini key", () => {
+test("main chat continues when Gemini key is missing", () => {
   process.env.GROQ_API_KEY = "test-groq"; delete process.env.GEMINI_API_KEY;
-  expect(() => createChatModel()).toThrow("Saved Gemini key");
+  expect(createChatModel().modelId).toContain("groq");
+});
+test("coding requests in English and Roman Urdu choose coding route", () => {
+  expect(isCodingRequest("Bhai ye code change kar do")).toBe(true);
+  expect(isCodingRequest("Home page ka title badal do")).toBe(true);
+  expect(isCodingRequest("Build a website")).toBe(true);
+  expect(isCodingRequest("Bhai main kaisa hoon?")).toBe(false);
+});
+test("exhausted coding credit hands off to Groq", async () => {
+  const calls = [];
+  await fallbackModel([mock("DeepSeek", calls, [], true), mock("Groq", calls, [])]).doGenerate(options);
+  expect(calls).toEqual(["DeepSeek", "Groq"]);
+});
+test("stalled stream before any output hands off to next provider", async () => {
+  const calls = [];
+  const stalled = mock("Groq", calls, []);
+  stalled.model.doStream = async () => { calls.push("Groq"); return { stream: new ReadableStream() }; };
+  const result = await fallbackModel([stalled, mock("DeepSeek", calls, [{ type: "text-delta", id: "1", delta: "ready" }])], 10).doStream(options);
+  const parts = []; for await (const part of result.stream) parts.push(part);
+  expect(calls).toEqual(["Groq", "DeepSeek"]);
+  expect(parts[0].delta).toBe("ready");
 });
 test("nonstream errors fall through DeepSeek to Gemini", async () => {
   const calls = [];

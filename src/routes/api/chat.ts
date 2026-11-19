@@ -180,7 +180,8 @@ export const Route = createFileRoute("/api/chat")({
         }
         const studioTools = studioFileTools(supabase, userId, activeStudio?.id, activeStudio?.code);
 
-        const model = createChatModel();
+        const { isCodingRequest } = await import("@/lib/ai-provider.server");
+        const model = createChatModel(Boolean(activeStudio) || androidV1 || isCodingRequest(messageText((body.messages as UIMessage[]).filter(m => m.role === "user").at(-1))));
 
         const tools = {
           generate_image_free: tool({

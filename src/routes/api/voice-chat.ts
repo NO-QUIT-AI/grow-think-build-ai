@@ -31,7 +31,7 @@ export const Route = createFileRoute("/api/voice-chat")({
         messages.push({ role: "user", content: `(Instruction: ${langRule})` });
         try {
           const { aiText } = await import("@/lib/ai-provider.server");
-          return Response.json({ text: await aiText(VOICE_PROMPT, messages, request.signal) });
+          return Response.json({ text: await aiText(VOICE_PROMPT, messages, request.signal, "voice") });
         } catch { console.warn("[voice-chat] providers unavailable"); }
         return new Response("Voice AI unavailable", { status: 503 });
       },
