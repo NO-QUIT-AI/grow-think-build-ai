@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { readableCode } from "@/lib/github-rules";
 import { GitHubSelfUpdate } from "@/components/GitHubSelfUpdate";
 import { GitHubSmartChange } from "@/components/GitHubSmartChange";
-import { githubStatus, startGitHubConnect, completeGitHubConnect, disconnectGitHub, listGitHubRepos, selectGitHubRepo, getGitHubTree, getGitHubFile, analyzeGitHubFile, fixGitHubFile, pushGitHubFix } from "@/lib/github.functions";
+import { githubStatus, chatGitHubConnection, startGitHubConnect, completeGitHubConnect, disconnectGitHub, listGitHubRepos, selectGitHubRepo, getGitHubTree, getGitHubFile, analyzeGitHubFile, fixGitHubFile, pushGitHubFix } from "@/lib/github.functions";
 
 export const Route = createFileRoute("/github-connect")({
   head: () => ({ meta: [
@@ -31,12 +31,14 @@ function GitHubPage() {
   const { user, loading } = useAuth();
   const statusFn = useServerFn(githubStatus), start = useServerFn(startGitHubConnect), complete = useServerFn(completeGitHubConnect), disconnect = useServerFn(disconnectGitHub);
   const list = useServerFn(listGitHubRepos), select = useServerFn(selectGitHubRepo), treeFn = useServerFn(getGitHubTree), fileFn = useServerFn(getGitHubFile);
+  const connection = useServerFn(chatGitHubConnection);
   const analyze = useServerFn(analyzeGitHubFile), fix = useServerFn(fixGitHubFile), push = useServerFn(pushGitHubFix);
   const qc = useQueryClient();
   const status = useQuery({ queryKey: ["github-status", user?.id], queryFn: () => statusFn(), enabled: !!user });
   const [permission, setPermission] = useState(false), [pushConfirm, setPushConfirm] = useState(false);
   const [repos, setRepos] = useState<Repo[]>([]), [page, setPage] = useState(1), [more, setMore] = useState(false);
   const [repo, setRepo] = useState<Repo | null>(null), [files, setFiles] = useState<{ path: string; folder: boolean; size: number }[]>([]);
+  const [persistedRepo, setPersistedRepo] = useState<string | null>(null);
   const [folder, setFolder] = useState(""), [file, setFile] = useState<{ path: string; content: string } | null>(null);
   const [search, setSearch] = useState(""), [busy, setBusy] = useState(""), [error, setError] = useState(""), [notice, setNotice] = useState("");
   const [findings, setFindings] = useState<Finding[]>([]), [preview, setPreview] = useState<Preview | null>(null);
@@ -47,12 +49,17 @@ function GitHubPage() {
     finally { setBusy(""); }
   }
   async function loadRepos(next = 1) {
-    const result = await list({ data: { page: next } });
+    const [result, saved] = await Promise.all([list({ data: { page: next } }), next === 1 ? connection() : Promise.resolve(null)]);
     setRepos(old => next === 1 ? result.repos : [...old, ...result.repos]); setPage(next); setMore(result.hasMore);
+    if (saved) {
+      setPersistedRepo(saved.repo);
+      const restored = result.repos.find(r => r.name === saved.repo);
+      if (restored) await choose(restored);
+    }
   }
   useEffect(() => {
     if (status.data?.connected) void act("Repositories load ho rahi hain…", () => loadRepos());
-    else { setRepos([]); setRepo(null); setFiles([]); setFile(null); setFindings([]); setPreview(null); }
+    else { setRepos([]); setRepo(null); setPersistedRepo(null); setFiles([]); setFile(null); setFindings([]); setPreview(null); }
   }, [status.data?.connected, user?.id]);
   useEffect(() => () => { stop.current = true; }, []);
   async function connect() {
@@ -84,6 +91,7 @@ function GitHubPage() {
   async function choose(r: Repo) {
     await act("Repository khul rahi hai…", async () => {
       const selected = await select({ data: { repo: r.name } });
+      setPersistedRepo(r.name);
       setRepo({ ...r, ...selected }); setFile(null); setPreview(null); setFindings([]); setFolder("");
       const result = await treeFn({ data: { repo: r.name } }); setFiles(result.files);
       setNotice(result.truncated ? "Bari repository: GitHub ne partial file list di hai." : "");
@@ -121,7 +129,7 @@ function GitHubPage() {
         <div className="flex items-center gap-3"><Github className="h-9 w-9 text-primary" /><div><h1 className="font-display text-2xl font-semibold">GitHub Connect</h1><p className="mt-1 text-sm text-muted-foreground">{status.data?.connected ? "Connected to GitHub ✅" : "Not Connected ❌"}</p></div></div>
         {user && <Button disabled={!!busy || status.isPending} variant={status.data?.connected ? "outline" : "default"} onClick={() => status.data?.connected ? void act("Disconnect ho raha hai…", async () => { await disconnect(); setNotice("GitHub disconnected."); await qc.invalidateQueries({ queryKey: ["github-status", user.id] }); }) : setPermission(true)}>{status.data?.connected ? <Unplug /> : <Github />}{status.data?.connected ? "Disconnect GitHub" : "Connect GitHub"}</Button>}
       </header>
-      {user && !loading && <GitHubSelfUpdate userId={user.id} selectedRepo={repo?.name ?? null} />}
+      {user && !loading && <GitHubSelfUpdate userId={user.id} selectedRepo={repo?.name ?? persistedRepo} />}
       {loading ? <Loader2 className="animate-spin text-primary" /> : !user ? <Button asChild><Link to="/auth">GitHub connect karne ke liye Sign in</Link></Button> : !status.data?.connected ? <div className="py-10"><ShieldCheck className="mb-4 h-12 w-12 text-primary" /><h2 className="mb-2 text-xl font-semibold">Apni repository, apni permission.</h2><p className="max-w-lg text-muted-foreground">NO QUIT AI will only read your repos to help fix code. We will not delete anything without your permission.</p></div> : <>
         <div className="mb-6 grid gap-4 md:grid-cols-[320px_1fr]">
           <section className="min-w-0 border-r border-border pr-4"><h2 className="mb-3 font-semibold">Your repositories</h2><Input aria-label="Search repositories" placeholder="Repository dhoondo…" value={search} onChange={e => setSearch(e.target.value)} />

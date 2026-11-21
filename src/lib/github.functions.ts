@@ -3,6 +3,7 @@ import { getRequest } from "@tanstack/react-start/server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { repoName, codePath, findingsSchema, assertPushApproval } from "./github-rules";
+import { githubReconnectPatch } from "./github-designation-rules";
 const repoInput = z.object({ repo: repoName });
 const fileInput = repoInput.extend({ path: codePath });
 
@@ -23,7 +24,7 @@ export const startGitHubConnect = createServerFn({ method: "POST" }).middleware(
   const { GATEWAY, GITHUB_SCOPES } = await import("./github.server");
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const nonce = crypto.randomUUID();
-  const { error } = await supabaseAdmin.from("github_workspaces").upsert({ user_id: context.userId, oauth_nonce: nonce, repo: null, branch: null });
+  const { error } = await supabaseAdmin.from("github_workspaces").upsert(githubReconnectPatch(context.userId, nonce), { onConflict: "user_id" });
   if (error) throw error;
   const request = getRequest();
   const url = new URL(request.url);
