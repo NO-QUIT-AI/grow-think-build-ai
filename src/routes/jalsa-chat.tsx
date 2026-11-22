@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { ArrowLeft, CheckCheck, Copy, Loader2, QrCode, Radio, Send, Unplug, Wifi, WifiOff, X } from 'lucide-react';
+import { ArrowLeft, Bot, CheckCheck, Copy, Loader2, QrCode, Radio, Send, Unplug, Wifi, WifiOff, X } from 'lucide-react';
 import QRCode from 'qrcode';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useJalsaChat } from '@/hooks/useJalsaChat';
 import { useJalsaMode } from '@/hooks/useJalsaMode';
 import { MAX_JALSA_TEXT } from '@/lib/jalsa-store';
+import { JALSA_AI_PEER, askJalsaAI, formatAiReply, isAiMention } from '@/lib/jalsa-ai';
 import type { JalsaPeer } from '@/lib/jalsa-peer';
 export const Route = createFileRoute('/jalsa-chat')({
   head: () => ({ meta: [
@@ -42,6 +43,7 @@ function LocalChat({ ownerId }: { ownerId: string | undefined }) {
   const [scan, setScan] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [aiThinking, setAiThinking] = useState(false);
   const pending = useRef<JalsaPeer | null>(null);
   const qrColors = useRef<HTMLDivElement>(null);
   const bottom = useRef<HTMLDivElement>(null);
@@ -99,7 +101,38 @@ function LocalChat({ ownerId }: { ownerId: string | undefined }) {
   async function copy() { try { await navigator.clipboard.writeText(code); toast.success('Pairing code copied'); } catch { toast.error('Select and copy the code below'); } }
   const peer = chat.history.peers.find(p => p.id === selected);
   const messages = chat.history.messages.filter(m => m.peer_id === selected);
-  function send() { if (selected && mode.enabled && chat.send(selected, draft)) setDraft(''); }
+  async function askAi(question: string, targetPeerId: string) {
+    const text = question.trim();
+    if (!text) return;
+    setAiThinking(true);
+    try {
+      const reply = await askJalsaAI([
+        { role: 'system', content: 'You are NO QUIT AI inside Jalsa Chat. Reply briefly in the user language.' },
+        { role: 'user', content: text },
+      ]);
+      if (reply) {
+        chat.sendLocalAi(formatAiReply(reply));
+      } else {
+        toast.error('NO QUIT AI is unavailable right now.');
+        chat.sendLocalAi('NO QUIT AI: (offline) could not reply — check DEEPSEEK_API_KEY.');
+      }
+    } finally {
+      setAiThinking(false);
+    }
+  }
+  function send() {
+    if (!selected || !mode.enabled) return;
+    const text = draft.trim();
+    if (!text) return;
+    if (selected === JALSA_AI_PEER.id) {
+      chat.send(selected, draft);
+      setDraft('');
+      void askAi(draft, selected);
+      return;
+    }
+    if (chat.send(selected, draft)) setDraft('');
+    if (isAiMention(draft)) void askAi(draft, selected);
+  }
   return (
     <main className="mx-auto flex min-h-screen max-w-5xl flex-col px-4 py-6">
       <header className="flex flex-wrap items-center gap-3 border-b border-border pb-5">
@@ -122,18 +155,21 @@ function LocalChat({ ownerId }: { ownerId: string | undefined }) {
           <Button onClick={openPairing} disabled={!mode.enabled || !chat.identity || !!chat.storageError} className="mt-4 w-full"><QrCode /> QR connect</Button>
           <h2 className="mb-3 mt-6 text-xs font-semibold text-muted-foreground">PAIRED PEOPLE</h2>
           {chat.history.peers.length === 0 && <p className="text-sm text-muted-foreground">No paired people yet.</p>}
-          <div className="space-y-1">{chat.history.peers.map(p => <Button key={p.id} variant={p.id === selected ? 'secondary' : 'ghost'} onClick={() => setSelected(p.id)} className="h-auto w-full justify-start py-3 text-left"><Radio className={chat.connected.includes(p.id) ? 'text-primary' : 'text-muted-foreground'} /><span className="min-w-0"><span className="block truncate">{p.name}</span><span className="block text-[10px] text-muted-foreground">{chat.connected.includes(p.id) ? 'Connected locally' : 'Disconnected • saved chat'}</span></span></Button>)}</div>
+          <div className="space-y-1">{[...chat.history.peers].sort((a, b) => (a.id === JALSA_AI_PEER.id ? -1 : b.id === JALSA_AI_PEER.id ? 1 : 0)).map(p => p.id === JALSA_AI_PEER.id
+            ? <Button key={p.id} variant={p.id === selected ? 'secondary' : 'ghost'} onClick={() => setSelected(p.id)} className="h-auto w-full justify-start py-3 text-left"><Bot className="text-primary" /><span className="min-w-0"><span className="block truncate">NO QUIT AI</span><span className="block text-[10px] text-muted-foreground">Local AI · deepseek-chat</span></span></Button>
+            : <Button key={p.id} variant={p.id === selected ? 'secondary' : 'ghost'} onClick={() => setSelected(p.id)} className="h-auto w-full justify-start py-3 text-left"><Radio className={chat.connected.includes(p.id) ? 'text-primary' : 'text-muted-foreground'} /><span className="min-w-0"><span className="block truncate">{p.name}</span><span className="block text-[10px] text-muted-foreground">{chat.connected.includes(p.id) ? 'Connected locally' : 'Disconnected • saved chat'}</span></span></Button>)}</div>
         </aside>
         <section className="flex min-w-0 flex-col pt-5 md:pl-6">
           {peer ? <>
-            <div className="flex items-center gap-3 border-b border-border pb-3"><Radio className="text-primary" /><div className="min-w-0"><h2 className="truncate font-semibold">{peer.name}</h2><p className="text-xs text-muted-foreground">Offline via local network · encrypted direct connection</p></div>{chat.connected.includes(peer.id) && <Button variant="ghost" size="icon" aria-label="Disconnect peer" onClick={() => { /* Closing only this session leaves saved history intact. */ chat.disconnect(peer.id); }} className="ml-auto"><Unplug /></Button>}</div>
+            <div className="flex items-center gap-3 border-b border-border pb-3">{peer.id === JALSA_AI_PEER.id ? <Bot className="text-primary" /> : <Radio className="text-primary" />}<div className="min-w-0"><h2 className="truncate font-semibold">{peer.name}</h2><p className="text-xs text-muted-foreground">{peer.id === JALSA_AI_PEER.id ? 'Local AI · deepseek-chat' : 'Offline via local network · encrypted direct connection'}</p></div>{chat.connected.includes(peer.id) && <Button variant="ghost" size="icon" aria-label="Disconnect peer" onClick={() => { /* Closing only this session leaves saved history intact. */ chat.disconnect(peer.id); }} className="ml-auto"><Unplug /></Button>}</div>
             <div role="log" aria-label="Jalsa messages" className="flex max-h-[55vh] min-h-64 flex-1 flex-col gap-3 overflow-y-auto py-4">
               {!messages.length && <p className="m-auto text-sm text-muted-foreground">No messages yet.</p>}
-              {messages.map(m => <div key={m.id} className={`max-w-[85%] rounded-md px-3 py-2 ${m.sender_id === chat.identity?.id ? 'self-end bg-primary text-primary-foreground' : 'self-start bg-secondary text-secondary-foreground'}`}><p className="break-words whitespace-pre-wrap text-sm">{m.text}</p><p className="mt-1 flex items-center gap-1 text-[10px] opacity-80">{m.delivery === 'queued' ? 'Queued • reconnect to send' : 'Sent via local network (Offline)'}{m.delivery === 'sent' && <CheckCheck className="h-3 w-3" />}</p></div>)}
+              {messages.map(m => <div key={m.id} className={`max-w-[85%] rounded-md px-3 py-2 ${m.sender_id === chat.identity?.id ? 'self-end bg-primary text-primary-foreground' : m.sender_id === JALSA_AI_PEER.id ? 'self-start border border-primary/40 bg-primary/10 text-foreground' : 'self-start bg-secondary text-secondary-foreground'}`}><p className="break-words whitespace-pre-wrap text-sm">{m.text}</p><p className="mt-1 flex items-center gap-1 text-[10px] opacity-80">{m.sender_id === JALSA_AI_PEER.id ? 'NO QUIT AI' : m.delivery === 'queued' ? 'Queued • reconnect to send' : 'Sent via local network (Offline)'}{m.sender_id !== JALSA_AI_PEER.id && m.delivery === 'sent' && <CheckCheck className="h-3 w-3" />}</p></div>)}
+              {aiThinking && <p className="self-start text-[11px] text-muted-foreground">NO QUIT AI is typing…</p>}
               <div ref={bottom} />
             </div>
-            {!chat.connected.includes(peer.id) && <p className="mb-2 text-xs text-muted-foreground">Peer disconnected. New messages stay queued until QR reconnect.</p>}
-            <div className="flex items-end gap-2"><Textarea aria-label="Jalsa message" placeholder="Jalsa Mode - No internet needed" value={draft} maxLength={MAX_JALSA_TEXT} disabled={!mode.enabled || !!chat.storageError} onChange={e => setDraft(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }} rows={2} className="min-h-12 resize-none" /><Button aria-label="Send Jalsa message" size="icon" disabled={!draft.trim() || !mode.enabled || !!chat.storageError} onClick={send}><Send /></Button></div>
+            {!chat.connected.includes(peer.id) && peer.id !== JALSA_AI_PEER.id && <p className="mb-2 text-xs text-muted-foreground">Peer disconnected. New messages stay queued until QR reconnect.</p>}
+            <div className="flex items-end gap-2"><Textarea aria-label="Jalsa message" placeholder="Message · type @AI or AI bhai to ask NO QUIT AI" value={draft} maxLength={MAX_JALSA_TEXT} disabled={!mode.enabled || !!chat.storageError} onChange={e => setDraft(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }} rows={2} className="min-h-12 resize-none" /><Button aria-label="Send Jalsa message" size="icon" disabled={!draft.trim() || !mode.enabled || !!chat.storageError} onClick={send}><Send /></Button></div>
           </> : <div className="m-auto flex max-w-sm flex-col items-center gap-4 py-12 text-center"><QrCode className="h-14 w-14 text-primary" /><h2 className="text-lg font-semibold">Pair a nearby device</h2><p className="text-sm text-muted-foreground">Same Wi-Fi or hotspot. Both devices need this page loaded first. Isolated networks may block a direct connection.</p><Button variant="outline" disabled={!mode.enabled || !chat.identity} onClick={openPairing}><QrCode /> QR connect</Button></div>}
         </section>
       </div>

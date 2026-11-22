@@ -4,8 +4,7 @@ type ChatMessage = { role: 'user' | 'assistant' | 'system'; content: string };
 
 type Body = { messages?: unknown };
 
-const OFFLINE_MESSAGE =
-  'NO QUIT AI is offline — start Ollama locally (phi3:mini).';
+const OFFLINE_MESSAGE = 'NO QUIT AI is unavailable right now.';
 
 function isChatMessage(value: unknown): value is ChatMessage {
   if (!value || typeof value !== 'object') return false;
@@ -21,16 +20,28 @@ export const Route = createFileRoute('/api/jalsa-ai')({
     handlers: {
       POST: async ({ request }) => {
         try {
+          const key = process.env.DEEPSEEK_API_KEY;
+          if (!key) {
+            return Response.json({ error: OFFLINE_MESSAGE }, { status: 503 });
+          }
+
           const body = (await request.json()) as Body;
           const messages = Array.isArray(body?.messages)
             ? body.messages.filter(isChatMessage)
             : [];
 
-          const res = await fetch('http://localhost:11434/api/chat', {
+          if (messages.length === 0) {
+            return Response.json({ error: OFFLINE_MESSAGE }, { status: 503 });
+          }
+
+          const res = await fetch('https://api.deepseek.com/chat/completions', {
             method: 'POST',
-            headers: { 'content-type': 'application/json' },
+            headers: {
+              'content-type': 'application/json',
+              authorization: `Bearer ${key}`,
+            },
             body: JSON.stringify({
-              model: 'phi3:mini',
+              model: 'deepseek-chat',
               messages,
               stream: false,
             }),
@@ -42,10 +53,10 @@ export const Route = createFileRoute('/api/jalsa-ai')({
           }
 
           const data = (await res.json()) as {
-            message?: { content?: unknown };
+            choices?: Array<{ message?: { content?: unknown } }>;
           };
-          const reply = data?.message?.content;
-          if (typeof reply !== 'string') {
+          const reply = data?.choices?.[0]?.message?.content;
+          if (typeof reply !== 'string' || reply.trim().length === 0) {
             return Response.json({ error: OFFLINE_MESSAGE }, { status: 503 });
           }
 
