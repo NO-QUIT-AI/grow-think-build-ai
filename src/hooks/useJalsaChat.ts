@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { JalsaPeer } from '@/lib/jalsa-peer';
+import { JALSA_AI_PEER } from '@/lib/jalsa-ai';
 import { loadJalsaHistory, loadJalsaIdentity, mergeJalsaMessages, saveJalsaHistory, saveJalsaIdentity, validJalsaText, type JalsaHistory, type JalsaIdentity, type JalsaMessage } from '@/lib/jalsa-store';
 export function useJalsaChat(ownerId: string | undefined) {
   const [identity, setIdentity] = useState<JalsaIdentity | null>(null);
@@ -24,7 +25,10 @@ export function useJalsaChat(ownerId: string | undefined) {
       setIdentity(me);
       key.current = ownerId ?? me.id;
       const saved = loadJalsaHistory(key.current);
-      archive.current = saved; setHistory(saved);
+      const withAi: JalsaHistory = saved.peers.some(p => p.id === JALSA_AI_PEER.id)
+        ? saved
+        : { ...saved, peers: [JALSA_AI_PEER, ...saved.peers] };
+      archive.current = withAi; setHistory(withAi);
     } catch { setStorageError('Local storage unavailable. Enable browser storage before sending.'); }
     const update = () => setOnline(navigator.onLine);
     update(); window.addEventListener('online', update); window.addEventListener('offline', update);
@@ -91,6 +95,16 @@ export function useJalsaChat(ownerId: string | undefined) {
     for (const peer of sessions.current) if (peer.identity?.id === peerId && peer.connected) { peer.send({ type: 'message', message }); break; }
     return true;
   }
+  function sendLocalAi(text: string) {
+    try {
+      const message: JalsaMessage = { id: crypto.randomUUID(), peer_id: JALSA_AI_PEER.id, sender_id: JALSA_AI_PEER.id, text, delivery: 'sent', created_at: new Date().toISOString() };
+      const peers = archive.current.peers.some(p => p.id === JALSA_AI_PEER.id)
+        ? archive.current.peers
+        : [JALSA_AI_PEER, ...archive.current.peers];
+      commit({ ...archive.current, peers, messages: mergeJalsaMessages(archive.current.messages, [message]) });
+      return true;
+    } catch { setStorageError('Device storage is full. Message was not saved.'); return false; }
+  }
   function rename(name: string) {
     if (!identity) return;
     const next = { ...identity, name: name.trim().slice(0,50) || 'Builder' };
@@ -112,5 +126,5 @@ export function useJalsaChat(ownerId: string | undefined) {
     }
     setConnected(previous => peerId ? previous.filter(id => id !== peerId) : []);
   }
-  return { identity, history, connected, online, storageError, syncState, newPeer, send, rename, disconnect };
+  return { identity, history, connected, online, storageError, syncState, newPeer, send, sendLocalAi, rename, disconnect };
 }
