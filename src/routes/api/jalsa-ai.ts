@@ -162,16 +162,13 @@ function compactToolResult(result: AgenticResult): Record<string, unknown> | und
 function offlineToolReply(result: AgenticResult): string {
   switch (result.tool) {
     case 'make_poster':
-      return 'Poster ready — title aur bullets tool card mein upar hain. Batayein aspect change karun? (offline reply)'.replace(
-        'Aspect ready',
-        'Aspect ready',
-      );
+      return 'Poster ready — title aur bullets tool card mein hain. Aspect change karna ho to bata dein. (offline reply)';
     case 'make_summary':
-      return 'Summary aur key points tool card mein hain — chahiye to aur detail add kar dun. (offline reply)';
+      return 'Summary aur key points tool card mein hain. Detail chahiye to bata dein. (offline reply)';
     case 'make_list':
-      return 'List ready hai — tool card mein items dekhein. Aur kuch add karun? (offline reply)';
+      return 'List ready hai — tool card mein items dekhein. Kuch add karna ho to bata dein. (offline reply)';
     case 'make_checklist':
-      return 'Checklist taiyar hai — tool card se tick karein. Kuch item add ya hata dun? (offline reply)';
+      return 'Checklist taiyar hai — tool card se tick karein. Item add ya hataana ho to bata dein. (offline reply)';
     default:
       return 'Tool chal gaya — result card mein hai. (offline reply)';
   }
@@ -197,7 +194,6 @@ export const Route = createFileRoute('/api/jalsa-ai')({
 
           // ---- Profile & memory merge ----
           const storedProfile = await loadProfile();
-          const hints: PersonalProfile = {};
           const name = readTrimmedString(body.userName);
           const city = readTrimmedString(body.userCity);
           const work = readTrimmedString(body.userWork);
@@ -215,8 +211,6 @@ export const Route = createFileRoute('/api/jalsa-ai')({
             profile.work = work;
             await rememberFact('work', work);
           }
-          // include hints so future merges stay consistent (hints used only after set)
-          void hints;
 
           const pendingTasks = readPendingTasks(body.pendingTasks);
           const lastUser = lastUserMessage(messages);
