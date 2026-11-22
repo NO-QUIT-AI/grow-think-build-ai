@@ -1,5 +1,7 @@
 import { ToolsMenu, CHAT_ACTION_EVT } from "@/components/nova/ToolsMenu";
 import { GitHubChatAction } from "@/components/nova/GitHubChatAction";
+import { ChatProjectCard } from "@/components/nova/ChatProjectCard";
+import { decodeProjectTurn, encodeProjectTurn } from "@/lib/project-card";
 import { isGitHubConnectRequest } from "@/lib/github-chat-intent";
 import { detectSpeechLang } from "@/lib/voice-transcript";
 import { backupToWorker } from "@/lib/worker-backup";
@@ -309,11 +311,13 @@ export function ChatPanel({
       .eq("conversation_id", id)
       .order("created_at", { ascending: true });
     setInitialMessages(
-      (rows ?? []).map((row) => ({
-        id: row.id,
-        role: row.role as UIMessage["role"],
-        parts: [{ type: "text" as const, text: row.content }],
-      })),
+      (rows ?? []).map((row) => {
+        const saved = row.role === "assistant" ? decodeProjectTurn(row.content) : { text: row.content, projects: [], reviews: [] };
+        const parts: UIMessage["parts"] = [{ type: "text", text: saved.text }];
+        for (const memoryId of saved.projects) parts.push({ type: "data-project", data: { memoryId } });
+        for (const previewId of saved.reviews) parts.push({ type: "data-review", data: { previewId } });
+        return { id: row.id, role: row.role as UIMessage["role"], parts };
+      }),
     );
     setConversationId(id);
     setThreadKey(id);
@@ -629,19 +633,21 @@ function ChatThread({
         voiceResolveRef.current = null;
       }
       const id = convRef.current;
-      // Tool-only turns still refresh the Studio and open the saved file.
+      // Preserve project/review references; builds stay in Chat until the user chooses an action.
+      const projects: string[] = [], reviews: string[] = [];
       for (const part of message.parts ?? []) {
         if (!String(part.type).startsWith("tool-")) continue;
-        const out = (part as { output?: { memoryId?: string; saved?: boolean } }).output;
-        if (out?.saved && out.memoryId) onOpenStudio(out.memoryId);
+        const out = (part as { output?: { memoryId?: string; saved?: boolean; previewId?: string } }).output;
+        if (out?.saved && out.memoryId) projects.push(out.memoryId);
+        if (out?.previewId) reviews.push(out.previewId);
       }
       onWorkChanged();
-      if (!text || !id) return;
+      if ((!text && !projects.length && !reviews.length) || !id) return;
       const __rows = {
         conversation_id: id,
         user_id: userId,
         role: "assistant",
-        content: text,
+        content: encodeProjectTurn(text, projects, reviews),
       };
       backupToWorker("message", __rows);
       await supabase.from("messages").insert(__rows);
@@ -720,7 +726,7 @@ function ChatThread({
       const request = { id: `build-${Date.now()}`, prompt: value, start: messages.length };
       setBuildRequest(request);
       onBuildActivity?.({ ...request, status: "submitted", text: "", code: "", steps: [] });
-      onBuildStart?.();
+      // Genuine progress remains available in Studio; do not leave the user's Chat.
     }
     if (!attached && !studioContext && readVoiceCache(value, lang)) {
       void askByVoice(value);
@@ -888,6 +894,12 @@ function ChatThread({
                 )}
                 {!isUser && tools.map((part,index)=> <GenesisToolApproval key={`approval-${index}`} disabled={busy} output={(part as {output?:Record<string,unknown>}).output??{}} onPlanApproved={id=>{planRef.current=id;void submit("Approved plan — shuru karo, steps ke mutabiq kaam karo.");}} onCostApproved={(id,tool)=>{costRef.current=id;void submit(`Approved cost for ${tool}. Retry exactly the saved tool arguments; do not change them.`);}}/>)}
                 {!isUser && tools.filter(part => ["tool-github_connect", "tool-github_push_to_new_branch", "tool-prepare_self_update"].includes(part.type)).map((part, index) => <GitHubChatAction key={`github-${index}`} disabled={busy} output={(part as { output?: Record<string, unknown> }).output ?? {}} onConnected={() => { void submit("GitHub consent and own repository selection completed. Check github_connect and continue my previous GitHub request; prepare Before/After only, do not push."); }} />)}
+                {!isUser && message.parts.map((part, index) => {
+                  const out = part.type === "data-project" ? part.data as { memoryId?: string } : (part as { output?: { saved?: boolean; memoryId?: string } }).output;
+                  if (!out?.memoryId || (part.type !== "data-project" && !("saved" in out && out.saved))) return null;
+                  return <ChatProjectCard key={`project-${index}`} memoryId={out.memoryId} userId={userId} disabled={busy} />;
+                })}
+                {!isUser && message.parts.filter(part => part.type === "data-review").map((part, index) => <GitHubChatAction key={`saved-review-${index}`} output={(part as { data: Record<string, unknown> }).data} disabled={busy} onConnected={() => {}} />)}
                 {message.parts.filter(part=>part.type==="file").map((part,index)=>part.type==="file"?<img key={`attachment-${index}`} src={part.url} alt="Attached screenshot" className="mb-2 max-h-64 rounded-md object-contain"/>:null)}
                 {!isUser &&
                   tools
