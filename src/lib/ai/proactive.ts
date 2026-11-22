@@ -238,7 +238,7 @@ export async function getWeather(city?: string, signal?: AbortSignal): Promise<W
     url.searchParams.set('latitude', String(coords.lat));
     url.searchParams.set('longitude', String(coords.lon));
     url.searchParams.set('current_weather', 'true');
-    url.searchParams.set('temprature_unit', ''); // no-op removed below for clarity
+    url.searchParams.set('temperature_unit', 'celsius');
 
     const res = await fetch(url.toString(), { signal: combined, headers: { accept: 'application/json' } });
     if (!res.ok) return weatherUnavailable(safeCity);
