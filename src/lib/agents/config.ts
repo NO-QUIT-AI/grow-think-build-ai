@@ -105,7 +105,7 @@ const FALLBACK_MODEL = 'meta-llama/llama-3.3-70b-instruct:free';
 
 function readModelOverride(): string | null {
   try {
-    const raw = process.env.AGENT_MODEL;
+    const raw = process.env['AGENT_MODEL'];
     if (typeof raw !== 'string') return null;
     const trimmed = raw.trim();
     return trimmed.length > 0 ? trimmed : null;

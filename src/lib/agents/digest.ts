@@ -34,7 +34,7 @@ type AbortSignalLike = { any?: (signals: AbortSignal[]) => AbortSignal };
 
 function getApiKey(): string | null {
   try {
-    const raw = process.env.OPENROUTER_API_KEY;
+    const raw = process.env['OPENROUTER_API_KEY'];
     if (typeof raw !== 'string') return null;
     const trimmed = raw.trim();
     return trimmed.length > 0 ? trimmed : null;
@@ -45,7 +45,7 @@ function getApiKey(): string | null {
 
 function getReferer(): string {
   try {
-    const raw = process.env.PUBLIC_SITE_URL;
+    const raw = process.env['PUBLIC_SITE_URL'];
     if (typeof raw === 'string') {
       const trimmed = raw.trim();
       if (trimmed.length > 0) return trimmed;
@@ -322,14 +322,14 @@ export function parseFindings(json: unknown, agent: AgentId, limit: number): Age
       if (!item || typeof item !== 'object') continue;
 
       const rec = item as Record<string, unknown>;
-      const title = asString(rec.title);
+      const title = asString(rec['title']);
       if (title.length === 0) continue;
 
-      const summary = asString(rec.summary);
-      const whyItMatters = asString(rec.whyItMatters);
-      const confidence = clampConfidence(rec.confidence);
-      const tags = toStringArray(rec.tags);
-      const sources = toStringArray(rec.sources);
+      const summary = asString(rec['summary']);
+      const whyItMatters = asString(rec['whyItMatters']);
+      const confidence = clampConfidence(rec['confidence']);
+      const tags = toStringArray(rec['tags']);
+      const sources = toStringArray(rec['sources']);
 
       out.push({
         id: makeId('finding'),

@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it } from "node:test";
+import { expect } from "./test-expect";
 import { fixImports } from "./self-update-rules";
 const known = new Set(["src/lib/agents/config.ts", "src/lib/utils.ts"]);
 describe("fixImports", () => {

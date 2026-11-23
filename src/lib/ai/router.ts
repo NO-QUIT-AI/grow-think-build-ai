@@ -70,7 +70,7 @@ function buildBody(base: Record<string, unknown>, options: RouteOptions): Record
 /** Tries local Ollama chat; returns trimmed reply or null. Never throws. */
 export async function callOllama(options: RouteOptions): Promise<string | null> {
   try {
-    const baseUrl = process.env.OLLAMA_URL ?? 'http://localhost:11434';
+    const baseUrl = process.env['OLLAMA_URL'] ?? 'http://localhost:11434';
     const url = `${baseUrl}/api/chat`;
     const signal = makeSignal(options.signal, toTimeout(options.timeoutMs));
     const body = buildBody({ model: OLLAMA_MODEL, messages: options.messages, stream: false }, options);
@@ -98,7 +98,7 @@ export async function callOllama(options: RouteOptions): Promise<string | null> 
 /** Tries DeepSeek chat completions; returns trimmed reply or null. Never throws. */
 export async function callDeepSeek(options: RouteOptions): Promise<string | null> {
   try {
-    const key = process.env.DEEPSEEK_API_KEY;
+    const key = process.env['DEEPSEEK_API_KEY'];
     if (!key) return null;
 
     const signal = makeSignal(options.signal, toTimeout(options.timeoutMs));

@@ -51,7 +51,7 @@ type TemperatureScope = 'cold' | 'warm' | 'hot';
 
 function getDeepSeekApiKey(): string | null {
   try {
-    const raw = process.env.DEEPSEEK_API_KEY;
+    const raw = process.env['DEEPSEEK_API_KEY'];
     if (typeof raw !== 'string') return null;
     const trimmed = raw.trim();
     return trimmed.length > 0 ? trimmed : null;

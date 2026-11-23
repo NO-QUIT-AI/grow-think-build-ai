@@ -181,7 +181,7 @@ function describeAgents(agents: unknown): string {
     const names: string[] = [];
     for (const id of safeArray(agents)) {
       if (!isAgentId(id)) continue;
-      let name = id;
+      let name: string = id;
       try {
         name = agentConfig(id).name;
       } catch {

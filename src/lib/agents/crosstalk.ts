@@ -252,7 +252,7 @@ export async function runCrosstalk(
       for (const from of AGENT_IDS) {
         if (grouped[from].length === 0) continue;
 
-        let name = from;
+        let name: string = from;
         try {
           name = agentConfig(from).name;
         } catch {
@@ -469,16 +469,16 @@ function parseProposals(
       if (out.length >= max) break;
       if (!item || typeof item !== 'object') continue;
       const rec = item as Record<string, unknown>;
-      const title = asTrimmedString(rec.title);
+      const title = asTrimmedString(rec['title']);
       if (title.length === 0) continue;
 
-      const what = asTrimmedString(rec.what);
-      const why = asTrimmedString(rec.why);
-      const effort = coerceEffort(rec.effort);
-      const risk = coerceRisk(rec.risk);
-      const impact = clampImpact(rec.impact);
-      const agents = coerceAgentArray(rec.agents, effectiveFallback);
-      const filesHint = coerceStringArray(rec.filesHint);
+      const what = asTrimmedString(rec['what']);
+      const why = asTrimmedString(rec['why']);
+      const effort = coerceEffort(rec['effort']);
+      const risk = coerceRisk(rec['risk']);
+      const impact = clampImpact(rec['impact']);
+      const agents = coerceAgentArray(rec['agents'], effectiveFallback);
+      const filesHint = coerceStringArray(rec['filesHint']);
 
       out.push({
         id: makeId('proposal'),
@@ -512,7 +512,7 @@ function localFallbackProposals(findings: AgentFinding[], limit: number): AgentP
           ? finding.confidence
           : 0;
       const impact = clampImpact(confidence * 10);
-      const agent = isAgentId(finding.agent) ? finding.agent : AGENT_IDS[0];
+      const agent = isAgentId(finding.agent) ? finding.agent : AGENT_IDS[0]!;
       const title = asTrimmedString(finding.title);
       if (title.length === 0) continue;
       out.push({
