@@ -18,12 +18,12 @@
 
 import { createFileRoute } from "@tanstack/react-router";
 
-import { describeSchedule } from "../../lib/agents/scheduler";
-import { getAgentStore } from "../../lib/agents/store";
-import { agentConfig } from "../../lib/agents/config";
-import { describeProposal } from "../../lib/agents/crosstalk";
-import { AGENT_IDS, isAgentId } from "../../lib/agents/types";
-import type { AgentStore } from "../../lib/agents/store";
+import { describeSchedule } from "@/lib/agents/scheduler";
+import { getAgentStore } from "@/lib/agents/store";
+import { agentConfig } from "@/lib/agents/config";
+import { describeProposal } from "@/lib/agents/crosstalk";
+import { AGENT_IDS, isAgentId } from "@/lib/agents/types";
+import type { AgentStore } from "@/lib/agents/store";
 import type {
   AgentFinding,
   AgentId,
@@ -31,7 +31,7 @@ import type {
   AgentProviderStatus,
   NightlyReport,
   ProposalStatus,
-} from "../../lib/agents/types";
+} from "@/lib/agents/types";
 
 const ROUTE = "/api/agents-status";
 const STALE_THRESHOLD_HOURS = 36;

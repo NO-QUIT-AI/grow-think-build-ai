@@ -40,6 +40,9 @@ import { Route as StudioRouteImport } from './routes/studio'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AdminAdsRouteImport } from './routes/admin.ads'
 import { Route as AdminOwnerRouteImport } from './routes/admin.owner'
+import { Route as ApiAgentsNightlyRouteImport } from './routes/api/agents-nightly'
+import { Route as ApiAgentsStatusRouteImport } from './routes/api/agents-status'
+import { Route as ApiAiVisionRouteImport } from './routes/api/ai-vision'
 import { Route as ApiAutoVideoClipsRouteImport } from './routes/api/auto-video-clips'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiCvPolishRouteImport } from './routes/api/cv-polish'
@@ -48,6 +51,7 @@ import { Route as ApiEditImageRouteImport } from './routes/api/edit-image'
 import { Route as ApiFalVideoRouteImport } from './routes/api/fal-video'
 import { Route as ApiFreeImageRouteImport } from './routes/api/free-image'
 import { Route as ApiGenerateVideoRouteImport } from './routes/api/generate-video'
+import { Route as ApiJalsaAiRouteImport } from './routes/api/jalsa-ai'
 import { Route as ApiMindRouteImport } from './routes/api/mind'
 import { Route as ApiNasaApodRouteImport } from './routes/api/nasa-apod'
 import { Route as ApiOwnerRouteImport } from './routes/api/owner'
@@ -227,6 +231,21 @@ const AdminOwnerRoute = AdminOwnerRouteImport.update({
   path: '/admin/owner',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAgentsNightlyRoute = ApiAgentsNightlyRouteImport.update({
+  id: '/api/agents-nightly',
+  path: '/api/agents-nightly',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAgentsStatusRoute = ApiAgentsStatusRouteImport.update({
+  id: '/api/agents-status',
+  path: '/api/agents-status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAiVisionRoute = ApiAiVisionRouteImport.update({
+  id: '/api/ai-vision',
+  path: '/api/ai-vision',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAutoVideoClipsRoute = ApiAutoVideoClipsRouteImport.update({
   id: '/api/auto-video-clips',
   path: '/api/auto-video-clips',
@@ -265,6 +284,11 @@ const ApiFreeImageRoute = ApiFreeImageRouteImport.update({
 const ApiGenerateVideoRoute = ApiGenerateVideoRouteImport.update({
   id: '/api/generate-video',
   path: '/api/generate-video',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiJalsaAiRoute = ApiJalsaAiRouteImport.update({
+  id: '/api/jalsa-ai',
+  path: '/api/jalsa-ai',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiMindRoute = ApiMindRouteImport.update({
@@ -417,6 +441,9 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/admin/ads': typeof AdminAdsRoute
   '/admin/owner': typeof AdminOwnerRoute
+  '/api/agents-nightly': typeof ApiAgentsNightlyRoute
+  '/api/agents-status': typeof ApiAgentsStatusRoute
+  '/api/ai-vision': typeof ApiAiVisionRoute
   '/api/auto-video-clips': typeof ApiAutoVideoClipsRoute
   '/api/chat': typeof ApiChatRoute
   '/api/cv-polish': typeof ApiCvPolishRoute
@@ -425,6 +452,7 @@ export interface FileRoutesByFullPath {
   '/api/fal-video': typeof ApiFalVideoRoute
   '/api/free-image': typeof ApiFreeImageRoute
   '/api/generate-video': typeof ApiGenerateVideoRoute
+  '/api/jalsa-ai': typeof ApiJalsaAiRoute
   '/api/mind': typeof ApiMindRouteWithChildren
   '/api/nasa-apod': typeof ApiNasaApodRoute
   '/api/owner': typeof ApiOwnerRoute
@@ -481,6 +509,9 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/admin/ads': typeof AdminAdsRoute
   '/admin/owner': typeof AdminOwnerRoute
+  '/api/agents-nightly': typeof ApiAgentsNightlyRoute
+  '/api/agents-status': typeof ApiAgentsStatusRoute
+  '/api/ai-vision': typeof ApiAiVisionRoute
   '/api/auto-video-clips': typeof ApiAutoVideoClipsRoute
   '/api/chat': typeof ApiChatRoute
   '/api/cv-polish': typeof ApiCvPolishRoute
@@ -489,6 +520,7 @@ export interface FileRoutesByTo {
   '/api/fal-video': typeof ApiFalVideoRoute
   '/api/free-image': typeof ApiFreeImageRoute
   '/api/generate-video': typeof ApiGenerateVideoRoute
+  '/api/jalsa-ai': typeof ApiJalsaAiRoute
   '/api/mind': typeof ApiMindRouteWithChildren
   '/api/nasa-apod': typeof ApiNasaApodRoute
   '/api/owner': typeof ApiOwnerRoute
@@ -546,6 +578,9 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/admin/ads': typeof AdminAdsRoute
   '/admin/owner': typeof AdminOwnerRoute
+  '/api/agents-nightly': typeof ApiAgentsNightlyRoute
+  '/api/agents-status': typeof ApiAgentsStatusRoute
+  '/api/ai-vision': typeof ApiAiVisionRoute
   '/api/auto-video-clips': typeof ApiAutoVideoClipsRoute
   '/api/chat': typeof ApiChatRoute
   '/api/cv-polish': typeof ApiCvPolishRoute
@@ -554,6 +589,7 @@ export interface FileRoutesById {
   '/api/fal-video': typeof ApiFalVideoRoute
   '/api/free-image': typeof ApiFreeImageRoute
   '/api/generate-video': typeof ApiGenerateVideoRoute
+  '/api/jalsa-ai': typeof ApiJalsaAiRoute
   '/api/mind': typeof ApiMindRouteWithChildren
   '/api/nasa-apod': typeof ApiNasaApodRoute
   '/api/owner': typeof ApiOwnerRoute
@@ -612,6 +648,9 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin/ads'
     | '/admin/owner'
+    | '/api/agents-nightly'
+    | '/api/agents-status'
+    | '/api/ai-vision'
     | '/api/auto-video-clips'
     | '/api/chat'
     | '/api/cv-polish'
@@ -620,6 +659,7 @@ export interface FileRouteTypes {
     | '/api/fal-video'
     | '/api/free-image'
     | '/api/generate-video'
+    | '/api/jalsa-ai'
     | '/api/mind'
     | '/api/nasa-apod'
     | '/api/owner'
@@ -676,6 +716,9 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin/ads'
     | '/admin/owner'
+    | '/api/agents-nightly'
+    | '/api/agents-status'
+    | '/api/ai-vision'
     | '/api/auto-video-clips'
     | '/api/chat'
     | '/api/cv-polish'
@@ -684,6 +727,7 @@ export interface FileRouteTypes {
     | '/api/fal-video'
     | '/api/free-image'
     | '/api/generate-video'
+    | '/api/jalsa-ai'
     | '/api/mind'
     | '/api/nasa-apod'
     | '/api/owner'
@@ -740,6 +784,9 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin/ads'
     | '/admin/owner'
+    | '/api/agents-nightly'
+    | '/api/agents-status'
+    | '/api/ai-vision'
     | '/api/auto-video-clips'
     | '/api/chat'
     | '/api/cv-polish'
@@ -748,6 +795,7 @@ export interface FileRouteTypes {
     | '/api/fal-video'
     | '/api/free-image'
     | '/api/generate-video'
+    | '/api/jalsa-ai'
     | '/api/mind'
     | '/api/nasa-apod'
     | '/api/owner'
@@ -805,6 +853,9 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   AdminAdsRoute: typeof AdminAdsRoute
   AdminOwnerRoute: typeof AdminOwnerRoute
+  ApiAgentsNightlyRoute: typeof ApiAgentsNightlyRoute
+  ApiAgentsStatusRoute: typeof ApiAgentsStatusRoute
+  ApiAiVisionRoute: typeof ApiAiVisionRoute
   ApiAutoVideoClipsRoute: typeof ApiAutoVideoClipsRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiCvPolishRoute: typeof ApiCvPolishRoute
@@ -813,6 +864,7 @@ export interface RootRouteChildren {
   ApiFalVideoRoute: typeof ApiFalVideoRoute
   ApiFreeImageRoute: typeof ApiFreeImageRoute
   ApiGenerateVideoRoute: typeof ApiGenerateVideoRoute
+  ApiJalsaAiRoute: typeof ApiJalsaAiRoute
   ApiMindRoute: typeof ApiMindRouteWithChildren
   ApiNasaApodRoute: typeof ApiNasaApodRoute
   ApiOwnerRoute: typeof ApiOwnerRoute
@@ -1056,6 +1108,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminOwnerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/agents-nightly': {
+      id: '/api/agents-nightly'
+      path: '/api/agents-nightly'
+      fullPath: '/api/agents-nightly'
+      preLoaderRoute: typeof ApiAgentsNightlyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/agents-status': {
+      id: '/api/agents-status'
+      path: '/api/agents-status'
+      fullPath: '/api/agents-status'
+      preLoaderRoute: typeof ApiAgentsStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ai-vision': {
+      id: '/api/ai-vision'
+      path: '/api/ai-vision'
+      fullPath: '/api/ai-vision'
+      preLoaderRoute: typeof ApiAiVisionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auto-video-clips': {
       id: '/api/auto-video-clips'
       path: '/api/auto-video-clips'
@@ -1110,6 +1183,13 @@ declare module '@tanstack/react-router' {
       path: '/api/generate-video'
       fullPath: '/api/generate-video'
       preLoaderRoute: typeof ApiGenerateVideoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/jalsa-ai': {
+      id: '/api/jalsa-ai'
+      path: '/api/jalsa-ai'
+      fullPath: '/api/jalsa-ai'
+      preLoaderRoute: typeof ApiJalsaAiRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/mind': {
@@ -1319,6 +1399,9 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   AdminAdsRoute: AdminAdsRoute,
   AdminOwnerRoute: AdminOwnerRoute,
+  ApiAgentsNightlyRoute: ApiAgentsNightlyRoute,
+  ApiAgentsStatusRoute: ApiAgentsStatusRoute,
+  ApiAiVisionRoute: ApiAiVisionRoute,
   ApiAutoVideoClipsRoute: ApiAutoVideoClipsRoute,
   ApiChatRoute: ApiChatRoute,
   ApiCvPolishRoute: ApiCvPolishRoute,
@@ -1327,6 +1410,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiFalVideoRoute: ApiFalVideoRoute,
   ApiFreeImageRoute: ApiFreeImageRoute,
   ApiGenerateVideoRoute: ApiGenerateVideoRoute,
+  ApiJalsaAiRoute: ApiJalsaAiRoute,
   ApiMindRoute: ApiMindRouteWithChildren,
   ApiNasaApodRoute: ApiNasaApodRoute,
   ApiOwnerRoute: ApiOwnerRoute,

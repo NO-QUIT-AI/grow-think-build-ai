@@ -36,3 +36,33 @@ export function materializeUpdateChanges(proposed: { path: string; after: string
   if (changes.some(change => changes.some(other => other.path !== change.path && change.path.startsWith(other.path + "/")))) throw new Error("Proposal has conflicting file/directory paths.");
   return updateChanges.parse(changes.filter(change => change.before !== change.after));
 }
+// Import guard: every relative/alias import in generated src code must resolve; src-internal relative
+// imports are rewritten to the @/ alias, and mis-depthed paths (e.g. ../lib from src/routes/api) are repaired.
+const CODE_EXT = /\.(ts|tsx|js|jsx|mjs)$/;
+const RESOLVE_EXT = ["", ".ts", ".tsx", ".js", ".jsx", ".mjs", "/index.ts", "/index.tsx", "/index.js"];
+function normalize(parts: string[]) {
+  const out: string[] = [];
+  for (const p of parts) { if (p === "..") { if (!out.length) return null; out.pop(); } else if (p && p !== ".") out.push(p); }
+  return out.join("/");
+}
+export function fixImports(path: string, code: string, known: Set<string>) {
+  if (!path.startsWith("src/") || !CODE_EXT.test(path)) return code;
+  const exists = (base: string) => RESOLVE_EXT.some(ext => known.has(base + ext));
+  const dir = path.split("/").slice(0, -1);
+  const broken: string[] = [];
+  const fixed = code.replace(/(\bfrom\s*|\bimport\s*\(\s*|\bimport\s+)(["'])(\.{1,2}\/[^"']*|@\/[^"']*)\2/g, (all, lead: string, q: string, spec: string) => {
+    if (spec.startsWith("@/")) { if (!exists("src/" + spec.slice(2))) broken.push(spec); return all; }
+    const resolved = normalize([...dir, ...spec.split("/")]);
+    if (resolved && exists(resolved)) return resolved.startsWith("src/") ? `${lead}${q}@/${resolved.slice(4)}${q}` : all;
+    const tail = spec.replace(/^(\.\.?\/)+/, "");
+    if (exists("src/" + tail)) return `${lead}${q}@/${tail}${q}`;
+    broken.push(spec);
+    return all;
+  });
+  if (broken.length) throw new Error(`Broken import in ${path}: ${broken.join(", ")} — file repo me nahi mili.`);
+  return fixed;
+}
+export function fixProposalImports<T extends { path: string; after: string }>(proposed: T[], treePaths: string[]): T[] {
+  const known = new Set([...treePaths, ...proposed.map(c => c.path)]);
+  return proposed.map(c => ({ ...c, after: fixImports(c.path, c.after, known) }));
+}

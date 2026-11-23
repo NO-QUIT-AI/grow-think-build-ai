@@ -18,9 +18,9 @@
 
 import { createFileRoute } from "@tanstack/react-router";
 
-import { describeSchedule, runNightlyOnce } from "../lib/agents/scheduler";
-import { getAgentStore } from "../lib/agents/store";
-import type { NightlyReport } from "../lib/agents/types";
+import { describeSchedule, runNightlyOnce } from "@/lib/agents/scheduler";
+import { getAgentStore } from "@/lib/agents/store";
+import type { NightlyReport } from "@/lib/agents/types";
 
 const ROUTE = "/api/agents-nightly";
 const MAX_ROUNDS_OPTION = 6;
