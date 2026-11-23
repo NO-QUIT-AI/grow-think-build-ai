@@ -3,6 +3,8 @@ import { GitHubChatAction } from "@/components/nova/GitHubChatAction";
 import { ChatProjectCard } from "@/components/nova/ChatProjectCard";
 import { decodeProjectTurn, encodeProjectTurn } from "@/lib/project-card";
 import { isGitHubConnectRequest } from "@/lib/github-chat-intent";
+import { isVercelApiRequest } from "@/lib/vercel-api-setup";
+import { VercelApiCard } from "@/components/nova/VercelApiCard";
 import { detectSpeechLang } from "@/lib/voice-transcript";
 import { backupToWorker } from "@/lib/worker-backup";
 import type { StudioContext } from "@/lib/studio-edit";
@@ -479,6 +481,7 @@ function ChatThread({
   const convRef = useRef<string | null>(conversationId);
   const [voiceOpen, setVoiceOpen] = useState(false);
   const [githubOpen, setGithubOpen] = useState(false);
+  const [vercelOpen, setVercelOpen] = useState(false);
   useEffect(() => {
     const textarea = composerRef.current;
     if (!textarea) return;
@@ -717,6 +720,11 @@ function ChatThread({
       return;
     }
     if ((!value && !attached) || busy) return;
+    if (!attached && isVercelApiRequest(value)) {
+      setInput(""); setVercelOpen(true);
+      setMessages(previous => [...previous, { id: crypto.randomUUID(), role: "user", parts: [{ type: "text", text: value }] }]);
+      return;
+    }
     if (!attached && isGitHubConnectRequest(value)) {
       setInput(""); setGithubOpen(true);
       setMessages(previous => [...previous, { id: crypto.randomUUID(), role: "user", parts: [{ type: "text", text: value }] }]);
@@ -826,6 +834,7 @@ function ChatThread({
     <div className="genesis-chat flex min-h-0 flex-1 flex-col bg-background">
       <GenesisUsage revision={usageRevision}/>
       <div className="flex-1 space-y-4 overflow-y-auto px-1 pb-4">
+        {vercelOpen && <div className="min-w-0"><div className="flex items-center justify-between"><h3 className="font-semibold">Vercel API Setup</h3><Button variant="ghost" size="icon" aria-label="Close Vercel card" onClick={() => setVercelOpen(false)}><X /></Button></div><VercelApiCard /></div>}
         {githubOpen && <div className="min-w-0"><div className="flex items-center justify-between"><h3 className="font-semibold">GitHub Connect</h3><Button variant="ghost" size="icon" aria-label="Close GitHub card" onClick={() => setGithubOpen(false)}><X /></Button></div><GitHubChatAction output={{ chatAction: "github_connect" }} disabled={busy} onConnected={() => { setGithubOpen(false); void submit("GitHub repository selected in this chat. Check github_connect and tell me which project is ready. Do not make changes yet."); }} /></div>}
         {messages.length === 0 && (
           <div className="panel p-5">
