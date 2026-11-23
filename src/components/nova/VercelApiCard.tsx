@@ -14,7 +14,7 @@ export function VercelApiCard() {
   const go = (kind: "env" | "deployments" | "new") => {
     setError("");
     try {
-      if (kind === "new") return open(vercelCloneUrl(repo, envs));
+      if (kind === "new") { open(vercelCloneUrl(repo, envs)); return; }
       if (!scope.trim() || !project.trim()) throw new Error("Vercel team/username aur project name dono likhein.");
       open(vercelProjectUrls(scope, project)[kind]);
     } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
