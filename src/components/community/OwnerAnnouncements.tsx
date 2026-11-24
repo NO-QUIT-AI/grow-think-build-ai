@@ -31,13 +31,13 @@ export function OwnerAnnouncements({ userId }: { userId: string }) {
   }, [load, userId]);
 
   async function publish() {
-    if (!title.trim() || !body.trim()) return toast.error("Title aur message dono likho");
+    if (!title.trim() || !body.trim()) { toast.error("Title aur message dono likho"); return; }
     setBusy(true);
     const { error } = await supabase
       .from("community_announcements")
       .insert({ author_id: userId, title: title.trim(), body: body.trim() });
     setBusy(false);
-    if (error) return toast.error("Sirf owner announcement kar sakta hai");
+    if (error) { toast.error("Sirf owner announcement kar sakta hai"); return; }
     setTitle("");
     setBody("");
     toast.success("Announcement publish ho gayi");
@@ -46,7 +46,7 @@ export function OwnerAnnouncements({ userId }: { userId: string }) {
 
   async function remove(id: string) {
     const { error } = await supabase.from("community_announcements").delete().eq("id", id);
-    if (error) return toast.error("Delete nahi hui");
+    if (error) { toast.error("Delete nahi hui"); return; }
     void load();
   }
 
