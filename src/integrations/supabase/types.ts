@@ -181,6 +181,33 @@ export type Database = {
           },
         ]
       }
+      community_announcements: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          pinned: boolean
+          title: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          pinned?: boolean
+          title: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          pinned?: boolean
+          title?: string
+        }
+        Relationships: []
+      }
       community_posts: {
         Row: {
           app_link: string | null

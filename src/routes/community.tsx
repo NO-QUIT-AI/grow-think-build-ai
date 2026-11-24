@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { CommunityShell } from "@/components/community/CommunityShell";
+import { OwnerAnnouncements } from "@/components/community/OwnerAnnouncements";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useT } from "@/i18n/LanguageContext";
@@ -275,6 +276,7 @@ function Feed({ userId }: { userId: string }) {
 
   return (
     <CommunityShell userId={userId} title={t("communityTitle")} subtitle={t("communitySubtitle")}>
+      <OwnerAnnouncements userId={userId} />
       <div className="panel mb-4 p-3">
         <Textarea
           value={text}

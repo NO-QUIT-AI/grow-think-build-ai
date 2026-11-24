@@ -218,6 +218,13 @@
       "when": 1795329983148,
       "tag": "0030_github_user_workspace_preview_readback",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1795538295651,
+      "tag": "0031_migration",
+      "breakpoints": true
     }
   ]
 }
