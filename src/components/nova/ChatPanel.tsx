@@ -573,15 +573,22 @@ function ChatThread({
     setEditing(true);
     setInput("");
     try {
-      const res = await fetch("/api/edit-image", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: before, prompt: instruction, lang }),
-      });
-      if (!res.ok) throw new Error((await res.text()) || "Image edit fail hui");
-      const json = (await res.json()) as { image?: string };
-      if (!json.image) throw new Error("Model ne image return nahi ki");
-      const after = json.image;
+      const editPrompt = instruction.trim() || "Improve this image and make it clean and professional.";
+      let after: string;
+      try {
+        const { freeImageEdit } = await import("@/lib/free-image-edit");
+        after = await freeImageEdit(before, editPrompt);
+      } catch (freeErr) {
+        const res = await fetch("/api/edit-image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: before, prompt: instruction, lang }),
+        });
+        if (!res.ok) throw freeErr;
+        const json = (await res.json()) as { image?: string };
+        if (!json.image) throw freeErr;
+        after = json.image;
+      }
       setEdits((prev) => [
         ...prev,
         { id: crypto.randomUUID(), before, after, prompt: instruction },
