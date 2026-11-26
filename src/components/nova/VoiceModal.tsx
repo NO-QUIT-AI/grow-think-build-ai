@@ -160,7 +160,7 @@ export function getSpeechRecognition(): (new () => SpeechRecognitionLike) | null
   return w.SpeechRecognition || w.webkitSpeechRecognition || null;
 }
 
-const LOCALES: Record<string, string> = { en: "en-IN", ur: "hi-IN", hi: "hi-IN", ar: "ar-SA" };
+const LOCALES: Record<string, string> = { en: "en-US", ur: "ur-PK", hi: "hi-IN", ar: "ar-SA" };
 
 /** Markdown / code hata ke bolne layak saaf text. */
 export function speakableText(md: string) {
@@ -267,7 +267,7 @@ function LegacyVoiceModal({ lang, onTranscript, ask, onClose }: {
     if (!Ctor) { toast.error("Voice not supported in this browser"); onClose(); return; }
     const rec = new Ctor();
     recRef.current = rec;
-    rec.lang = "en-IN";
+    rec.lang = LOCALES[lang] ?? "en-US";
     rec.continuous = true;
     rec.interimResults = false;
     rec.onresult = event => {
@@ -426,7 +426,7 @@ function LiveVoiceModal({ onClose, onFallback }: VoiceProps & { onFallback: () =
         if (!res.ok) throw new Error("token");
         const { token } = (await res.json()) as { token: string };
         if (cancelled) return;
-        await conversation.startSession({ conversationToken: token, connectionType: "webrtc" });
+        await conversation.startSession({ conversationToken: token, connectionType: "webrtc", overrides: { agent: { language: (({ en: "en", ur: "hi", hi: "hi", ar: "ar" } as Record<string, string>)[lang] ?? "en") as any } } });
       } catch {
         if (!cancelled) fallback();
       }
