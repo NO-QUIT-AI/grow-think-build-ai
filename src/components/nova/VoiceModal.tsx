@@ -363,7 +363,7 @@ export function VoiceModal(props: VoiceProps) {
   );
 }
 
-function LiveVoiceModal({ onClose, onFallback }: VoiceProps & { onFallback: () => void }) {
+function LiveVoiceModal({ lang, onClose, onFallback }: VoiceProps & { onFallback: () => void }) {
   const [reply, setReply] = useState("");
   const [heard, setHeard] = useState("");
   const [muted, setMuted] = useState(false);
