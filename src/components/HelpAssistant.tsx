@@ -43,11 +43,11 @@ type ChatMsg =
   | { kind: "guide"; entry: HelpEntry }
   | { kind: "fallback"; text: string };
 
-const SUGGESTIONS = ["Website banana hai", "CV kaise banau?", "Points kaise kamau?", "Jalsa mode kya hai?"];
+const SUGGESTIONS = ["Build a website", "How do I make a CV?", "How do I earn points?", "What is Jalsa mode?"];
 
 /**
- * Floating help assistant: user likhta hai kya karna hai, assistant usi
- * page par navigate kar deta hai aur step-by-step guide dikhata hai.
+ * Floating help assistant: the user types what they want to do; the assistant
+ * navigates to that page and shows a step-by-step guide.
  */
 export function HelpAssistant() {
   const [open, setOpen] = useState(false);
@@ -84,7 +84,7 @@ export function HelpAssistant() {
         ? { kind: "guide", entry }
         : {
             kind: "fallback",
-            text: "Hmm, ye samajh nahi aaya. Try karo: 'website banana hai', 'CV banani hai', 'points kamane hain' — ya neeche se koi topic chuno.",
+            text: "Sorry, I didn't understand that. Try: 'build a website', 'make a CV', 'earn points' — or pick a topic below.",
           },
     ]);
     if (entry) {
@@ -112,7 +112,7 @@ export function HelpAssistant() {
             <div className="min-w-0">
               <p className="text-sm font-semibold text-foreground">NO QUIT Help Assistant</p>
               <p className="truncate text-[11px] text-muted-foreground">
-                Bolo kya karna hai — main page khol ke guide karunga
+                Tell me what you want to do — I'll open the page and guide you
               </p>
             </div>
           </header>
@@ -121,7 +121,7 @@ export function HelpAssistant() {
             {msgs.length === 0 && (
               <div className="space-y-2">
                 <p className="text-xs text-muted-foreground">
-                  Assalam o Alaikum! Batao kya karna hai — main wahi page khol dunga aur step by step
+                  Hello! Tell me what you want to do — I'll open that page and guide you step by step
                   sikha dunga. Misal:
                 </p>
                 <div className="flex flex-wrap gap-1.5">
@@ -222,7 +222,7 @@ export function HelpAssistant() {
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Kya karna hai? likho..."
+              placeholder="What do you want to do?"
               className="h-9 flex-1 rounded-full border border-border bg-background px-3 text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-primary/60"
             />
             <button

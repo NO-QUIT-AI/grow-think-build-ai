@@ -11,7 +11,7 @@ export function vercelCloneUrl(repoUrl: string, envNames: string[]) {
   const repo = repoUrl.trim();
   if (!/^https:\/\/github\.com\/[\w.-]+\/[\w.-]+\/?$/.test(repo)) throw new Error("GitHub repo link sahi dalein, jaise https://github.com/user/project");
   const p = new URLSearchParams({ "repository-url": repo.replace(/\/$/, "") });
-  if (envNames.length) { p.set("env", envNames.join(",")); p.set("envDescription", "Apni API keys yahan paste karein — NO QUIT AI inhein kabhi nahi dekhta."); }
+  if (envNames.length) { p.set("env", envNames.join(",")); p.set("envDescription", "Paste your API keys here — NO QUIT AI never sees them."); }
   return `https://vercel.com/new/clone?${p.toString()}`;
 }
 

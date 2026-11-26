@@ -94,18 +94,18 @@ const SUGGESTION_KEYS: TranslationKey[] = ["chatSuggestionDomain", "chatSuggesti
 // Naya guided button = bas yahan ek entry add karo.
 const GUIDE_ACTIONS = [
   {
-    label: "Real domain add karo",
-    tooltipText: "Apna asal domain Vercel project se jodo - DNS records milenge",
+    label: "Add custom domain",
+    tooltipText: "Connect your own domain to a Vercel project and get the DNS records",
     guideMessage:
-      "Bhai apna asal domain naam bhejo jaise noquitai.com aur project ka naam bhejo. Main Vercel pe add karke tumhe DNS records (A record 76.76.21.21, CNAME cname.vercel-dns.com) de dunga jo tumhe domain provider pe lagane hain.",
-    prefill: "Mera domain [domain-name] project [project-name] par add karo",
+      "Send your domain name (for example noquitai.com) and your project name. I will add it on Vercel and give you the DNS records (A record 76.76.21.21, CNAME cname.vercel-dns.com) to set at your domain provider.",
+    prefill: "Add my domain [domain-name] to project [project-name]",
   },
   {
-    label: "User domain add chain",
-    tooltipText: "Pura chain: project check → domain add → DNS live check",
+    label: "Domain setup wizard",
+    tooltipText: "Full flow: check project → add domain → verify DNS is live",
     guideMessage:
-      "Bhai ye pura chain hai - Pehle project check karunga, phir domain add karunga, phir DNS check karke bataunga live hai ya nahi. Chalo shuru karte hain, domain naam bhejo?",
-    prefill: "Domain add chain shuru karo, mera domain hai: ",
+      "This is the full flow: I will check your project, add the domain, then check DNS and tell you whether it is live. Let's start — what is your domain name?",
+    prefill: "Start domain setup. My domain is: ",
   },
 ];
 
@@ -172,11 +172,11 @@ function FreeImageView({ urls, prompt, waiting }: { urls: string[]; prompt: stri
     <div className="mb-3 space-y-2">
       {!loaded && !failed && (
         <div className="flex aspect-square w-full max-w-sm animate-pulse items-center justify-center rounded-xl border border-border bg-secondary text-xs text-primary">
-          {retrying ? "Thodi der lag rahi hai, dusra model try kar raha hu..." : "No Quit AI is creating your image..."}
+          {retrying ? "Taking a bit longer, trying another model..." : "No Quit AI is creating your image..."}
         </div>
       )}
       {failed ? (
-        <p className="text-xs text-destructive">Image nahi bani — thodi der baad dobara try karo.</p>
+        <p className="text-xs text-destructive">Image could not be created — please try again shortly.</p>
       ) : (
         <img
           key={url}
@@ -253,7 +253,7 @@ async function downloadDataUrl(dataUrl: string, filename: string) {
     anchor.remove();
     setTimeout(() => URL.revokeObjectURL(url), 10_000);
   } catch {
-    toast.error("Download nahi ho saki");
+    toast.error("Download failed");
   }
 }
 
@@ -687,7 +687,7 @@ function ChatThread({
       ...stream,
       status,
       error: error?.message,
-      approvePlan: id => { planRef.current = id; void submitRef.current("Approved plan — shuru karo, steps ke mutabiq kaam karo."); },
+      approvePlan: id => { planRef.current = id; void submitRef.current("Approved plan — start now and follow the steps."); },
       approveCost: (id, tool) => { costRef.current = id; void submitRef.current(`Approved cost for ${tool}. Retry exactly the saved tool arguments; do not change them.`); },
       cancel: () => void stopRef.current(),
     }), 0);
@@ -713,7 +713,7 @@ function ChatThread({
   function voteGuide(id: string, vote: "up" | "down", message: string) {
     setGuideVotes((prev) => ({ ...prev, [id]: vote }));
     saveGuideFeedback(id, vote, message);
-    toast.success(vote === "up" ? "Shukriya bhai! 👍" : "Feedback mil gaya, improve karenge");
+    toast.success(vote === "up" ? "Thanks! 👍" : "Feedback received — we will improve");
   }
 
   useEffect(() => {
@@ -754,7 +754,7 @@ function ChatThread({
     if (!id) {
       id = await ensureConversation(value);
       if (!id) {
-        if (isBuildRequest(value)) onBuildActivity?.({ id: `build-${Date.now()}`, prompt: value, status: "error", text: "", code: "", steps: [], error: "Conversation save nahi hui. Chat se dobara try karein." });
+        if (isBuildRequest(value)) onBuildActivity?.({ id: `build-${Date.now()}`, prompt: value, status: "error", text: "", code: "", steps: [], error: "Conversation could not be saved. Please try again from chat." });
         return;
       }
       convRef.current = id;
@@ -908,7 +908,7 @@ function ChatThread({
                     })}
                   </div>
                 )}
-                {!isUser && tools.map((part,index)=> <GenesisToolApproval key={`approval-${index}`} disabled={busy} output={(part as {output?:Record<string,unknown>}).output??{}} onPlanApproved={id=>{planRef.current=id;void submit("Approved plan — shuru karo, steps ke mutabiq kaam karo.");}} onCostApproved={(id,tool)=>{costRef.current=id;void submit(`Approved cost for ${tool}. Retry exactly the saved tool arguments; do not change them.`);}}/>)}
+                {!isUser && tools.map((part,index)=> <GenesisToolApproval key={`approval-${index}`} disabled={busy} output={(part as {output?:Record<string,unknown>}).output??{}} onPlanApproved={id=>{planRef.current=id;void submit("Approved plan — start now and follow the steps.");}} onCostApproved={(id,tool)=>{costRef.current=id;void submit(`Approved cost for ${tool}. Retry exactly the saved tool arguments; do not change them.`);}}/>)}
                 {!isUser && tools.filter(part => ["tool-github_connect", "tool-github_push_to_new_branch", "tool-prepare_self_update"].includes(part.type)).map((part, index) => <GitHubChatAction key={`github-${index}`} disabled={busy} output={(part as { output?: Record<string, unknown> }).output ?? {}} onConnected={() => { void submit("GitHub consent and own repository selection completed. Check github_connect and continue my previous GitHub request; prepare Before/After only, do not push."); }} />)}
                 {!isUser && message.parts.map((part, index) => {
                   const out = part.type === "data-project" ? part.data as { memoryId?: string } : (part as { output?: { saved?: boolean; memoryId?: string } }).output;
@@ -961,7 +961,7 @@ function ChatThread({
                               void navigator.clipboard
                                 ?.writeText(text)
                                 .then(() => toast.success("Guide copy ho gaya"))
-                                .catch(() => toast.error("Copy nahi hua"));
+                                .catch(() => toast.error("Copy failed"));
                             }}
                             className="inline-flex items-center gap-1 rounded-full border border-border bg-secondary px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:border-primary"
                           >
