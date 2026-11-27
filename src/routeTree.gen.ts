@@ -28,6 +28,7 @@ import { Route as HowToUseRouteImport } from './routes/how-to-use'
 import { Route as InviteRouteImport } from './routes/invite'
 import { Route as JalsaChatRouteImport } from './routes/jalsa-chat'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as MyStoryRouteImport } from './routes/my-story'
 import { Route as PlayerRouteImport } from './routes/player'
@@ -169,6 +170,11 @@ const JalsaChatRoute = JalsaChatRouteImport.update({
 const LeaderboardRoute = LeaderboardRouteImport.update({
   id: '/leaderboard',
   path: '/leaderboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MessagesRoute = MessagesRouteImport.update({
@@ -429,6 +435,7 @@ export interface FileRoutesByFullPath {
   '/invite': typeof InviteRoute
   '/jalsa-chat': typeof JalsaChatRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/login': typeof LoginRoute
   '/messages': typeof MessagesRoute
   '/my-story': typeof MyStoryRoute
   '/player': typeof PlayerRoute
@@ -497,6 +504,7 @@ export interface FileRoutesByTo {
   '/invite': typeof InviteRoute
   '/jalsa-chat': typeof JalsaChatRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/login': typeof LoginRoute
   '/messages': typeof MessagesRoute
   '/my-story': typeof MyStoryRoute
   '/player': typeof PlayerRoute
@@ -566,6 +574,7 @@ export interface FileRoutesById {
   '/invite': typeof InviteRoute
   '/jalsa-chat': typeof JalsaChatRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/login': typeof LoginRoute
   '/messages': typeof MessagesRoute
   '/my-story': typeof MyStoryRoute
   '/player': typeof PlayerRoute
@@ -636,6 +645,7 @@ export interface FileRouteTypes {
     | '/invite'
     | '/jalsa-chat'
     | '/leaderboard'
+    | '/login'
     | '/messages'
     | '/my-story'
     | '/player'
@@ -704,6 +714,7 @@ export interface FileRouteTypes {
     | '/invite'
     | '/jalsa-chat'
     | '/leaderboard'
+    | '/login'
     | '/messages'
     | '/my-story'
     | '/player'
@@ -772,6 +783,7 @@ export interface FileRouteTypes {
     | '/invite'
     | '/jalsa-chat'
     | '/leaderboard'
+    | '/login'
     | '/messages'
     | '/my-story'
     | '/player'
@@ -841,6 +853,7 @@ export interface RootRouteChildren {
   InviteRoute: typeof InviteRoute
   JalsaChatRoute: typeof JalsaChatRoute
   LeaderboardRoute: typeof LeaderboardRoute
+  LoginRoute: typeof LoginRoute
   MessagesRoute: typeof MessagesRoute
   MyStoryRoute: typeof MyStoryRoute
   PlayerRoute: typeof PlayerRoute
@@ -1022,6 +1035,13 @@ declare module '@tanstack/react-router' {
       path: '/leaderboard'
       fullPath: '/leaderboard'
       preLoaderRoute: typeof LeaderboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/messages': {
@@ -1387,6 +1407,7 @@ const rootRouteChildren: RootRouteChildren = {
   InviteRoute: InviteRoute,
   JalsaChatRoute: JalsaChatRoute,
   LeaderboardRoute: LeaderboardRoute,
+  LoginRoute: LoginRoute,
   MessagesRoute: MessagesRoute,
   MyStoryRoute: MyStoryRoute,
   PlayerRoute: PlayerRoute,
