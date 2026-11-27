@@ -1,3 +1,4 @@
+import { readCache, writeCache, removeCache } from "@/lib/local-cache";
 import { ToolsMenu, CHAT_ACTION_EVT } from "@/components/nova/ToolsMenu";
 import { GitHubChatAction } from "@/components/nova/GitHubChatAction";
 import { ChatProjectCard } from "@/components/nova/ChatProjectCard";
@@ -281,17 +282,25 @@ export function ChatPanel({
   const [threadKey, setThreadKey] = useState(() => `draft-${Date.now()}`);
   const [loadingThread, setLoadingThread] = useState(false);
 
+  const threadsKey = `nqai_cached_threads_${userId}`;
   const loadThreads = useCallback(async () => {
-    const { data } = await supabase
+    const cached = readCache<Thread[]>(threadsKey);
+    if (cached) setThreads(cached);
+    const { data, error } = await supabase
       .from("conversations")
       .select("id, title, updated_at")
       .eq("user_id", userId)
       .order("updated_at", { ascending: false })
       .limit(50);
+    if (error) return cached ?? [];
     const rows = (data ?? []) as Thread[];
     setThreads(rows);
     return rows;
-  }, [userId]);
+  }, [userId, threadsKey]);
+
+  useEffect(() => {
+    if (threads.length) writeCache(threadsKey, threads);
+  }, [threads, threadsKey]);
 
   useEffect(() => {
     void loadThreads();
@@ -306,23 +315,33 @@ export function ChatPanel({
 
   const openThread = useCallback(async (id: string) => {
     setHistoryOpen(false);
-    setLoadingThread(true);
-    const { data: rows } = await supabase
+    const cachedMsgs = readCache<UIMessage[]>(`nqai_cached_messages_${id}`);
+    if (cachedMsgs) {
+      setInitialMessages(cachedMsgs);
+      setConversationId(id);
+      setThreadKey(id);
+    } else setLoadingThread(true);
+    const { data: rows, error: msgError } = await supabase
       .from("messages")
       .select("id, role, content")
       .eq("conversation_id", id)
       .order("created_at", { ascending: true });
-    setInitialMessages(
-      (rows ?? []).map((row) => {
+    if (msgError) { setLoadingThread(false); return; }
+    const fresh: UIMessage[] = (rows ?? []).map((row) => {
         const saved = row.role === "assistant" ? decodeProjectTurn(row.content) : { text: row.content, projects: [], reviews: [] };
         const parts: UIMessage["parts"] = [{ type: "text", text: saved.text }];
         for (const memoryId of saved.projects) parts.push({ type: "data-project", data: { memoryId } });
         for (const previewId of saved.reviews) parts.push({ type: "data-review", data: { previewId } });
         return { id: row.id, role: row.role as UIMessage["role"], parts };
-      }),
-    );
-    setConversationId(id);
-    setThreadKey(id);
+      });
+    writeCache(`nqai_cached_messages_${id}`, fresh);
+    // Only remount the thread when the server has something the cache lacked.
+    const changed = !cachedMsgs || cachedMsgs.length !== fresh.length;
+    if (changed) {
+      setInitialMessages(fresh);
+      setConversationId(id);
+      setThreadKey(cachedMsgs ? `${id}-${fresh.length}` : id);
+    }
     setLoadingThread(false);
   }, []);
 
@@ -354,7 +373,12 @@ export function ChatPanel({
       toast.error(t("chatDeleteFailed"));
       return;
     }
-    setThreads((prev) => prev.filter((t) => t.id !== id));
+    removeCache(`nqai_cached_messages_${id}`);
+    setThreads((prev) => {
+      const next = prev.filter((t) => t.id !== id);
+      writeCache(threadsKey, next);
+      return next;
+    });
     if (conversationId === id) startNewChat();
     toast.success(t("chatDeleted"));
   }
@@ -719,6 +743,13 @@ function ChatThread({
   useEffect(() => {
     if (bottomRef.current?.getClientRects().length) bottomRef.current.scrollIntoView({ behavior: "smooth" });
   }, [messages, busy]);
+
+  useEffect(() => {
+    const id = convRef.current;
+    if (id && messages.length && status !== "streaming" && status !== "submitted") {
+      writeCache(`nqai_cached_messages_${id}`, messages);
+    }
+  }, [messages, status]);
 
   async function submit(text: string) {
     const value = text.trim();

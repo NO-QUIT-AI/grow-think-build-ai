@@ -1,3 +1,4 @@
+import { readCache, writeCache } from "@/lib/local-cache";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Brain, Heart, Loader2, Pause, Play, Search, Sparkles, Trash2, X, Zap } from "lucide-react";
 import { toast } from "sonner";
@@ -39,13 +40,19 @@ export function MindPanel({ userId, refreshKey }: { userId: string; refreshKey: 
   const [likedOnly, setLikedOnly] = useState(false);
 
   const load = useCallback(async () => {
-    setLoading(true);
-    const { data } = await supabase
+    const cached = readCache<Memory[]>(`nqai_cached_memories_${userId}`);
+    if (cached) setMemories(cached);
+    else setLoading(true);
+    const { data, error } = await supabase
       .from("memories")
       .select("id, prompt, project_type, code, summary, blueprint, liked, version, created_at")
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
-    setMemories((data as unknown as Memory[]) ?? []);
+    if (!error) {
+      const rows = (data as unknown as Memory[]) ?? [];
+      setMemories(rows);
+      writeCache(`nqai_cached_memories_${userId}`, rows);
+    }
     setLoading(false);
   }, [userId]);
 
@@ -59,13 +66,18 @@ export function MindPanel({ userId, refreshKey }: { userId: string; refreshKey: 
   const [autoOn, setAutoOn] = useState(true);
 
   const loadThoughts = useCallback(async () => {
-    const { data } = await supabase
+    const cached = readCache<Thought[]>(`nqai_cached_thoughts_${userId}`);
+    if (cached) setThoughts(cached);
+    const { data, error } = await supabase
       .from("mind_thoughts")
       .select("id, thought, source_chat, is_auto, created_at")
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(50);
-    setThoughts((data as unknown as Thought[]) ?? []);
+    if (error) return;
+    const rows = (data as unknown as Thought[]) ?? [];
+    setThoughts(rows);
+    writeCache(`nqai_cached_thoughts_${userId}`, rows);
   }, [userId]);
 
   const think = useCallback(
@@ -119,9 +131,11 @@ export function MindPanel({ userId, refreshKey }: { userId: string; refreshKey: 
 
   useEffect(() => {
     if (!autoOn) return;
+    // Auto-think at most every 10 minutes, only while the tab is visible and online.
     const id = setInterval(() => {
+      if (document.visibilityState !== "visible" || !navigator.onLine) return;
       void think(false);
-    }, 90_000);
+    }, 10 * 60_000);
     return () => clearInterval(id);
   }, [autoOn, think]);
 
@@ -157,7 +171,11 @@ export function MindPanel({ userId, refreshKey }: { userId: string; refreshKey: 
       toast.error("Like update nahi ho saka");
       return;
     }
-    setMemories((prev) => prev.map((m) => (m.id === id ? { ...m, liked: !liked } : m)));
+    setMemories((prev) => {
+      const next = prev.map((m) => (m.id === id ? { ...m, liked: !liked } : m));
+      writeCache(`nqai_cached_memories_${userId}`, next);
+      return next;
+    });
   }
 
   async function remove(id: string) {
@@ -166,7 +184,11 @@ export function MindPanel({ userId, refreshKey }: { userId: string; refreshKey: 
       toast.error("Delete nahi ho saka");
       return;
     }
-    setMemories((prev) => prev.filter((m) => m.id !== id));
+    setMemories((prev) => {
+      const next = prev.filter((m) => m.id !== id);
+      writeCache(`nqai_cached_memories_${userId}`, next);
+      return next;
+    });
   }
 
   return (

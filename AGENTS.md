@@ -41,3 +41,4 @@
 - All backend text inference including main chat uses task-aware ai-provider.server candidates with bounded waits and pre-output failover; coding handlers pass the coding task, voice handlers pass voice, and emitted tools/text are never replayed to prevent duplicate actions. Keep keys server-only and do not use AI Gateway for text.
 - Chat GitHub cards reuse per-user connection and selected workspace, with separate branch and Main click approvals; Tools opens the inline card so navigation and owner-repo designation cannot interrupt or override user selection.
 - GitHub AI review and branch-preview generation use schema-validated JSON with DeepSeek-first read-only provider failover; invalid or truncated output never becomes a persisted proposal or push.
+- Chat threads/messages and Mind memories/thoughts use localStorage stale-while-revalidate via src/lib/local-cache.ts; Supabase stays source of truth — instant screens, fewer reads.
