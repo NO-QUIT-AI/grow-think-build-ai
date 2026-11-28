@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { requirePro } from "@/lib/pro-user.server";
+import { reservePaidVideo, savePaidVideoTask, ownsPaidVideoTask } from "@/lib/paid-video-guard.server";
 
 /** Viral build intro via Runway gen4_turbo (5s). Pro only, RUNWAYML_API_SECRET server-side. */
 const API = "https://api.dev.runwayml.com/v1";
@@ -24,6 +25,8 @@ export const Route = createFileRoute("/api/runway-video")({
         if (pro instanceof Response) return pro;
         const parsed = Body.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return Response.json({ error: "Invalid input" }, { status: 400 });
+        const reservation = await reservePaidVideo(pro.id, "runway");
+        if (reservation instanceof Response) return reservation;
         const res = await fetch(`${API}/image_to_video`, {
           method: "POST",
           headers: headers(),
@@ -41,6 +44,7 @@ export const Route = createFileRoute("/api/runway-video")({
           return Response.json({ error: `Runway error (${res.status})`, detail: t.slice(0, 300) }, { status: 502 });
         }
         const j = (await res.json()) as { id: string };
+        if (!j.id || !(await savePaidVideoTask(reservation, pro.id, "runway", j.id))) return Response.json({ error: "Unable to save video task ownership." }, { status: 503 });
         return Response.json({ id: j.id });
       },
       GET: async ({ request }) => {
@@ -48,6 +52,7 @@ export const Route = createFileRoute("/api/runway-video")({
         if (pro instanceof Response) return pro;
         const id = new URL(request.url).searchParams.get("id") ?? "";
         if (!/^[0-9a-zA-Z-]{8,64}$/.test(id)) return Response.json({ error: "Invalid input" }, { status: 400 });
+        if (!(await ownsPaidVideoTask(pro.id, "runway", id))) return Response.json({ error: "Video task not found." }, { status: 404 });
         const r = await fetch(`${API}/tasks/${id}`, { headers: headers() });
         if (!r.ok) return Response.json({ error: `Status error (${r.status})` }, { status: 502 });
         const t = (await r.json()) as { status: string; output?: string[] };

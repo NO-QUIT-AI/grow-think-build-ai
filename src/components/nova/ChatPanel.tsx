@@ -1,4 +1,5 @@
 import { readCache, writeCache, removeCache } from "@/lib/local-cache";
+import { messageCacheKey } from "@/lib/paid-video-rules";
 import { ToolsMenu, CHAT_ACTION_EVT } from "@/components/nova/ToolsMenu";
 import { GitHubChatAction } from "@/components/nova/GitHubChatAction";
 import { ChatProjectCard } from "@/components/nova/ChatProjectCard";
@@ -57,25 +58,21 @@ const VOICE_CACHE_KEY = "nqai_voice_cache";
 function voiceKey(q: string, lang: string) {
   return `${lang}::${q.toLowerCase().trim()}`;
 }
-function loadVoiceCache(): Record<string, string> {
-  try {
-    return JSON.parse(localStorage.getItem(VOICE_CACHE_KEY) || "{}");
-  } catch {
-    return {};
-  }
+function loadVoiceCache(userId: string): Record<string, string> {
+  return readCache<Record<string, string>>(`${VOICE_CACHE_KEY}_${userId}`) ?? {};
 }
-function readVoiceCache(q: string, lang: string): string | null {
+function readVoiceCache(q: string, lang: string, userId: string): string | null {
   if (typeof window === "undefined") return null;
-  return loadVoiceCache()[voiceKey(q, lang)] ?? null;
+  return loadVoiceCache(userId)[voiceKey(q, lang)] ?? null;
 }
-function writeVoiceCache(q: string, lang: string, answer: string) {
+function writeVoiceCache(q: string, lang: string, answer: string, userId: string) {
   if (typeof window === "undefined") return;
-  const cache = loadVoiceCache();
+  const cache = loadVoiceCache(userId);
   cache[voiceKey(q, lang)] = answer;
   const keys = Object.keys(cache);
   for (const k of keys.slice(0, Math.max(0, keys.length - 200))) delete cache[k];
   try {
-    localStorage.setItem(VOICE_CACHE_KEY, JSON.stringify(cache));
+    writeCache(`${VOICE_CACHE_KEY}_${userId}`, cache);
   } catch {
     /* storage full */
   }
@@ -315,7 +312,7 @@ export function ChatPanel({
 
   const openThread = useCallback(async (id: string) => {
     setHistoryOpen(false);
-    const cachedMsgs = readCache<UIMessage[]>(`nqai_cached_messages_${id}`);
+    const cachedMsgs = readCache<UIMessage[]>(messageCacheKey(userId, id));
     if (cachedMsgs) {
       setInitialMessages(cachedMsgs);
       setConversationId(id);
@@ -325,6 +322,7 @@ export function ChatPanel({
       .from("messages")
       .select("id, role, content")
       .eq("conversation_id", id)
+      .eq("user_id", userId)
       .order("created_at", { ascending: true });
     if (msgError) { setLoadingThread(false); return; }
     const fresh: UIMessage[] = (rows ?? []).map((row) => {
@@ -334,7 +332,7 @@ export function ChatPanel({
         for (const previewId of saved.reviews) parts.push({ type: "data-review", data: { previewId } });
         return { id: row.id, role: row.role as UIMessage["role"], parts };
       });
-    writeCache(`nqai_cached_messages_${id}`, fresh);
+    writeCache(messageCacheKey(userId, id), fresh);
     // Only remount the thread when the server has something the cache lacked.
     const changed = !cachedMsgs || cachedMsgs.length !== fresh.length;
     if (changed) {
@@ -343,7 +341,7 @@ export function ChatPanel({
       setThreadKey(cachedMsgs ? `${id}-${fresh.length}` : id);
     }
     setLoadingThread(false);
-  }, []);
+  }, [userId]);
 
   // Pehla message bhejte hi chat save ho jati hai.
   const ensureConversation = useCallback(
@@ -373,7 +371,7 @@ export function ChatPanel({
       toast.error(t("chatDeleteFailed"));
       return;
     }
-    removeCache(`nqai_cached_messages_${id}`);
+    removeCache(messageCacheKey(userId, id));
     setThreads((prev) => {
       const next = prev.filter((t) => t.id !== id);
       writeCache(threadsKey, next);
@@ -660,7 +658,7 @@ function ChatThread({
       const text = messageText(message);
       const cacheQ = voiceQuestionRef.current;
       const usedTool = (message.parts ?? []).some((p) => String(p.type).startsWith("tool-"));
-      if (cacheQ && text && !usedTool && cacheQ.length <= 500) writeVoiceCache(cacheQ, lang, text);
+      if (cacheQ && text && !usedTool && cacheQ.length <= 500) writeVoiceCache(cacheQ, lang, text, userId);
       voiceQuestionRef.current = "";
       if (voiceResolveRef.current) {
         voiceResolveRef.current(text || t("aiNoReply"));
@@ -747,9 +745,9 @@ function ChatThread({
   useEffect(() => {
     const id = convRef.current;
     if (id && messages.length && status !== "streaming" && status !== "submitted") {
-      writeCache(`nqai_cached_messages_${id}`, messages);
+      writeCache(messageCacheKey(userId, id), messages);
     }
-  }, [messages, status]);
+  }, [messages, status, userId]);
 
   async function submit(text: string) {
     const value = text.trim();
@@ -774,7 +772,7 @@ function ChatThread({
       onBuildActivity?.({ ...request, status: "submitted", text: "", code: "", steps: [] });
       // Genuine progress remains available in Studio; do not leave the user's Chat.
     }
-    if (!attached && !studioContext && readVoiceCache(value, lang)) {
+    if (!attached && !studioContext && readVoiceCache(value, lang, userId)) {
       void askByVoice(value);
       return;
     }
@@ -805,7 +803,7 @@ function ChatThread({
 
   // Voice agent: cache (device par save) me ho to AI call nahi, warna AI se poocho.
   async function askByVoice(question: string): Promise<string> {
-    const cached = studioContext ? null : readVoiceCache(question, lang);
+    const cached = studioContext ? null : readVoiceCache(question, lang, userId);
     if (cached) {
       setInput("");
       const stamp = Date.now();
@@ -844,7 +842,7 @@ function ChatThread({
     }).catch(() => null);
     const answer = res?.ok ? String(((await res.json()) as { text?: string }).text ?? "") : "";
     if (!answer) return t("aiNoReply");
-    writeVoiceCache(question, lang, answer);
+    writeVoiceCache(question, lang, answer, userId);
     const stamp = Date.now();
     setMessages((prev) => [
       ...prev,

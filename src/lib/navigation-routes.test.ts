@@ -23,7 +23,7 @@ function normalize(path: string): string {
 const pageRoutes = sourceFiles(ROUTES_ROOT).flatMap((path) => {
   const source = readFileSync(path, "utf8");
   const route = /createFileRoute\(\s*["']([^"']+)["']/.exec(source)?.[1];
-  return route && !route.startsWith("/api/") ? [normalize(route)] : [];
+  return route && !route.startsWith("/api/") ? [normalize(route.replace(/\/_authenticated(?=\/|$)/, "") || "/")] : [];
 });
 
 function isRegisteredPage(target: string): boolean {

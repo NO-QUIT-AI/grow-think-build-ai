@@ -25,3 +25,14 @@ export function removeCache(key: string): void {
   if (typeof window === "undefined") return;
   try { window.localStorage.removeItem(key); } catch { /* ignore */ }
 }
+
+export function clearPrivateCaches(): void {
+  if (typeof window === "undefined") return;
+  try {
+    for (const key of Object.keys(window.localStorage)) {
+      if (key.startsWith("nqai_cached_") || key.startsWith("nqai_voice_cache") || key === "nqai.byok.keys" || key === "nqai.personalProfile") {
+        window.localStorage.removeItem(key);
+      }
+    }
+  } catch { /* Private storage can be disabled; never prevent sign-out. */ }
+}

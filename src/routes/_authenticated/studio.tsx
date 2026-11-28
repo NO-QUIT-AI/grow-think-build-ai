@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
-export const Route = createFileRoute("/studio")({
+export const Route = createFileRoute("/_authenticated/studio")({
   head: () => ({
     meta: [
       { title: "Local Studio — NO QUIT AI (Ollama)" },

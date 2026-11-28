@@ -11,7 +11,7 @@ import { deviceSafetyScore, linkWarnings, type SafetyAnswer } from "@/lib/securi
 import { hasNativeSafety, nativeSecurity } from "@/lib/native-security";
 import { getSecurityBackup, setSecurityBackup, runSecurityBackup, downloadSecurityBackup } from "@/lib/security-backup.functions";
 
-export const Route = createFileRoute("/security-center")({
+export const Route = createFileRoute("/_authenticated/security-center")({
   head: () => ({ meta: [
     { title: "Security Center — NO QUIT AI" },
     { name: "description", content: "Review device safety, check suspicious links and back up saved NO QUIT AI chats, builds and domain settings." },

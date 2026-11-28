@@ -1,4 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { userFromRequest } from '@/lib/auth-user.server';
+import { createMemoryStore } from '@/lib/ai/memory';
 
 import {
   loadProfile,
@@ -183,6 +185,8 @@ export const Route = createFileRoute('/api/jalsa-ai')({
   server: {
     handlers: {
       POST: async ({ request }): Promise<Response> => {
+        if (!(await userFromRequest(request))) return new Response('Unauthorized', { status: 401 });
+        const memoryStore = createMemoryStore();
         try {
           const raw = (await request.json()) as Body | null;
           const body: Body = raw !== null && typeof raw === 'object' ? raw : {};
@@ -193,7 +197,7 @@ export const Route = createFileRoute('/api/jalsa-ai')({
           const messages = incoming.slice(-MAX_MESSAGES);
 
           // ---- Profile & memory merge ----
-          const storedProfile = await loadProfile();
+          const storedProfile = await loadProfile(memoryStore);
           const name = readTrimmedString(body.userName);
           const city = readTrimmedString(body.userCity);
           const work = readTrimmedString(body.userWork);
@@ -201,15 +205,15 @@ export const Route = createFileRoute('/api/jalsa-ai')({
           let profile: PersonalProfile = { ...storedProfile };
           if (name !== undefined) {
             profile.name = name;
-            await rememberFact('name', name);
+            await rememberFact('name', name, memoryStore);
           }
           if (city !== undefined) {
             profile.city = city;
-            await rememberFact('city', city);
+            await rememberFact('city', city, memoryStore);
           }
           if (work !== undefined) {
             profile.work = work;
-            await rememberFact('work', work);
+            await rememberFact('work', work, memoryStore);
           }
 
           const pendingTasks = readPendingTasks(body.pendingTasks);

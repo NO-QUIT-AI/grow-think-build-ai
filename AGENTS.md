@@ -42,3 +42,8 @@
 - Chat GitHub cards reuse per-user connection and selected workspace, with separate branch and Main click approvals; Tools opens the inline card so navigation and owner-repo designation cannot interrupt or override user selection.
 - GitHub AI review and branch-preview generation use schema-validated JSON with DeepSeek-first read-only provider failover; invalid or truncated output never becomes a persisted proposal or push.
 - Chat threads/messages and Mind memories/thoughts use localStorage stale-while-revalidate via src/lib/local-cache.ts; Supabase stays source of truth — instant screens, fewer reads.
+
+- Runway/fal require atomic database reservations and user-owned tasks; fail closed before paid submission.
+- Private tool pages live under the shared client-only _authenticated gate; public content, callbacks and offline-only Jalsa remain public, with server authentication on all cloud actions.
+- Owner authorization is bound to owners.user_id, never email matching; profile reputation/build counters and referral rewards are server-managed.
+- User-scope message/voice caches; sign-out cancels queries and clears private caches.

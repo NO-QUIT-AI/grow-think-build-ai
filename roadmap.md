@@ -70,3 +70,6 @@ Phase 3:
 - [x] 15. Tool chaining: AUTONOMY_PROMPT rules — "banao+deploy+test+report" runs write_files → vercel_deploy → deploy_status → design_review → report without interruption.
 
 - [ ] Combined protection audit: durable Runway limits (approved), private-data/cache isolation, login gates, Cloudflare bot/WAF access and confirmation, tests and publish.
+
+- [x] Applied paid-video caps (default 3/hour, 10/user/day, 50/app/day), private task ownership, UUID-bound owners, locked reputation/referral writes, owner-only ad metrics, authenticated audio/Jalsa AI, per-user caches and 13 login-gated tool pages.
+- [ ] Finish protection verification and publish: blocked by depleted workspace credits; Cloudflare WAF read returned 403 and requires Zone WAF/Bot permissions plus change confirmations. Paid API limits and navigation regression tests added; full signed-in/two-user and live deployment verification remain.

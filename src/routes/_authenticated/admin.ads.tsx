@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { isAdsActive, useAdsConfig } from "@/lib/adsense";
 import { OWNER_EMAIL, estimateEarnings, fetchAdStats, type AdStats } from "@/lib/ads-stats";
 
-export const Route = createFileRoute("/admin/ads")({
+export const Route = createFileRoute("/_authenticated/admin/ads")({
   head: () => ({
     meta: [
       { title: "Ad Earnings — NO QUIT AI" },
@@ -35,9 +35,6 @@ function AdminAdsPage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
 
-  useEffect(() => {
-    if (!loading && !user) navigate({ to: "/auth" });
-  }, [user, loading, navigate]);
 
   if (loading || !user) {
     return (

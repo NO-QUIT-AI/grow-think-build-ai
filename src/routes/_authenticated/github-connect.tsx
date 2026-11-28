@@ -12,7 +12,7 @@ import { GitHubSelfUpdate } from "@/components/GitHubSelfUpdate";
 import { GitHubSmartChange } from "@/components/GitHubSmartChange";
 import { githubStatus, chatGitHubConnection, startGitHubConnect, completeGitHubConnect, disconnectGitHub, listGitHubRepos, selectGitHubRepo, getGitHubTree, getGitHubFile, analyzeGitHubFile, fixGitHubFile, pushGitHubFix } from "@/lib/github.functions";
 
-export const Route = createFileRoute("/github-connect")({
+export const Route = createFileRoute("/_authenticated/github-connect")({
   head: () => ({ meta: [
     { title: "GitHub Connect — NO QUIT AI" },
     { name: "description", content: "Connect your own GitHub repositories, review code and approve fixes with NO QUIT AI." },

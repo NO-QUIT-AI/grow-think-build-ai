@@ -1,0 +1,11 @@
+ALTER TABLE public.owners ADD COLUMN user_id uuid;
+UPDATE public.owners o SET user_id=u.id FROM auth.users u WHERE lower(o.email)=lower(u.email) AND o.user_id IS NULL;
+CREATE UNIQUE INDEX owners_user_identity_idx ON public.owners(user_id) WHERE user_id IS NOT NULL;
+CREATE OR REPLACE FUNCTION public.is_owner(_uid uuid) RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$ SELECT EXISTS(SELECT 1 FROM public.owners o WHERE o.user_id=_uid) $$;
+REVOKE INSERT, UPDATE ON public.profiles FROM authenticated;
+GRANT INSERT(id,display_name,username,avatar_url,bio) ON public.profiles TO authenticated;
+GRANT UPDATE(display_name,username,avatar_url,bio,updated_at) ON public.profiles TO authenticated;
+REVOKE INSERT ON public.referrals FROM authenticated;
+REVOKE ALL ON FUNCTION public.nqai_invite_multiplier(uuid) FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.nqai_invite_multiplier(uuid) TO service_role;
+CREATE OR REPLACE FUNCTION public.ad_stats() RETURNS json LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=public AS $$ BEGIN IF NOT public.is_owner(auth.uid()) THEN RAISE EXCEPTION 'Owner access required' USING ERRCODE='42501'; END IF; RETURN json_build_object('total',(SELECT count(*) FROM public.ad_impressions),'today',(SELECT count(*) FROM public.ad_impressions WHERE created_at>=date_trunc('day',now())),'last7',(SELECT count(*) FROM public.ad_impressions WHERE created_at>=now()-interval '7 days'),'last30',(SELECT count(*) FROM public.ad_impressions WHERE created_at>=now()-interval '30 days'),'viewers',(SELECT count(DISTINCT user_id) FROM public.ad_impressions)); END $$;

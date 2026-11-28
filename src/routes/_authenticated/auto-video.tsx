@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { splitStory, type StockClip, type VideoScene } from "@/lib/auto-video";
 
-export const Route = createFileRoute("/auto-video")({
+export const Route = createFileRoute("/_authenticated/auto-video")({
   head: () => ({ meta: [
     { title: "Auto Story to Video — NO QUIT AI" },
     { name: "description", content: "Turn your story into a vertical video with free browser voice, stock clips, animated captions and local MP4 export." },

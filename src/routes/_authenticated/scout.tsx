@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { ScottChat } from "@/components/ScottChat";
 
-export const Route = createFileRoute("/scout")({
+export const Route = createFileRoute("/_authenticated/scout")({
   head: () => ({
     meta: [
       { title: "Scott Coach & Scout — NO QUIT AI" },

@@ -37,7 +37,7 @@ import {
   type CvRecord,
 } from "@/lib/cv";
 
-export const Route = createFileRoute("/cv")({
+export const Route = createFileRoute("/_authenticated/cv")({
   head: () => ({
     meta: [
       { title: "CV Maker — NO QUIT AI" },
@@ -62,9 +62,6 @@ function CvPage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
 
-  useEffect(() => {
-    if (!loading && !user) navigate({ to: "/auth" });
-  }, [user, loading, navigate]);
 
   if (loading || !user) {
     return (

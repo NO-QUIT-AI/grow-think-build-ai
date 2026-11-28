@@ -16,7 +16,7 @@ type CallSearch = {
   inviteId?: string | undefined;
 };
 
-export const Route = createFileRoute("/call/$roomId")({
+export const Route = createFileRoute("/_authenticated/call/$roomId")({
   validateSearch: (search: Record<string, unknown>): CallSearch => ({
     type: search["type"] === "video" ? "video" : "audio",
     friendId: typeof search["friendId"] === "string" ? (search["friendId"] as string) : undefined,

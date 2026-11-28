@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { requirePro } from "@/lib/pro-user.server";
+import { reservePaidVideo, savePaidVideoTask, ownsPaidVideoTask } from "@/lib/paid-video-guard.server";
 
 /** Photo → galaxy video via fal Wan 2.2 at 480p (cheap). Pro only, FAL_KEY server-side. */
 const MODEL = "fal-ai/wan/v2.2-a14b/image-to-video";
@@ -26,6 +27,8 @@ export const Route = createFileRoute("/api/fal-video")({
         if (pro instanceof Response) return pro;
         const parsed = Body.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return Response.json({ error: "Invalid input" }, { status: 400 });
+        const reservation = await reservePaidVideo(pro.id, "fal-avatar");
+        if (reservation instanceof Response) return reservation;
         const hfKey = process.env["HUGGINGFACE_API_KEY"];
         if (hfKey) {
           // Free HuggingFace router. 503/404 → wait 20s, retry 3x, then fall back to fal.ai.
@@ -62,6 +65,7 @@ export const Route = createFileRoute("/api/fal-video")({
           return Response.json({ error: `fal error (${res.status})`, detail: t.slice(0, 300) }, { status: 502 });
         }
         const j = (await res.json()) as { request_id: string };
+        if (!j.request_id || !(await savePaidVideoTask(reservation, pro.id, "fal-avatar", j.request_id))) return Response.json({ error: "Unable to save video task ownership." }, { status: 503 });
         return Response.json({ id: j.request_id });
       },
       GET: async ({ request }) => {
@@ -69,6 +73,7 @@ export const Route = createFileRoute("/api/fal-video")({
         if (pro instanceof Response) return pro;
         const id = new URL(request.url).searchParams.get("id") ?? "";
         if (!/^[0-9a-zA-Z-]{8,64}$/.test(id)) return Response.json({ error: "Invalid input" }, { status: 400 });
+        if (!(await ownsPaidVideoTask(pro.id, "fal-avatar", id))) return Response.json({ error: "Video task not found." }, { status: 404 });
         const base = `https://queue.fal.run/${APP}/requests/${id}`;
         const s = await fetch(`${base}/status`, { headers: headers() });
         if (!s.ok) return Response.json({ error: `Status error (${s.status})` }, { status: 502 });

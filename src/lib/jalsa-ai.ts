@@ -1,3 +1,4 @@
+import { supabase } from '@/integrations/supabase/client';
 export const JALSA_AI_PEER = { id: 'no-quit-ai', name: 'NO QUIT AI' };
 
 export type JalsaAIMessage = {
@@ -27,9 +28,11 @@ export function formatAiReply(reply: string): string {
  */
 export async function askJalsaAI(messages: JalsaAIMessage[]): Promise<string | null> {
   try {
+    const { data: auth } = await supabase.auth.getSession();
+    if (!auth.session) return null;
     const res = await fetch('/api/jalsa-ai', {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${auth.session.access_token}` },
       body: JSON.stringify({ messages }),
     });
     if (!res.ok) return null;

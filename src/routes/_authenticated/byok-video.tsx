@@ -8,7 +8,7 @@ import { Download, ExternalLink, KeyRound, Trash2, Film, Square } from "lucide-r
 import { toast } from "sonner";
 import { PROVIDERS, loadKeys, saveKeys, splitScript, falGenerate, mergeClips, type ByokKeys, type ByokProvider } from "@/lib/byok-video";
 
-export const Route = createFileRoute("/byok-video")({
+export const Route = createFileRoute("/_authenticated/byok-video")({
   head: () => ({
     meta: [
       { title: "Bring Your Own Key Movie Maker — NO QUIT AI" },

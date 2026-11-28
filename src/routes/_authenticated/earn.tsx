@@ -25,7 +25,7 @@ import {
   type NqaiWallet,
 } from "@/lib/nqai";
 
-export const Route = createFileRoute("/earn")({
+export const Route = createFileRoute("/_authenticated/earn")({
   head: () => ({
     meta: [
       { title: "Earn NQAI Coins — NO QUIT AI" },
@@ -50,9 +50,6 @@ function EarnPage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
 
-  useEffect(() => {
-    if (!loading && !user) navigate({ to: "/auth" });
-  }, [user, loading, navigate]);
 
   if (loading || !user) {
     return (

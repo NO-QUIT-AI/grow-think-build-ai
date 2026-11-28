@@ -20,6 +20,8 @@ import { initAdsConfig } from "@/lib/adsense";
 import { LanguageProvider } from "@/i18n/LanguageContext";
 import { registerAppOfflineScreen } from "@/lib/pwa-registration";
 import { SecuritySafeguards } from "@/components/SecuritySafeguards";
+import { supabase } from "@/integrations/supabase/client";
+import { clearPrivateCaches } from "@/lib/local-cache";
 
 function NotFoundComponent() {
   return (
@@ -144,6 +146,22 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
   const androidPage = router.state.location.pathname === "/android-app";
+  useEffect(() => {
+    let identity: string | null = null;
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      const next = session?.user.id ?? null;
+      if (event === "SIGNED_OUT" || (identity && next !== identity)) {
+        void queryClient.cancelQueries();
+        queryClient.clear();
+        clearPrivateCaches();
+      }
+      identity = next;
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") {
+        void router.invalidate();
+      }
+    });
+    return () => data.subscription.unsubscribe();
+  }, [queryClient, router]);
   useEffect(() => { void registerAppOfflineScreen().catch(() => {}); }, [androidPage]);
 
   // Load the runtime ad config (publisher ID from env) and inject the

@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
-export const Route = createFileRoute("/admin/owner")({
+export const Route = createFileRoute("/_authenticated/admin/owner")({
   head: () => ({
     meta: [
       { title: "Owner Panel — NO QUIT AI" },
@@ -45,9 +45,6 @@ function OwnerPage() {
   const [q, setQ] = useState("");
   const [views, setViews] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    if (!loading && !user) navigate({ to: "/auth" });
-  }, [user, loading, navigate]);
 
   const load = useCallback(async () => {
     try {

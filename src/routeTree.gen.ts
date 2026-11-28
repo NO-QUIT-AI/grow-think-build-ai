@@ -10,37 +10,36 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AccountDeletionRouteImport } from './routes/account-deletion'
 import { Route as AndroidAppRouteImport } from './routes/android-app'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AutoVideoRouteImport } from './routes/auto-video'
-import { Route as ByokVideoRouteImport } from './routes/byok-video'
 import { Route as CallbackRouteImport } from './routes/callback'
-import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ContactRouteImport } from './routes/contact'
-import { Route as CvRouteImport } from './routes/cv'
 import { Route as DeleteAccountRouteImport } from './routes/delete-account'
 import { Route as DeleteDataRouteImport } from './routes/delete-data'
-import { Route as EarnRouteImport } from './routes/earn'
-import { Route as GithubConnectRouteImport } from './routes/github-connect'
 import { Route as HowToUseRouteImport } from './routes/how-to-use'
 import { Route as InviteRouteImport } from './routes/invite'
 import { Route as JalsaChatRouteImport } from './routes/jalsa-chat'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as MyStoryRouteImport } from './routes/my-story'
 import { Route as PlayerRouteImport } from './routes/player'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ScottRouteImport } from './routes/scott'
-import { Route as ScoutRouteImport } from './routes/scout'
-import { Route as SecurityCenterRouteImport } from './routes/security-center'
 import { Route as SpaceRouteImport } from './routes/space'
-import { Route as StudioRouteImport } from './routes/studio'
 import { Route as TermsRouteImport } from './routes/terms'
-import { Route as AdminAdsRouteImport } from './routes/admin.ads'
-import { Route as AdminOwnerRouteImport } from './routes/admin.owner'
+import { Route as AuthenticatedAutoVideoRouteImport } from './routes/_authenticated/auto-video'
+import { Route as AuthenticatedByokVideoRouteImport } from './routes/_authenticated/byok-video'
+import { Route as AuthenticatedCommunityRouteImport } from './routes/_authenticated/community'
+import { Route as AuthenticatedCvRouteImport } from './routes/_authenticated/cv'
+import { Route as AuthenticatedEarnRouteImport } from './routes/_authenticated/earn'
+import { Route as AuthenticatedGithubConnectRouteImport } from './routes/_authenticated/github-connect'
+import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
+import { Route as AuthenticatedScoutRouteImport } from './routes/_authenticated/scout'
+import { Route as AuthenticatedSecurityCenterRouteImport } from './routes/_authenticated/security-center'
+import { Route as AuthenticatedStudioRouteImport } from './routes/_authenticated/studio'
 import { Route as ApiAgentsNightlyRouteImport } from './routes/api/agents-nightly'
 import { Route as ApiAgentsStatusRouteImport } from './routes/api/agents-status'
 import { Route as ApiAiVisionRouteImport } from './routes/api/ai-vision'
@@ -67,9 +66,11 @@ import { Route as ApiVoiceAgentTokenRouteImport } from './routes/api/voice-agent
 import { Route as ApiVoiceChatRouteImport } from './routes/api/voice-chat'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
-import { Route as CallRoomIdRouteImport } from './routes/call.$roomId'
 import { Route as SSubdomainRouteImport } from './routes/s.$subdomain'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
+import { Route as AuthenticatedAdminAdsRouteImport } from './routes/_authenticated/admin.ads'
+import { Route as AuthenticatedAdminOwnerRouteImport } from './routes/_authenticated/admin.owner'
+import { Route as AuthenticatedCallRoomIdRouteImport } from './routes/_authenticated/call.$roomId'
 import { Route as ApiMindThinkRouteImport } from './routes/api/mind/think'
 import { Route as ApiPublicAccountDeletionRouteImport } from './routes/api/public/account-deletion'
 import { Route as ApiPublicErrorReportRouteImport } from './routes/api/public/error-report'
@@ -80,6 +81,10 @@ import { Route as ApiPublicJobsDailyReportRouteImport } from './routes/api/publi
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -102,34 +107,14 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AutoVideoRoute = AutoVideoRouteImport.update({
-  id: '/auto-video',
-  path: '/auto-video',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ByokVideoRoute = ByokVideoRouteImport.update({
-  id: '/byok-video',
-  path: '/byok-video',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const CallbackRoute = CallbackRouteImport.update({
   id: '/callback',
   path: '/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CommunityRoute = CommunityRouteImport.update({
-  id: '/community',
-  path: '/community',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CvRoute = CvRouteImport.update({
-  id: '/cv',
-  path: '/cv',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DeleteAccountRoute = DeleteAccountRouteImport.update({
@@ -140,16 +125,6 @@ const DeleteAccountRoute = DeleteAccountRouteImport.update({
 const DeleteDataRoute = DeleteDataRouteImport.update({
   id: '/delete-data',
   path: '/delete-data',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EarnRoute = EarnRouteImport.update({
-  id: '/earn',
-  path: '/earn',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GithubConnectRoute = GithubConnectRouteImport.update({
-  id: '/github-connect',
-  path: '/github-connect',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HowToUseRoute = HowToUseRouteImport.update({
@@ -177,11 +152,6 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MessagesRoute = MessagesRouteImport.update({
-  id: '/messages',
-  path: '/messages',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const MyStoryRoute = MyStoryRouteImport.update({
   id: '/my-story',
   path: '/my-story',
@@ -202,24 +172,9 @@ const ScottRoute = ScottRouteImport.update({
   path: '/scott',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ScoutRoute = ScoutRouteImport.update({
-  id: '/scout',
-  path: '/scout',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SecurityCenterRoute = SecurityCenterRouteImport.update({
-  id: '/security-center',
-  path: '/security-center',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SpaceRoute = SpaceRouteImport.update({
   id: '/space',
   path: '/space',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StudioRoute = StudioRouteImport.update({
-  id: '/studio',
-  path: '/studio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -227,15 +182,57 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminAdsRoute = AdminAdsRouteImport.update({
-  id: '/admin/ads',
-  path: '/admin/ads',
-  getParentRoute: () => rootRouteImport,
+const AuthenticatedAutoVideoRoute = AuthenticatedAutoVideoRouteImport.update({
+  id: '/auto-video',
+  path: '/auto-video',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AdminOwnerRoute = AdminOwnerRouteImport.update({
-  id: '/admin/owner',
-  path: '/admin/owner',
-  getParentRoute: () => rootRouteImport,
+const AuthenticatedByokVideoRoute = AuthenticatedByokVideoRouteImport.update({
+  id: '/byok-video',
+  path: '/byok-video',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCommunityRoute = AuthenticatedCommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCvRoute = AuthenticatedCvRouteImport.update({
+  id: '/cv',
+  path: '/cv',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedEarnRoute = AuthenticatedEarnRouteImport.update({
+  id: '/earn',
+  path: '/earn',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedGithubConnectRoute =
+  AuthenticatedGithubConnectRouteImport.update({
+    id: '/github-connect',
+    path: '/github-connect',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMessagesRoute = AuthenticatedMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedScoutRoute = AuthenticatedScoutRouteImport.update({
+  id: '/scout',
+  path: '/scout',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSecurityCenterRoute =
+  AuthenticatedSecurityCenterRouteImport.update({
+    id: '/security-center',
+    path: '/security-center',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedStudioRoute = AuthenticatedStudioRouteImport.update({
+  id: '/studio',
+  path: '/studio',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const ApiAgentsNightlyRoute = ApiAgentsNightlyRouteImport.update({
   id: '/api/agents-nightly',
@@ -367,11 +364,6 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
   path: '/blog/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CallRoomIdRoute = CallRoomIdRouteImport.update({
-  id: '/call/$roomId',
-  path: '/call/$roomId',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SSubdomainRoute = SSubdomainRouteImport.update({
   id: '/s/$subdomain',
   path: '/s/$subdomain',
@@ -381,6 +373,21 @@ const UUsernameRoute = UUsernameRouteImport.update({
   id: '/u/$username',
   path: '/u/$username',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAdminAdsRoute = AuthenticatedAdminAdsRouteImport.update({
+  id: '/admin/ads',
+  path: '/admin/ads',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAdminOwnerRoute = AuthenticatedAdminOwnerRouteImport.update({
+  id: '/admin/owner',
+  path: '/admin/owner',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCallRoomIdRoute = AuthenticatedCallRoomIdRouteImport.update({
+  id: '/call/$roomId',
+  path: '/call/$roomId',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const ApiMindThinkRoute = ApiMindThinkRouteImport.update({
   id: '/think',
@@ -421,33 +428,31 @@ export interface FileRoutesByFullPath {
   '/account-deletion': typeof AccountDeletionRoute
   '/android-app': typeof AndroidAppRoute
   '/auth': typeof AuthRoute
-  '/auto-video': typeof AutoVideoRoute
-  '/byok-video': typeof ByokVideoRoute
   '/callback': typeof CallbackRoute
-  '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
-  '/cv': typeof CvRoute
   '/delete-account': typeof DeleteAccountRoute
   '/delete-data': typeof DeleteDataRoute
-  '/earn': typeof EarnRoute
-  '/github-connect': typeof GithubConnectRoute
   '/how-to-use': typeof HowToUseRoute
   '/invite': typeof InviteRoute
   '/jalsa-chat': typeof JalsaChatRoute
   '/leaderboard': typeof LeaderboardRoute
   '/login': typeof LoginRoute
-  '/messages': typeof MessagesRoute
   '/my-story': typeof MyStoryRoute
   '/player': typeof PlayerRoute
   '/privacy': typeof PrivacyRoute
   '/scott': typeof ScottRoute
-  '/scout': typeof ScoutRoute
-  '/security-center': typeof SecurityCenterRoute
   '/space': typeof SpaceRoute
-  '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
-  '/admin/ads': typeof AdminAdsRoute
-  '/admin/owner': typeof AdminOwnerRoute
+  '/auto-video': typeof AuthenticatedAutoVideoRoute
+  '/byok-video': typeof AuthenticatedByokVideoRoute
+  '/community': typeof AuthenticatedCommunityRoute
+  '/cv': typeof AuthenticatedCvRoute
+  '/earn': typeof AuthenticatedEarnRoute
+  '/github-connect': typeof AuthenticatedGithubConnectRoute
+  '/messages': typeof AuthenticatedMessagesRoute
+  '/scout': typeof AuthenticatedScoutRoute
+  '/security-center': typeof AuthenticatedSecurityCenterRoute
+  '/studio': typeof AuthenticatedStudioRoute
   '/api/agents-nightly': typeof ApiAgentsNightlyRoute
   '/api/agents-status': typeof ApiAgentsStatusRoute
   '/api/ai-vision': typeof ApiAiVisionRoute
@@ -473,10 +478,12 @@ export interface FileRoutesByFullPath {
   '/api/voice-agent-token': typeof ApiVoiceAgentTokenRoute
   '/api/voice-chat': typeof ApiVoiceChatRoute
   '/blog/$slug': typeof BlogSlugRoute
-  '/call/$roomId': typeof CallRoomIdRoute
   '/s/$subdomain': typeof SSubdomainRoute
   '/u/$username': typeof UUsernameRoute
   '/blog/': typeof BlogIndexRoute
+  '/admin/ads': typeof AuthenticatedAdminAdsRoute
+  '/admin/owner': typeof AuthenticatedAdminOwnerRoute
+  '/call/$roomId': typeof AuthenticatedCallRoomIdRoute
   '/api/mind/think': typeof ApiMindThinkRoute
   '/api/public/account-deletion': typeof ApiPublicAccountDeletionRoute
   '/api/public/error-report': typeof ApiPublicErrorReportRoute
@@ -490,33 +497,31 @@ export interface FileRoutesByTo {
   '/account-deletion': typeof AccountDeletionRoute
   '/android-app': typeof AndroidAppRoute
   '/auth': typeof AuthRoute
-  '/auto-video': typeof AutoVideoRoute
-  '/byok-video': typeof ByokVideoRoute
   '/callback': typeof CallbackRoute
-  '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
-  '/cv': typeof CvRoute
   '/delete-account': typeof DeleteAccountRoute
   '/delete-data': typeof DeleteDataRoute
-  '/earn': typeof EarnRoute
-  '/github-connect': typeof GithubConnectRoute
   '/how-to-use': typeof HowToUseRoute
   '/invite': typeof InviteRoute
   '/jalsa-chat': typeof JalsaChatRoute
   '/leaderboard': typeof LeaderboardRoute
   '/login': typeof LoginRoute
-  '/messages': typeof MessagesRoute
   '/my-story': typeof MyStoryRoute
   '/player': typeof PlayerRoute
   '/privacy': typeof PrivacyRoute
   '/scott': typeof ScottRoute
-  '/scout': typeof ScoutRoute
-  '/security-center': typeof SecurityCenterRoute
   '/space': typeof SpaceRoute
-  '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
-  '/admin/ads': typeof AdminAdsRoute
-  '/admin/owner': typeof AdminOwnerRoute
+  '/auto-video': typeof AuthenticatedAutoVideoRoute
+  '/byok-video': typeof AuthenticatedByokVideoRoute
+  '/community': typeof AuthenticatedCommunityRoute
+  '/cv': typeof AuthenticatedCvRoute
+  '/earn': typeof AuthenticatedEarnRoute
+  '/github-connect': typeof AuthenticatedGithubConnectRoute
+  '/messages': typeof AuthenticatedMessagesRoute
+  '/scout': typeof AuthenticatedScoutRoute
+  '/security-center': typeof AuthenticatedSecurityCenterRoute
+  '/studio': typeof AuthenticatedStudioRoute
   '/api/agents-nightly': typeof ApiAgentsNightlyRoute
   '/api/agents-status': typeof ApiAgentsStatusRoute
   '/api/ai-vision': typeof ApiAiVisionRoute
@@ -542,10 +547,12 @@ export interface FileRoutesByTo {
   '/api/voice-agent-token': typeof ApiVoiceAgentTokenRoute
   '/api/voice-chat': typeof ApiVoiceChatRoute
   '/blog/$slug': typeof BlogSlugRoute
-  '/call/$roomId': typeof CallRoomIdRoute
   '/s/$subdomain': typeof SSubdomainRoute
   '/u/$username': typeof UUsernameRoute
   '/blog': typeof BlogIndexRoute
+  '/admin/ads': typeof AuthenticatedAdminAdsRoute
+  '/admin/owner': typeof AuthenticatedAdminOwnerRoute
+  '/call/$roomId': typeof AuthenticatedCallRoomIdRoute
   '/api/mind/think': typeof ApiMindThinkRoute
   '/api/public/account-deletion': typeof ApiPublicAccountDeletionRoute
   '/api/public/error-report': typeof ApiPublicErrorReportRoute
@@ -556,37 +563,36 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/account-deletion': typeof AccountDeletionRoute
   '/android-app': typeof AndroidAppRoute
   '/auth': typeof AuthRoute
-  '/auto-video': typeof AutoVideoRoute
-  '/byok-video': typeof ByokVideoRoute
   '/callback': typeof CallbackRoute
-  '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
-  '/cv': typeof CvRoute
   '/delete-account': typeof DeleteAccountRoute
   '/delete-data': typeof DeleteDataRoute
-  '/earn': typeof EarnRoute
-  '/github-connect': typeof GithubConnectRoute
   '/how-to-use': typeof HowToUseRoute
   '/invite': typeof InviteRoute
   '/jalsa-chat': typeof JalsaChatRoute
   '/leaderboard': typeof LeaderboardRoute
   '/login': typeof LoginRoute
-  '/messages': typeof MessagesRoute
   '/my-story': typeof MyStoryRoute
   '/player': typeof PlayerRoute
   '/privacy': typeof PrivacyRoute
   '/scott': typeof ScottRoute
-  '/scout': typeof ScoutRoute
-  '/security-center': typeof SecurityCenterRoute
   '/space': typeof SpaceRoute
-  '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
-  '/admin/ads': typeof AdminAdsRoute
-  '/admin/owner': typeof AdminOwnerRoute
+  '/_authenticated/auto-video': typeof AuthenticatedAutoVideoRoute
+  '/_authenticated/byok-video': typeof AuthenticatedByokVideoRoute
+  '/_authenticated/community': typeof AuthenticatedCommunityRoute
+  '/_authenticated/cv': typeof AuthenticatedCvRoute
+  '/_authenticated/earn': typeof AuthenticatedEarnRoute
+  '/_authenticated/github-connect': typeof AuthenticatedGithubConnectRoute
+  '/_authenticated/messages': typeof AuthenticatedMessagesRoute
+  '/_authenticated/scout': typeof AuthenticatedScoutRoute
+  '/_authenticated/security-center': typeof AuthenticatedSecurityCenterRoute
+  '/_authenticated/studio': typeof AuthenticatedStudioRoute
   '/api/agents-nightly': typeof ApiAgentsNightlyRoute
   '/api/agents-status': typeof ApiAgentsStatusRoute
   '/api/ai-vision': typeof ApiAiVisionRoute
@@ -612,10 +618,12 @@ export interface FileRoutesById {
   '/api/voice-agent-token': typeof ApiVoiceAgentTokenRoute
   '/api/voice-chat': typeof ApiVoiceChatRoute
   '/blog/$slug': typeof BlogSlugRoute
-  '/call/$roomId': typeof CallRoomIdRoute
   '/s/$subdomain': typeof SSubdomainRoute
   '/u/$username': typeof UUsernameRoute
   '/blog/': typeof BlogIndexRoute
+  '/_authenticated/admin/ads': typeof AuthenticatedAdminAdsRoute
+  '/_authenticated/admin/owner': typeof AuthenticatedAdminOwnerRoute
+  '/_authenticated/call/$roomId': typeof AuthenticatedCallRoomIdRoute
   '/api/mind/think': typeof ApiMindThinkRoute
   '/api/public/account-deletion': typeof ApiPublicAccountDeletionRoute
   '/api/public/error-report': typeof ApiPublicErrorReportRoute
@@ -631,33 +639,31 @@ export interface FileRouteTypes {
     | '/account-deletion'
     | '/android-app'
     | '/auth'
-    | '/auto-video'
-    | '/byok-video'
     | '/callback'
-    | '/community'
     | '/contact'
-    | '/cv'
     | '/delete-account'
     | '/delete-data'
-    | '/earn'
-    | '/github-connect'
     | '/how-to-use'
     | '/invite'
     | '/jalsa-chat'
     | '/leaderboard'
     | '/login'
-    | '/messages'
     | '/my-story'
     | '/player'
     | '/privacy'
     | '/scott'
+    | '/space'
+    | '/terms'
+    | '/auto-video'
+    | '/byok-video'
+    | '/community'
+    | '/cv'
+    | '/earn'
+    | '/github-connect'
+    | '/messages'
     | '/scout'
     | '/security-center'
-    | '/space'
     | '/studio'
-    | '/terms'
-    | '/admin/ads'
-    | '/admin/owner'
     | '/api/agents-nightly'
     | '/api/agents-status'
     | '/api/ai-vision'
@@ -683,10 +689,12 @@ export interface FileRouteTypes {
     | '/api/voice-agent-token'
     | '/api/voice-chat'
     | '/blog/$slug'
-    | '/call/$roomId'
     | '/s/$subdomain'
     | '/u/$username'
     | '/blog/'
+    | '/admin/ads'
+    | '/admin/owner'
+    | '/call/$roomId'
     | '/api/mind/think'
     | '/api/public/account-deletion'
     | '/api/public/error-report'
@@ -700,33 +708,31 @@ export interface FileRouteTypes {
     | '/account-deletion'
     | '/android-app'
     | '/auth'
-    | '/auto-video'
-    | '/byok-video'
     | '/callback'
-    | '/community'
     | '/contact'
-    | '/cv'
     | '/delete-account'
     | '/delete-data'
-    | '/earn'
-    | '/github-connect'
     | '/how-to-use'
     | '/invite'
     | '/jalsa-chat'
     | '/leaderboard'
     | '/login'
-    | '/messages'
     | '/my-story'
     | '/player'
     | '/privacy'
     | '/scott'
+    | '/space'
+    | '/terms'
+    | '/auto-video'
+    | '/byok-video'
+    | '/community'
+    | '/cv'
+    | '/earn'
+    | '/github-connect'
+    | '/messages'
     | '/scout'
     | '/security-center'
-    | '/space'
     | '/studio'
-    | '/terms'
-    | '/admin/ads'
-    | '/admin/owner'
     | '/api/agents-nightly'
     | '/api/agents-status'
     | '/api/ai-vision'
@@ -752,10 +758,12 @@ export interface FileRouteTypes {
     | '/api/voice-agent-token'
     | '/api/voice-chat'
     | '/blog/$slug'
-    | '/call/$roomId'
     | '/s/$subdomain'
     | '/u/$username'
     | '/blog'
+    | '/admin/ads'
+    | '/admin/owner'
+    | '/call/$roomId'
     | '/api/mind/think'
     | '/api/public/account-deletion'
     | '/api/public/error-report'
@@ -765,37 +773,36 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/about'
     | '/account-deletion'
     | '/android-app'
     | '/auth'
-    | '/auto-video'
-    | '/byok-video'
     | '/callback'
-    | '/community'
     | '/contact'
-    | '/cv'
     | '/delete-account'
     | '/delete-data'
-    | '/earn'
-    | '/github-connect'
     | '/how-to-use'
     | '/invite'
     | '/jalsa-chat'
     | '/leaderboard'
     | '/login'
-    | '/messages'
     | '/my-story'
     | '/player'
     | '/privacy'
     | '/scott'
-    | '/scout'
-    | '/security-center'
     | '/space'
-    | '/studio'
     | '/terms'
-    | '/admin/ads'
-    | '/admin/owner'
+    | '/_authenticated/auto-video'
+    | '/_authenticated/byok-video'
+    | '/_authenticated/community'
+    | '/_authenticated/cv'
+    | '/_authenticated/earn'
+    | '/_authenticated/github-connect'
+    | '/_authenticated/messages'
+    | '/_authenticated/scout'
+    | '/_authenticated/security-center'
+    | '/_authenticated/studio'
     | '/api/agents-nightly'
     | '/api/agents-status'
     | '/api/ai-vision'
@@ -821,10 +828,12 @@ export interface FileRouteTypes {
     | '/api/voice-agent-token'
     | '/api/voice-chat'
     | '/blog/$slug'
-    | '/call/$roomId'
     | '/s/$subdomain'
     | '/u/$username'
     | '/blog/'
+    | '/_authenticated/admin/ads'
+    | '/_authenticated/admin/owner'
+    | '/_authenticated/call/$roomId'
     | '/api/mind/think'
     | '/api/public/account-deletion'
     | '/api/public/error-report'
@@ -835,37 +844,26 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
   AccountDeletionRoute: typeof AccountDeletionRoute
   AndroidAppRoute: typeof AndroidAppRoute
   AuthRoute: typeof AuthRoute
-  AutoVideoRoute: typeof AutoVideoRoute
-  ByokVideoRoute: typeof ByokVideoRoute
   CallbackRoute: typeof CallbackRoute
-  CommunityRoute: typeof CommunityRoute
   ContactRoute: typeof ContactRoute
-  CvRoute: typeof CvRoute
   DeleteAccountRoute: typeof DeleteAccountRoute
   DeleteDataRoute: typeof DeleteDataRoute
-  EarnRoute: typeof EarnRoute
-  GithubConnectRoute: typeof GithubConnectRoute
   HowToUseRoute: typeof HowToUseRoute
   InviteRoute: typeof InviteRoute
   JalsaChatRoute: typeof JalsaChatRoute
   LeaderboardRoute: typeof LeaderboardRoute
   LoginRoute: typeof LoginRoute
-  MessagesRoute: typeof MessagesRoute
   MyStoryRoute: typeof MyStoryRoute
   PlayerRoute: typeof PlayerRoute
   PrivacyRoute: typeof PrivacyRoute
   ScottRoute: typeof ScottRoute
-  ScoutRoute: typeof ScoutRoute
-  SecurityCenterRoute: typeof SecurityCenterRoute
   SpaceRoute: typeof SpaceRoute
-  StudioRoute: typeof StudioRoute
   TermsRoute: typeof TermsRoute
-  AdminAdsRoute: typeof AdminAdsRoute
-  AdminOwnerRoute: typeof AdminOwnerRoute
   ApiAgentsNightlyRoute: typeof ApiAgentsNightlyRoute
   ApiAgentsStatusRoute: typeof ApiAgentsStatusRoute
   ApiAiVisionRoute: typeof ApiAiVisionRoute
@@ -891,7 +889,6 @@ export interface RootRouteChildren {
   ApiVoiceAgentTokenRoute: typeof ApiVoiceAgentTokenRoute
   ApiVoiceChatRoute: typeof ApiVoiceChatRoute
   BlogSlugRoute: typeof BlogSlugRoute
-  CallRoomIdRoute: typeof CallRoomIdRoute
   SSubdomainRoute: typeof SSubdomainRoute
   UUsernameRoute: typeof UUsernameRoute
   BlogIndexRoute: typeof BlogIndexRoute
@@ -909,6 +906,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -939,20 +943,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auto-video': {
-      id: '/auto-video'
-      path: '/auto-video'
-      fullPath: '/auto-video'
-      preLoaderRoute: typeof AutoVideoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/byok-video': {
-      id: '/byok-video'
-      path: '/byok-video'
-      fullPath: '/byok-video'
-      preLoaderRoute: typeof ByokVideoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/callback': {
       id: '/callback'
       path: '/callback'
@@ -960,25 +950,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/community': {
-      id: '/community'
-      path: '/community'
-      fullPath: '/community'
-      preLoaderRoute: typeof CommunityRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/contact': {
       id: '/contact'
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cv': {
-      id: '/cv'
-      path: '/cv'
-      fullPath: '/cv'
-      preLoaderRoute: typeof CvRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/delete-account': {
@@ -993,20 +969,6 @@ declare module '@tanstack/react-router' {
       path: '/delete-data'
       fullPath: '/delete-data'
       preLoaderRoute: typeof DeleteDataRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/earn': {
-      id: '/earn'
-      path: '/earn'
-      fullPath: '/earn'
-      preLoaderRoute: typeof EarnRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/github-connect': {
-      id: '/github-connect'
-      path: '/github-connect'
-      fullPath: '/github-connect'
-      preLoaderRoute: typeof GithubConnectRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/how-to-use': {
@@ -1044,13 +1006,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/messages': {
-      id: '/messages'
-      path: '/messages'
-      fullPath: '/messages'
-      preLoaderRoute: typeof MessagesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/my-story': {
       id: '/my-story'
       path: '/my-story'
@@ -1079,32 +1034,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ScottRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/scout': {
-      id: '/scout'
-      path: '/scout'
-      fullPath: '/scout'
-      preLoaderRoute: typeof ScoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/security-center': {
-      id: '/security-center'
-      path: '/security-center'
-      fullPath: '/security-center'
-      preLoaderRoute: typeof SecurityCenterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/space': {
       id: '/space'
       path: '/space'
       fullPath: '/space'
       preLoaderRoute: typeof SpaceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/studio': {
-      id: '/studio'
-      path: '/studio'
-      fullPath: '/studio'
-      preLoaderRoute: typeof StudioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -1114,19 +1048,75 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/ads': {
-      id: '/admin/ads'
-      path: '/admin/ads'
-      fullPath: '/admin/ads'
-      preLoaderRoute: typeof AdminAdsRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_authenticated/auto-video': {
+      id: '/_authenticated/auto-video'
+      path: '/auto-video'
+      fullPath: '/auto-video'
+      preLoaderRoute: typeof AuthenticatedAutoVideoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/admin/owner': {
-      id: '/admin/owner'
-      path: '/admin/owner'
-      fullPath: '/admin/owner'
-      preLoaderRoute: typeof AdminOwnerRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_authenticated/byok-video': {
+      id: '/_authenticated/byok-video'
+      path: '/byok-video'
+      fullPath: '/byok-video'
+      preLoaderRoute: typeof AuthenticatedByokVideoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/community': {
+      id: '/_authenticated/community'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof AuthenticatedCommunityRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/cv': {
+      id: '/_authenticated/cv'
+      path: '/cv'
+      fullPath: '/cv'
+      preLoaderRoute: typeof AuthenticatedCvRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/earn': {
+      id: '/_authenticated/earn'
+      path: '/earn'
+      fullPath: '/earn'
+      preLoaderRoute: typeof AuthenticatedEarnRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/github-connect': {
+      id: '/_authenticated/github-connect'
+      path: '/github-connect'
+      fullPath: '/github-connect'
+      preLoaderRoute: typeof AuthenticatedGithubConnectRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/messages': {
+      id: '/_authenticated/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof AuthenticatedMessagesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/scout': {
+      id: '/_authenticated/scout'
+      path: '/scout'
+      fullPath: '/scout'
+      preLoaderRoute: typeof AuthenticatedScoutRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/security-center': {
+      id: '/_authenticated/security-center'
+      path: '/security-center'
+      fullPath: '/security-center'
+      preLoaderRoute: typeof AuthenticatedSecurityCenterRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/studio': {
+      id: '/_authenticated/studio'
+      path: '/studio'
+      fullPath: '/studio'
+      preLoaderRoute: typeof AuthenticatedStudioRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/agents-nightly': {
       id: '/api/agents-nightly'
@@ -1310,13 +1300,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/call/$roomId': {
-      id: '/call/$roomId'
-      path: '/call/$roomId'
-      fullPath: '/call/$roomId'
-      preLoaderRoute: typeof CallRoomIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/s/$subdomain': {
       id: '/s/$subdomain'
       path: '/s/$subdomain'
@@ -1330,6 +1313,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/u/$username'
       preLoaderRoute: typeof UUsernameRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/admin/ads': {
+      id: '/_authenticated/admin/ads'
+      path: '/admin/ads'
+      fullPath: '/admin/ads'
+      preLoaderRoute: typeof AuthenticatedAdminAdsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/owner': {
+      id: '/_authenticated/admin/owner'
+      path: '/admin/owner'
+      fullPath: '/admin/owner'
+      preLoaderRoute: typeof AuthenticatedAdminOwnerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/call/$roomId': {
+      id: '/_authenticated/call/$roomId'
+      path: '/call/$roomId'
+      fullPath: '/call/$roomId'
+      preLoaderRoute: typeof AuthenticatedCallRoomIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/mind/think': {
       id: '/api/mind/think'
@@ -1376,6 +1380,41 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAutoVideoRoute: typeof AuthenticatedAutoVideoRoute
+  AuthenticatedByokVideoRoute: typeof AuthenticatedByokVideoRoute
+  AuthenticatedCommunityRoute: typeof AuthenticatedCommunityRoute
+  AuthenticatedCvRoute: typeof AuthenticatedCvRoute
+  AuthenticatedEarnRoute: typeof AuthenticatedEarnRoute
+  AuthenticatedGithubConnectRoute: typeof AuthenticatedGithubConnectRoute
+  AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
+  AuthenticatedScoutRoute: typeof AuthenticatedScoutRoute
+  AuthenticatedSecurityCenterRoute: typeof AuthenticatedSecurityCenterRoute
+  AuthenticatedStudioRoute: typeof AuthenticatedStudioRoute
+  AuthenticatedAdminAdsRoute: typeof AuthenticatedAdminAdsRoute
+  AuthenticatedAdminOwnerRoute: typeof AuthenticatedAdminOwnerRoute
+  AuthenticatedCallRoomIdRoute: typeof AuthenticatedCallRoomIdRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAutoVideoRoute: AuthenticatedAutoVideoRoute,
+  AuthenticatedByokVideoRoute: AuthenticatedByokVideoRoute,
+  AuthenticatedCommunityRoute: AuthenticatedCommunityRoute,
+  AuthenticatedCvRoute: AuthenticatedCvRoute,
+  AuthenticatedEarnRoute: AuthenticatedEarnRoute,
+  AuthenticatedGithubConnectRoute: AuthenticatedGithubConnectRoute,
+  AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
+  AuthenticatedScoutRoute: AuthenticatedScoutRoute,
+  AuthenticatedSecurityCenterRoute: AuthenticatedSecurityCenterRoute,
+  AuthenticatedStudioRoute: AuthenticatedStudioRoute,
+  AuthenticatedAdminAdsRoute: AuthenticatedAdminAdsRoute,
+  AuthenticatedAdminOwnerRoute: AuthenticatedAdminOwnerRoute,
+  AuthenticatedCallRoomIdRoute: AuthenticatedCallRoomIdRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 interface ApiMindRouteChildren {
   ApiMindThinkRoute: typeof ApiMindThinkRoute
 }
@@ -1389,37 +1428,26 @@ const ApiMindRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AboutRoute: AboutRoute,
   AccountDeletionRoute: AccountDeletionRoute,
   AndroidAppRoute: AndroidAppRoute,
   AuthRoute: AuthRoute,
-  AutoVideoRoute: AutoVideoRoute,
-  ByokVideoRoute: ByokVideoRoute,
   CallbackRoute: CallbackRoute,
-  CommunityRoute: CommunityRoute,
   ContactRoute: ContactRoute,
-  CvRoute: CvRoute,
   DeleteAccountRoute: DeleteAccountRoute,
   DeleteDataRoute: DeleteDataRoute,
-  EarnRoute: EarnRoute,
-  GithubConnectRoute: GithubConnectRoute,
   HowToUseRoute: HowToUseRoute,
   InviteRoute: InviteRoute,
   JalsaChatRoute: JalsaChatRoute,
   LeaderboardRoute: LeaderboardRoute,
   LoginRoute: LoginRoute,
-  MessagesRoute: MessagesRoute,
   MyStoryRoute: MyStoryRoute,
   PlayerRoute: PlayerRoute,
   PrivacyRoute: PrivacyRoute,
   ScottRoute: ScottRoute,
-  ScoutRoute: ScoutRoute,
-  SecurityCenterRoute: SecurityCenterRoute,
   SpaceRoute: SpaceRoute,
-  StudioRoute: StudioRoute,
   TermsRoute: TermsRoute,
-  AdminAdsRoute: AdminAdsRoute,
-  AdminOwnerRoute: AdminOwnerRoute,
   ApiAgentsNightlyRoute: ApiAgentsNightlyRoute,
   ApiAgentsStatusRoute: ApiAgentsStatusRoute,
   ApiAiVisionRoute: ApiAiVisionRoute,
@@ -1445,7 +1473,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiVoiceAgentTokenRoute: ApiVoiceAgentTokenRoute,
   ApiVoiceChatRoute: ApiVoiceChatRoute,
   BlogSlugRoute: BlogSlugRoute,
-  CallRoomIdRoute: CallRoomIdRoute,
   SSubdomainRoute: SSubdomainRoute,
   UUsernameRoute: UUsernameRoute,
   BlogIndexRoute: BlogIndexRoute,

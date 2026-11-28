@@ -11,6 +11,7 @@
  * Audio transcription keeps its existing Ollama-then-DeepSeek attempts.
  */
 import { createFileRoute } from '@tanstack/react-router';
+import { userFromRequest } from '@/lib/auth-user.server';
 
 import { routeChat, type ChatMessage } from '../../lib/ai/router';
 
@@ -312,6 +313,7 @@ export const Route = createFileRoute('/api/ai-vision')({
   server: {
     handlers: {
       POST: async ({ request }): Promise<Response> => {
+        if (!(await userFromRequest(request))) return new Response('Unauthorized', { status: 401 });
         let body: Body;
         try {
           const raw: unknown = await request.json();

@@ -1060,16 +1060,43 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
           email: string
           id?: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
           email?: string
           id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      paid_video_requests: {
+        Row: {
+          created_at: string
+          id: string
+          provider: string
+          task_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          provider: string
+          task_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          provider?: string
+          task_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -1458,6 +1485,16 @@ export type Database = {
       }
       rename_build_subdomain: {
         Args: { _build_id: string; _subdomain: string }
+        Returns: string
+      }
+      reserve_paid_video: {
+        Args: {
+          p_day: number
+          p_global_day: number
+          p_hour: number
+          p_provider: string
+          p_user: string
+        }
         Returns: string
       }
       slugify: { Args: { _t: string }; Returns: string }

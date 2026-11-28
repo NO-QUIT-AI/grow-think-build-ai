@@ -225,6 +225,20 @@
       "when": 1795538295651,
       "tag": "0031_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1795850082401,
+      "tag": "0032_paid_video_guard_and_private_message_integrity",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1795850151908,
+      "tag": "0033_bind_owner_identity_and_lock_reward_fields",
+      "breakpoints": true
     }
   ]
 }

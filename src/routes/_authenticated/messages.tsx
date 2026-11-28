@@ -33,7 +33,7 @@ import { useT } from "@/i18n/LanguageContext";
 
 type Search = { u?: string | undefined };
 
-export const Route = createFileRoute("/messages")({
+export const Route = createFileRoute("/_authenticated/messages")({
   validateSearch: (search: Record<string, unknown>): Search => ({
     u: typeof search['u'] === "string" ? (search['u'] as string) : undefined,
   }),
@@ -77,9 +77,6 @@ function MessagesPage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
 
-  useEffect(() => {
-    if (!loading && !user) navigate({ to: "/auth" });
-  }, [user, loading, navigate]);
 
   if (loading || !user) {
     return (

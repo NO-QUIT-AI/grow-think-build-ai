@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { userFromRequest } from "@/lib/auth-user.server";
+import { reservePaidVideo, savePaidVideoTask, ownsPaidVideoTask } from "@/lib/paid-video-guard.server";
 
 /**
  * fal.ai video jobs — FAL_KEY sirf server pe.
@@ -44,6 +45,9 @@ export const Route = createFileRoute("/api/generate-video")({
         if (kind === "intro" && !(await isPro(user.id)))
           return Response.json({ error: "Intro clip sirf Pro users ke liye hai" }, { status: 403 });
 
+        const provider = kind === "intro" ? "fal-intro" : "fal-avatar";
+        const reservation = await reservePaidVideo(user.id, provider);
+        if (reservation instanceof Response) return reservation;
         const body = kind === "intro" ? { prompt, image_url, duration: 5 } : { prompt, image_url };
         const res = await fetch(`https://queue.fal.run/${MODELS[kind]}`, {
           method: "POST",
@@ -56,6 +60,7 @@ export const Route = createFileRoute("/api/generate-video")({
           return Response.json({ error: `Video service error (${res.status})`, detail: t.slice(0, 300) }, { status: res.status === 401 || res.status === 403 ? 502 : res.status });
         }
         const j = (await res.json()) as { request_id: string };
+        if (!j.request_id || !(await savePaidVideoTask(reservation, user.id, provider, j.request_id))) return Response.json({ error: "Unable to save video task ownership." }, { status: 503 });
         return Response.json({ request_id: j.request_id, kind });
       },
       GET: async ({ request }) => {
@@ -64,8 +69,9 @@ export const Route = createFileRoute("/api/generate-video")({
         const u = new URL(request.url);
         const kind = u.searchParams.get("kind") as Kind | null;
         const id = u.searchParams.get("id") ?? "";
-        if (!kind || !(kind in MODELS) || !/^[0-9a-zA-Z-]{8,64}$/.test(id))
+        if ((kind !== "avatar" && kind !== "intro") || !/^[0-9a-zA-Z-]{8,64}$/.test(id))
           return Response.json({ error: "Invalid input" }, { status: 400 });
+        if (!(await ownsPaidVideoTask(user.id, kind === "intro" ? "fal-intro" : "fal-avatar", id))) return Response.json({ error: "Video task not found." }, { status: 404 });
 
         const base = `https://queue.fal.run/${appId(kind)}/requests/${id}`;
         const s = await fetch(`${base}/status`, { headers: falHeaders() });

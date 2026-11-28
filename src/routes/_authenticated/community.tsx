@@ -30,7 +30,7 @@ import {
   type CommunityProfile,
 } from "@/lib/community";
 
-export const Route = createFileRoute("/community")({
+export const Route = createFileRoute("/_authenticated/community")({
   head: () => ({
     meta: [
       { title: "Community Feed — NO QUIT AI Builders" },
@@ -76,9 +76,6 @@ function CommunityPage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
 
-  useEffect(() => {
-    if (!loading && !user) navigate({ to: "/auth" });
-  }, [user, loading, navigate]);
 
   if (loading || !user) {
     return (
