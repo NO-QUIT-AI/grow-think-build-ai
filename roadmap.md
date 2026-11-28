@@ -68,3 +68,5 @@ Phase 3:
 - [x] 13. Voice input: already in ChatPanel (SpeechRecognition, verified).
 - [x] 14. persona_save tool: owner style stored in R2, injected into every owner chat system prompt.
 - [x] 15. Tool chaining: AUTONOMY_PROMPT rules — "banao+deploy+test+report" runs write_files → vercel_deploy → deploy_status → design_review → report without interruption.
+
+- [ ] Combined protection audit: durable Runway limits (approved), private-data/cache isolation, login gates, Cloudflare bot/WAF access and confirmation, tests and publish.
